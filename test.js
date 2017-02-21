@@ -78,11 +78,11 @@ class geometry {
 
         this.nBuffer = gl.createBuffer();
         gl.bindBuffer (gl.ARRAY_BUFFER, this.nBuffer);
-        gl.bufferData (gl.ARRAY_BUFFER, _normals, gl.STATIC_DRAW);
+        gl.bufferData (gl.ARRAY_BUFFER, flattenMatrixArray (_normals), gl.STATIC_DRAW);
 
         this.vBuffer = gl.createBuffer ();
         gl.bindBuffer (gl.ARRAY_BUFFER, this.vBuffer);
-        gl.bufferData (gl.ARRAY_BUFFER, _vertices, gl.STATIC_DRAW);
+        gl.bufferData (gl.ARRAY_BUFFER, flattenMatrixArray (_vertices), gl.STATIC_DRAW);
     }
 
     /** setup: enables all buffers and sets the vertex and normal attributes.
@@ -192,7 +192,7 @@ class light {
     setup () {
         var pos = [ this.transform.position, 1.0 ];
         gl.uniform4fv (gl.getUniformLocation (program, 
-        "fLightPosition"), pos);
+        "fLightPosition"), flattenMatrixArray (pos));
         gl.uniform4fv (gl.getUniformLocation (program, 
         "fAmbientLight"), this.ambient);
         gl.uniform4fv (gl.getUniformLocation (program, 
@@ -207,18 +207,18 @@ function setupLights () {
     var pos2 = [ lightSource2.transform.position, 1.0 ];
     var locations = [ pos1 , pos2 ]; 
 
-    var ambient = [ lightSource1.ambient , lightSource2.ambient ];
-    var diffuse = [ lightSource1.diffuse , lightSource2.diffuse ];
-    var specular = [ lightSource1.specular , lightSource2.specular ];
+    var ambient = [ lightSource1.ambient, lightSource2.ambient ];
+    var diffuse = [ lightSource1.diffuse, lightSource2.diffuse ];
+    var specular = [ lightSource1.specular, lightSource2.specular ];
 
     gl.uniform4fv (gl.getUniformLocation (program, 
-    "fLightPosition"), flatten (locations));
+    "fLightPosition"), flattenMatrixArray (locations));
     gl.uniform4fv (gl.getUniformLocation (program, 
-    "fAmbientLight"), flatten (ambient));
+    "fAmbientLight"), flattenMatrixArray (ambient));
     gl.uniform4fv (gl.getUniformLocation (program, 
-    "fDiffuseLight"), flatten (diffuse));
+    "fDiffuseLight"), flattenMatrixArray (diffuse));
     gl.uniform4fv (gl.getUniformLocation (program, 
-    "fSpecularLight"), flatten (specular));
+    "fSpecularLight"), flattenMatrixArray (specular));
 }
 
 /** object: an abstraction for a object. Objects contain a material, geometry,
@@ -781,51 +781,20 @@ function camReset () {
 }
 
 
-function flatten( v )
-{
-    if ( v.matrix === true ) {
-        v = transpose( v );
-    }
-
-    var n = v.length;
-    var elemsAreArrays = false;
-
-    if ( Array.isArray(v[0]) ) {
-        elemsAreArrays = true;
-        n *= v[0].length;
-    }
-
-    var floats = new Float32Array( n );
-
-    if ( elemsAreArrays ) {
-        var idx = 0;
-        for ( var i = 0; i < v.length; ++i ) {
-            for ( var j = 0; j < v[i].length; ++j ) {
-                floats[idx++] = v[i][j];
-            }
-        }
-    }
-    else {
-        for ( var i = 0; i < v.length; ++i ) {
-            floats[i] = v[i];
-        }
-    }
-
-    return floats;
-}
-
 /**	Flattens an array of Float32Array's
  *	@param { Array } array: array to be flattened
  *	@ret { Float32Array } ret: a flattened array of floats
  */
 function flattenMatrixArray(array) {
     var flattenedArray = [];
+
     for (var i = 0; i < array.length; i++) {
     	for (var j = 0; j < array[i].length; j++) {
     		flattenedArray.push(array[i][j]);
     	}
     }
-    return new Float32Array(ret);
+
+    return new Float32Array(flattenedArray);
 }
 
 /** @endfile: test.js */
