@@ -1,4 +1,4 @@
-/** @file: project3.js
+/** @file: test.js
  *  Created by Matthew P. Kuzdal 
  *  ID:404564296
  *  CS174A - Introduction to Computer Graphics - Project 3
@@ -814,4 +814,18 @@ function flatten( v )
     return floats;
 }
 
-/** @endfile: project3.js */
+/**	Flattens an array of Float32Array's
+ *	@param { Array } array: array to be flattened
+ *	@ret { Float32Array } ret: a flattened array of floats
+ */
+function flattenMatrixArray(array) {
+    var flattenedArray = [];
+    for (var i = 0; i < array.length; i++) {
+    	for (var j = 0; j < array[i].length; j++) {
+    		flattenedArray.push(array[i][j]);
+    	}
+    }
+    return new Float32Array(ret);
+}
+
+/** @endfile: test.js */
