@@ -203,22 +203,19 @@ class light {
 }
 
 function setupLights () {
-    var pos1 = [ lightSource1.transform.position, 1.0 ];
-    var pos2 = [ lightSource2.transform.position, 1.0 ];
-    var locations = [ pos1 , pos2 ]; 
+    var pos1 = [ lightSource1.transform.position[0], lightSource1.transform.position[1], lightSource1.transform.position[2], 1.0 ];
+    var pos2 = [ lightSource2.transform.position[0], lightSource2.transform.position[1], lightSource2.transform.position[2], 1.0 ];
+    var locations = [new Float32Array(pos1), new Float32Array(pos2)]; 
 
     var ambient = [ lightSource1.ambient, lightSource2.ambient ];
     var diffuse = [ lightSource1.diffuse, lightSource2.diffuse ];
     var specular = [ lightSource1.specular, lightSource2.specular ];
 
-    gl.uniform4fv (gl.getUniformLocation (program, 
-    "fLightPosition"), flattenArray (locations));
-    gl.uniform4fv (gl.getUniformLocation (program, 
-    "fAmbientLight"), flattenArray (ambient));
-    gl.uniform4fv (gl.getUniformLocation (program, 
-    "fDiffuseLight"), flattenArray (diffuse));
-    gl.uniform4fv (gl.getUniformLocation (program, 
-    "fSpecularLight"), flattenArray (specular));
+    gl.uniform4fv (gl.getUniformLocation (program, "fLightPosition"), flattenArray (locations));
+    gl.uniform4fv (gl.getUniformLocation (program, "fAmbientLight"), flattenArray (ambient));
+    gl.uniform4fv (gl.getUniformLocation (program, "fDiffuseLight"), flattenArray (diffuse));
+    gl.uniform4fv (gl.getUniformLocation (program, "fSpecularLight"), flattenArray (specular));
+
 }
 
 /** object: an abstraction for a object. Objects contain a material, geometry,
@@ -372,7 +369,6 @@ class camera {
         this.position = vec3.add (this.position, this.position, direction);
 
         this.setCameraMatrix ();
-        console.log ("Position: " + this.position);
     }
 
     /** camMoveForward: moves the camera in the forwards direction by 'speed' many units.
@@ -387,7 +383,6 @@ class camera {
         this.position = vec3.add (this.position, this.position, direction);
 
         this.setCameraMatrix ();
-        console.log ("Position: " + this.position);
     }
 
     /** camPitchUp: pitches the camera in the upwards direction by speed many units.
@@ -433,7 +428,6 @@ class camera {
         quat.mul (this.rotation, this.rotation, q);
 
         this.setCameraMatrix ();
-        console.log ("Angle: " + quat.getAxisAngle (storage, this.rotation));
     }
 
     /** camYawLeft: yaws the camera to the right by speed many units.
@@ -449,7 +443,6 @@ class camera {
         quat.mul (this.rotation, this.rotation, q);
 
         this.setCameraMatrix ();
-        console.log ("Angle: " + quat.getAxisAngle (storage, this.rotation));
     }
 
     /** camSetSpeed: sets the camera speed.
@@ -457,7 +450,6 @@ class camera {
      */
     camSetSpeed (speed) {
         this.speed = speed;
-        console.log ("Speed: " + speed);
     }
 }
 
