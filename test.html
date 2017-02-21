@@ -25,68 +25,6 @@ void main ()
 </script>
 
 <script id="fragment-shader" type="x-shader/x-fragment">
-/*
-precision mediump float;
-
-uniform int fShadingType;
-
-uniform sampler2D texture;
-uniform samplerCube texMap;
-
-varying vec3 fPos;
-varying vec3 fNormal;
-varying vec2 fTexCoord;
-
-varying vec4 fAmbientProduct, fDiffuseProduct, fSpecularProduct;
-varying float fShininess;
-varying vec4 fLightPosition;
-varying vec3 fCameraPosition;
-
-varying vec4 fColor;
-
-void main ()
-{
-    if (fShadingType == 1 || fShadingType == 2) {
-        // Phong + Flat shading: done in fragment shader
-        vec4 fColor;
-
-        vec3 L;
-        if (fLightPosition.w == 0.0) 
-            L = normalize (fLightPosition.xyz);
-        else 
-            L = normalize (fLightPosition.xyz - fPos);
-
-        vec3 E = normalize (fCameraPosition - fPos);
-       
-        vec3 N = normalize (fNormal);
-
-        vec3 H = normalize (L + E);
-
-        // ambient
-        vec4 ambient = fAmbientProduct;
-
-        //diffuse
-        float Kd = max (dot (L, N), 0.0);
-        vec4 diffuse = Kd * fDiffuseProduct;
-
-        // specular
-        float Ks = pow (max (dot (N, H), 0.0), fShininess);
-        vec4 specular = Ks * fSpecularProduct;
-    
-        if (dot (L, N) < 0.0)
-            specular = vec4 (0.0, 0.0, 0.0, 1.0);
-
-        fColor = ambient + diffuse + specular;
-        fColor.a = 1.0;
-
-        gl_FragColor = fColor * texture2D (texture, fTexCoord);
-
-    } else {
-        // none + Gourard shading: simply set the color to the calculated value in the vertex shader
-        gl_FragColor = fColor * texture2D (texture, fTexCoord);
-
-    } 
-}*/
 
 precision mediump float;
 
