@@ -45,6 +45,7 @@ var cubes = [];
 var materials = [];
 var geometries = [];
 var transforms = [];
+var boxColliders = [];
 var rot_animations = [];
 
 var cubeVertices = [
@@ -57,6 +58,12 @@ var cubeVertices = [
      vec4.fromValues (  0.5,  0.5, -0.5, 1.0 ),
      vec4.fromValues (  0.5, -0.5, -0.5, 1.0 )
 ];
+
+class boxCollider {
+    constructor (_vertices) {
+        this.vertices = _vertices;
+    }
+}
 
 /** geometry: an abstraction for a geometry object. Geometries manage and maintain
  *  all GLSL buffers, normals, and vertex attributes. 
@@ -184,9 +191,10 @@ class light {
     /** setup: sets up the lightposition uniform in the vertex shader.
      */
     setup () {
-        var pos = [ this.transform.position, 1.0 ];
+        var pos = [ this.transform.position[0], this.transform.position[1], this.transform.position[2], 1.0 ];
+
         gl.uniform4fv (gl.getUniformLocation (program, 
-        "fLightPosition"), flattenArray (pos));
+        "fLightPosition"), pos);
         gl.uniform4fv (gl.getUniformLocation (program, 
         "fAmbientLight"), this.ambient);
         gl.uniform4fv (gl.getUniformLocation (program, 
@@ -222,14 +230,12 @@ class object {
      *  @param { material } material: the material that defines an object.
      *  @param { geometry } geometry: the object's geometry to define it.
      */
-    constructor (_transform, _material, _geometry) {
+    constructor (_transform, _material, _geometry, _boxCollider) {
         this.transform = _transform || new transform ();
         this.material = _material;
         this.geometry = _geometry;
+        this.boxCollider = _boxCollider;
         this.active = true;
-
-        this.LBF = vec4.fromValues (-0.5, -0.5, -0.5, 1.0);
-        this.RTN = vec4.fromValues ( 0.5,  0.5,  0.5, 1.0);
     }
 
     /** update: event loop function. Calls the update function for the transform component.
@@ -258,35 +264,82 @@ class object {
         mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
         mat4.mul (PCM, PC, this.transform.MVmatrix);
 
-        var LBF_prime = vec4.create ();
-        vec4.transformMat4 (LBF_prime, this.LBF, PCM);
-
-        if (LBF_prime[0] > LBF_prime[3]) {
-            console.log ("HERE");
-            return;
-        }
-        if (LBF_prime[1] > LBF_prime[3]) {
-            console.log ("HERE");
-            return;
-        }
-        if (LBF_prime[2] > LBF_prime[3]) {
-            console.log ("HERE");
-            return;
+        var p_prime = [];
+        for (var i = 0; i < this.boxCollider.vertices.length; i++) {
+            var storage = vec4.create ();
+            p_prime.push (vec4.transformMat4 (storage, this.boxCollider.vertices[i], PCM));
         }
 
-        var RTN_prime = vec4.create ();
-        vec4.transformMat4 (RTN_prime, this.RTN, PCM);
+        var toDraw = false;
 
-        if (RTN_prime[0] + RTN_prime[3] < 0) {
-            console.log ("HERE");
+        // check right plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][0] < p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
             return;
         }
-        if (RTN_prime[1] + RTN_prime[3] < 0) {
-            console.log ("HERE");
+        toDraw = false;
+
+        // check left plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][0] > -p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
             return;
         }
-        if (RTN_prime[2] < 0) {
-            console.log ("HERE");
+        toDraw = false;
+
+        // check top plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][1] < p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return;
+        }
+        toDraw = false;
+
+        // check bottom plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][1] > -p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return;
+        }
+        toDraw = false;
+
+        // check far plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][2] < p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return;
+        }
+        toDraw = false;
+
+        // check near plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][2] > 0) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
             return;
         }
 
@@ -316,7 +369,7 @@ class camera {
         this.fovy = _fovy           || 50.0;
         this.aspect = _aspect       || canvas.width / canvas.height;
         this.far = _far             || 1000.0;
-        this.near = _near           || 0.001;
+        this.near = _near           || 0.0001;
 
         this.matrix = mat4.create ();
         this.perspectiveProjectionMatrix = mat4.create ();
@@ -346,6 +399,7 @@ class camera {
         var storage = vec3.create ();
         mat4.fromRotationTranslation (this.matrix, this.rotation, this.position);
         mat4.invert (this.matrix, this.matrix);
+
         gl.uniform3fv (gl.getUniformLocation (program, 
         "fCameraPosition"), this.position);
     }
@@ -578,16 +632,17 @@ window.onload = function init () {
 
     // Instantiate the camera and light source
     cam = new camera ();
-    lightSource1 = new light (new transform (vec3.fromValues (10.0, 0.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+    lightSource1 = new light (new transform (vec3.fromValues (10.0, 0.0, 10.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (0.0, 0.0, 1.0, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0));
+
     lightSource2 = new light (new transform (vec3.fromValues (-10.0, 0.0, 10.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (1.0, 0.0, 0.0, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0));
-    //setupLights ();
-    lightSource1.setup ();
+    setupLights ();
+
     // generate each of the spheres and create a geometry instance to define it
     generateCubeNormals (cubeVertices);
     generateCubeVertices (cubeVertices);
@@ -603,9 +658,13 @@ window.onload = function init () {
                             new transform (vec3.fromValues (4.0,  0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create())
                         ];
 
+    boxColliders =      [   new boxCollider (cubeVertices),
+                            new boxCollider (cubeVertices)
+                        ];
+
     // create the object for each of the 6 bodies.
-    cubes  =            [   new object (transforms[0], materials[0], geometries[0]),
-                            new object (transforms[1], materials[1], geometries[0])
+    cubes  =            [   new object (transforms[0], materials[0], geometries[0], boxColliders[0]),
+                            new object (transforms[1], materials[1], geometries[0], boxColliders[1])
                         ];
 
     rot_animations =    [   new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (0.0, 1.0, 0.0)),
@@ -688,9 +747,10 @@ function generateCubeNormals (vertices) {
 }
 
 function AUX_generateCubeNormals (a, b, c, d, vertices) {
-    var storage = vec4.create ();
-    var t1 = vec4.subtract (storage, vertices[b], vertices[a]);
-    var t2 = vec4.subtract (storage, vertices[c], vertices[b]);
+    var t1 = vec3.create ();
+    var t2 = vec3.create ();
+    vec4.subtract (t1, vertices[b], vertices[a]);
+    vec4.subtract (t2, vertices[c], vertices[b]);
 
     t1 = vec3.fromValues (t1[0], t1[1], t1[2]);
     t2 = vec3.fromValues (t2[0], t2[1], t2[2]);
