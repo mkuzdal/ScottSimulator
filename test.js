@@ -158,16 +158,11 @@ class sphereCollider {
 
     inFustrum (PC, scaling, T) {
         var c = vec3.create ();
-        var c = vec3.transformMat4 (c, this.center, T);
+        vec3.transformMat4 (c, this.center, T);
 
         var r = this.radius * scaling;
 
-        var d;
-        var A;
-        var B;
-        var C;
-        var D;
-        var toDraw = false;
+        var d, A, B, C, D;
 
         // check right plane:
         A = PC[3]  - PC[0];
@@ -183,15 +178,14 @@ class sphereCollider {
         d = A * c[0] + B * c[1] + C * c[2] + D;
 
         if (d + r < 0) {
-            console.log ("HERER");
             return false;
         } 
 
         // check left plane:
-        A = PC[12] + PC[0];
-        B = PC[13] + PC[1];
-        C = PC[14] + PC[2];
-        D = PC[15] + PC[3];
+        A = PC[3]  + PC[0];
+        B = PC[7]  + PC[4];
+        C = PC[11] + PC[8];
+        D = PC[15] + PC[12];
 
         var mag = Math.sqrt (A * A + B * B + C * C);
         A = A / mag;
@@ -200,9 +194,75 @@ class sphereCollider {
         D = D / mag;
         d = A * c[0] + B * c[1] + C * c[2] + D;
 
-        console.log (d);
         if (d + r < 0) {
-            console.log ("HEREL");
+            return false;
+        } 
+
+        // check top plane:
+        A = PC[3]  - PC[1];
+        B = PC[7]  - PC[5];
+        C = PC[11] - PC[9];
+        D = PC[15] - PC[13];
+
+        var mag = Math.sqrt (A * A + B * B + C * C);
+        A = A / mag;
+        B = B / mag;
+        C = C / mag;
+        D = D / mag;
+        d = A * c[0] + B * c[1] + C * c[2] + D;
+
+        if (d + r < 0) {
+            return false;
+        } 
+
+        // check bottom plane:
+        A = PC[3]  + PC[1];
+        B = PC[7]  + PC[5];
+        C = PC[11] + PC[9];
+        D = PC[15] + PC[13];
+
+        var mag = Math.sqrt (A * A + B * B + C * C);
+        A = A / mag;
+        B = B / mag;
+        C = C / mag;
+        D = D / mag;
+        d = A * c[0] + B * c[1] + C * c[2] + D;
+
+        if (d + r < 0) {
+            return false;
+        } 
+
+        // check far plane:
+        A = PC[3]  - PC[2];
+        B = PC[7]  - PC[6];
+        C = PC[11] - PC[10];
+        D = PC[15] - PC[14];
+
+        var mag = Math.sqrt (A * A + B * B + C * C);
+        A = A / mag;
+        B = B / mag;
+        C = C / mag;
+        D = D / mag;
+        d = A * c[0] + B * c[1] + C * c[2] + D;
+
+        if (d + r < 0) {
+            return false;
+        } 
+
+        // check near plane:
+        A = PC[2];
+        B = PC[6];
+        C = PC[10];
+        D = PC[14];
+
+        var mag = Math.sqrt (A * A + B * B + C * C);
+        A = A / mag;
+        B = B / mag;
+        C = C / mag;
+        D = D / mag;
+        d = A * c[0] + B * c[1] + C * c[2] + D;
+
+        if (d + r < 0) {
             return false;
         } 
 
