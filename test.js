@@ -54,14 +54,14 @@ var transforms = [];
 var rot_animations = [];
 
 var cubeVertices = [
-    vec4 (-0.5, -0.5,  0.5, 1.0),
-    vec4 (-0.5,  0.5,  0.5, 1.0),
-    vec4 (0.5,  0.5,  0.5, 1.0),
-    vec4 (0.5, -0.5,  0.5, 1.0),
-    vec4 (-0.5, -0.5, -0.5, 1.0),
-    vec4 (-0.5,  0.5, -0.5, 1.0),
-    vec4 (0.5,  0.5, -0.5, 1.0),
-    vec4 (0.5, -0.5, -0.5, 1.0)
+     vec4.fromValues ( -0.5, -0.5,  0.5, 1.0 ),
+     vec4.fromValues ( -0.5,  0.5,  0.5, 1.0 ),
+     vec4.fromValues (  0.5,  0.5,  0.5, 1.0 ),
+     vec4.fromValues (  0.5, -0.5,  0.5, 1.0 ),
+     vec4.fromValues ( -0.5, -0.5, -0.5, 1.0 ),
+     vec4.fromValues ( -0.5,  0.5, -0.5, 1.0 ),
+     vec4.fromValues (  0.5,  0.5, -0.5, 1.0 ),
+     vec4.fromValues (  0.5, -0.5, -0.5, 1.0 )
 ];
 
 /** geometry: an abstraction for a geometry object. Geometries manage and maintain
@@ -78,11 +78,11 @@ class geometry {
 
         this.nBuffer = gl.createBuffer();
         gl.bindBuffer (gl.ARRAY_BUFFER, this.nBuffer);
-        gl.bufferData (gl.ARRAY_BUFFER, flatten(_normals), gl.STATIC_DRAW);
+        gl.bufferData (gl.ARRAY_BUFFER, _normals, gl.STATIC_DRAW);
 
         this.vBuffer = gl.createBuffer ();
         gl.bindBuffer (gl.ARRAY_BUFFER, this.vBuffer);
-        gl.bufferData (gl.ARRAY_BUFFER, flatten (_vertices), gl.STATIC_DRAW);
+        gl.bufferData (gl.ARRAY_BUFFER, _vertices, gl.STATIC_DRAW);
     }
 
     /** setup: enables all buffers and sets the vertex and normal attributes.
@@ -95,7 +95,7 @@ class geometry {
 
         gl.bindBuffer (gl.ARRAY_BUFFER, this.nBuffer);
         var vNormal = gl.getAttribLocation (program, "vNormal");
-        gl.vertexAttribPointer (vNormal, 4, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer (vNormal, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray (vNormal);
     }
 }
@@ -112,23 +112,22 @@ class material {
      *  @param { float } shinines: defines the shininess of the material.
      *  @param { int } shader: the type of shading to use (see shading types above).
      */
-    constructor (_ambient, _diffuse, _specular, _shininess, _shader) {
-        this.ambient = _ambient     || vec4 (1.0, 0.0, 1.0, 1.0);
-        this.diffuse = _diffuse     || vec4 (1.0, 0.8, 0.0, 1.0);
-        this.specular = _specular   || vec4 (1.0, 1.0, 1.0, 1.0);
+    constructor (_ambient, _diffuse, _specular, _shininess) {
+        this.ambient = _ambient     || vec4.fromValues (1.0, 0.0, 1.0, 1.0);
+        this.diffuse = _diffuse     || vec4.fromValues (1.0, 0.8, 0.0, 1.0);
+        this.specular = _specular   || vec4.fromValues (1.0, 1.0, 1.0, 1.0);
         this.shininess = _shininess || 50.0;
-        this.shader = _shader;
     }
 
     /** setup: enables all uniform variables to define the shading. 
      */
     setup () {
         gl.uniform4fv (gl.getUniformLocation(program, 
-        "fAmbientMaterial"),flatten (this.ambient));
+        "fAmbientMaterial"), this.ambient);
         gl.uniform4fv (gl.getUniformLocation(program, 
-        "fDiffuseMaterial"),flatten (this.diffuse));
+        "fDiffuseMaterial"), this.diffuse);
         gl.uniform4fv (gl.getUniformLocation(program, 
-        "fSpecularMaterial"),flatten (this.specular));   
+        "fSpecularMaterial"), this.specular);   
         gl.uniform1f (gl.getUniformLocation (program, 
         "fShininess"), this.shininess);
     }
@@ -145,9 +144,12 @@ class transform {
      *  @param { vec4 } rotation: the rotation quaternion of the object.
      */
     constructor (_position, _scale, _rotation) {
-        this.position = _position   || vec3 (0.0, 0.0, 0.0);
-        this.scale = _scale         || vec3 (1.0, 1.0, 1.0);
-        this.rotation = _rotation   || angleAxisToQuat (0.0, vec3 (0.0, 1.0, 0.0));
+        this.position = _position   || vec3.fromValues (0.0, 0.0, 0.0);
+        this.scale = _scale         || vec3.fromValues (1.0, 1.0, 1.0);
+        this.rotation = _rotation   || quat.create();
+
+        this.MVmatrix = mat4.create ();
+        this.NMmatrix = mat3.create ();
 
         this.setMatrices ();
     }
@@ -162,8 +164,8 @@ class transform {
     /** setMatrices: sets the model and normal matrices for an object.
      */
     setMatrices () {
-        this.NMmatrix = mult (scale (this.scale[0], this.scale[1], this.scale[2]), quaternionToMat (this.rotation));
-        this.MVmatrix = mult (translate (this.position), this.NMmatrix);
+        mat4.fromRotationTranslationScale (this.MVmatrix, this.rotation, this.position, this.scale);
+        mat3.normalFromMat4 (this.NMmatrix, this.MVmatrix);
     }
 }
 
@@ -179,31 +181,32 @@ class light {
      *  @param { vec4 } specular: the specular value for the light.
      */
     constructor (_transform, _ambient, _diffuse, _specular) {
-        this.transform = _transform || new transform (vec3 (0.0, 0.0, 0.0), vec3 (1.0, 1.0, 1.0), angleAxisToQuat (0.0, vec3 (0.0, 1.0, 0.0)));
-        this.ambient = _ambient     || vec4 (0.2, 0.2, 0.2, 1.0);
-        this.diffuse = _diffuse     || vec4 (0.4, 0.4, 0.4, 1.0);
-        this.specular = _specular   || vec4 (0.6, 0.6, 0.6, 1.0);
-    }
+        this.transform = _transform || new transform ();
+        this.ambient = _ambient     || vec4.fromValues (0.2, 0.2, 0.2, 1.0);
+        this.diffuse = _diffuse     || vec4.fromValues (0.4, 0.4, 0.4, 1.0);
+        this.specular = _specular   || vec4.fromValues (0.6, 0.6, 0.6, 1.0);
+    }   
 
     /** setup: sets up the lightposition uniform in the vertex shader.
      */
     setup () {
-        var pos = vec4 (this.transform.position, 1.0);
+        var pos = [ this.transform.position, 1.0 ];
         gl.uniform4fv (gl.getUniformLocation (program, 
-        "fLightPosition"), flatten (pos));
+        "fLightPosition"), pos);
         gl.uniform4fv (gl.getUniformLocation (program, 
-        "fAmbientLight"), flatten (this.ambient));
+        "fAmbientLight"), this.ambient);
         gl.uniform4fv (gl.getUniformLocation (program, 
-        "fDiffuseLight"), flatten (this.diffuse));
+        "fDiffuseLight"), this.diffuse);
         gl.uniform4fv (gl.getUniformLocation (program, 
-        "fSpecularLight"), flatten (this.specular));
+        "fSpecularLight"), this.specular);
     }
 }
 
 function setupLights () {
-    var pos1 = vec4 (lightSource1.transform.position, 1.0);
-    var pos2 = vec4 (lightSource2.transform.position, 1.0);
+    var pos1 = [ lightSource1.transform.position, 1.0 ];
+    var pos2 = [ lightSource2.transform.position, 1.0 ];
     var locations = [ pos1 , pos2 ]; 
+
     var ambient = [ lightSource1.ambient , lightSource2.ambient ];
     var diffuse = [ lightSource1.diffuse , lightSource2.diffuse ];
     var specular = [ lightSource1.specular , lightSource2.specular ];
@@ -234,8 +237,8 @@ class object {
         this.geometry = _geometry;
         this.active = true;
 
-        this.LBF = vec4 (-0.5, -0.5, -0.5, 1.0);
-        this.RTN = vec4 (0.5, 0.5, 0.5, 1.0);
+        this.LBF = [ -0.5, -0.5, -0.5, 1.0 ];
+        this.RTN = [  0.5,  0.5,  0.5, 1.0 ];
     }
 
     /** update: event loop function. Calls the update function for the transform component.
@@ -254,11 +257,11 @@ class object {
         this.geometry.setup ();
         this.material.setup ();
 
-        gl.uniformMatrix4fv (modelViewMatrixLoc, false, flatten (this.transform.MVmatrix));
-        gl.uniformMatrix4fv (cameraMatrixLoc, false, flatten (cam.matrix));
-        gl.uniformMatrix4fv (projectionMatrixLoc, false, flatten (cam.perspectiveProjectionMatrix)); 
-        gl.uniformMatrix4fv (normalMatrixLoc, false, flatten (this.transform.NMmatrix));
-
+        gl.uniformMatrix4fv (modelViewMatrixLoc, false, this.transform.MVmatrix);
+        gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
+        gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
+        gl.uniformMatrix3fv (normalMatrixLoc, false, this.transform.NMmatrix);
+/*
         var x = mult (mult (cam.perspectiveProjectionMatrix, cam.matrix), this.transform.MVmatrix);
 
         var LBF_prime = vec4 ((x[0][0] * this.LBF[0] + x[0][1] * this.LBF[1] + x[0][2] * this.LBF[2] + x[0][3] * this.LBF[3]),
@@ -296,7 +299,7 @@ class object {
             console.log ("HERE");
             return;
         }
-
+*/
         gl.drawArrays (gl.TRIANGLES, 0, this.geometry.Nvertices);
         gl.bindBuffer (gl.ARRAY_BUFFER, null);
     }
@@ -317,13 +320,19 @@ class camera {
      *  @param { float } near: the near clipping place.
      */
     constructor (_position, _rotation, _speed, _fovy, _aspect, _far, _near) {
-        this.position = _position   || vec3 (0.0, 0.0, 15.0);
-        this.rotation = _rotation   || eulerToQuat (0.0, 0.0, 0.0);
+        this.position = _position   || vec3.fromValues (0.0, 0.0, 15.0);
+        this.rotation = _rotation   || quat.create ();
         this.speed = _speed         || 1.0;
         this.fovy = _fovy           || 50.0;
         this.aspect = _aspect       || canvas.width / canvas.height;
         this.far = _far             || 1000.0;
         this.near = _near           || 0.001;
+
+        this.matrix = mat4.create ();
+        this.perspectiveProjectionMatrix = mat4.create ();
+        this.orthoProjectionMatrix = mat4.create ();
+
+
         this.setPerspective ();
         this.setOrthographic ();
         this.setCameraMatrix ();
@@ -332,96 +341,115 @@ class camera {
     /** setPerspective: sets the perspective projection matrix.
      */
     setPerspective () {
-        this.perspectiveProjectionMatrix = perspective (this.fovy, this.aspect, this.near, this.far);
+        mat4.perspective (this.perspectiveProjectionMatrix, this.fovy, this.aspect, this.near, this.far);
     }
 
     /** setOrthographic: sets the orthographic projection matrix.
      */
     setOrthographic () {
-        this.orthoProjectionMatrix = ortho (-this.aspect, this.aspect, -1.0, 1.0, -1.0, 1.0);
+        mat4.ortho (this.orthoProjectionMatrix, -this.aspect, this.aspect, -1.0, 1.0, -1.0, 1.0);
     }
 
     /** setCameraMatrix: sets the camera view matrix.
      */
     setCameraMatrix () {
-        this.matrix = mult (quaternionToMat (this.rotation), translate (scale2 (-1, this.position)));
+        var storage = vec3.create ();
+        mat4.fromRotationTranslation (this.matrix, this.rotation, vec3.negate (storage, this.position));
 
         gl.uniform3fv (gl.getUniformLocation (program, 
-        "fCameraPosition"), flatten (this.position));
+        "fCameraPosition"), this.position);
     }
 
     /** camMoveForward: moves the camera in the forwards direction by 'speed' many units.
      */
     camMoveForward () {
-        if (this.observe == null) {
-            var direction = quatFront (this.rotation);
-            var to_move = scale2 (this.speed, direction);
-            this.position = add (this.position, to_move);
-            this.setCameraMatrix ();
-            console.log ("Position: " + this.position);
-        }
+        var storage = mat4.create ();
+        mat4.fromQuat (storage, this.rotation);
+            
+        var direction = vec3.fromValues (-storage[8], -storage[9], -storage[10]);
+        vec3.scale (direction, direction, this.speed);
+
+        this.position = vec3.add (this.position, this.position, direction);
+
+        this.setCameraMatrix ();
+        console.log ("Position: " + this.position);
     }
 
     /** camMoveForward: moves the camera in the forwards direction by 'speed' many units.
      */
     camMoveBackwards () {
-        if (this.observe == null) {
-            var direction = quatFront (this.rotation);
-            var to_move = scale2 (-this.speed, direction);
-            this.position = add (this.position, to_move);
-            this.setCameraMatrix ();
-            console.log ("Position: " + this.position);
-        }
+        var storage = mat4.create ();
+        mat4.Quat (storage, this.rotation);
+            
+        var direction = vec3.fromValues (storage[8], storage[9], storage[10]);
+        vec3.scale (direction, direction, this.speed);
+
+        this.position = vec3.add (this.position, this.position, direction);
+
+        this.setCameraMatrix ();
+        console.log ("Position: " + this.position);
     }
 
     /** camPitchUp: pitches the camera in the upwards direction by speed many units.
      */
     camPitchUp () {
-        if (this.observe == null) {
-            var quat = angleAxisToQuat (-this.speed, quatRight (this.rotation));
-            //var quat = angleAxisToQuat (this.speed, vec3 (1.0, 0.0, 0.0));
-            this.rotation = quatMult (this.rotation, quat);
-            this.setCameraMatrix ();
-        }
+        var storage = mat4.create ();
+        mat4.fromQuat (storage, this.rotation);
+
+        var direction = vec3.fromValues (storage[0], storage[1], storage[2]);
+
+        var q = quat.create ();
+        quat.setAxisAngle (q, direction, -this.speed * Math.PI / 180.0)
+        quat.mul (this.rotation, this.rotation, q);
+
+        this.setCameraMatrix ();
     }
 
     /** camPitchDown: pitches the camera in the downwards direction by speed many units.
      */
     camPitchDown () {
-        if (this.observe == null) {
-            var quat = angleAxisToQuat (this.speed, quatRight (this.rotation));
-            //var quat = angleAxisToQuat (-this.speed, vec3 (1.0, 0.0, 0.0));
-            this.rotation = quatMult (this.rotation, quat);
-            this.setCameraMatrix ();
-        }
+        var storage = mat4.create ();
+        mat4.fromQuat (storage, this.rotation);
+
+        var direction = vec3.fromValues (storage[0], storage[1], storage[2]);
+
+        var q = quat.create ();
+        quat.setAxisAngle (q, direction, this.speed * Math.PI / 180.0)
+        quat.mul (this.rotation, this.rotation, q);
+
+        this.setCameraMatrix ();
     }
 
     /** camYawLeft: yaws the camera to the left by speed many units.
      */
     camYawLeft () {
-        if (this.observe == null) {
-            var quat = angleAxisToQuat (-this.speed, quatUp (this.rotation));
-            //var quat = angleAxisToQuat (-this.speed, vec3 (0.0, 1.0, 0.0));
-            this.rotation = quatMult (this.rotation, quat);
-            this.setCameraMatrix ();
-        } else {
-            this.theta -= this.speed;
-            console.log (this.theta);
-        }
+        var storage = mat4.create ();
+        mat4.fromQuat (storage, this.rotation);
+
+        var direction = vec3.fromValues (storage[4], storage[5], storage[6]);
+
+        var q = quat.create ();
+        quat.setAxisAngle (q, direction, -this.speed * Math.PI / 180.0)
+        quat.mul (this.rotation, this.rotation, q);
+
+        this.setCameraMatrix ();
+        console.log ("Angle: " + quat.getAxisAngle (storage, this.rotation));
     }
 
     /** camYawLeft: yaws the camera to the right by speed many units.
      */
     camYawRight () {
-        if (this.observe == null) {
-            var quat = angleAxisToQuat (this.speed, quatUp (this.rotation));
-            //var quat = angleAxisToQuat (this.speed, vec3 (0.0, 1.0, 0.0));
-            this.rotation = quatMult (this.rotation, quat);
-            this.setCameraMatrix ();
-        } else {
-            this.theta += this.speed;
-            console.log (this.theta);
-        }
+        var storage = mat4.create ();
+        mat4.fromQuat (storage, this.rotation);
+
+        var direction = vec3.fromValues (storage[4], storage[5], storage[6]);
+
+        var q = quat.create ();
+        quat.setAxisAngle (q, direction, this.speed * Math.PI / 180.0)
+        quat.mul (this.rotation, this.rotation, q);
+
+        this.setCameraMatrix ();
+        console.log ("Angle: " + quat.getAxisAngle (storage, this.rotation));
     }
 
     /** camSetSpeed: sets the camera speed.
@@ -460,8 +488,9 @@ class animationRotation {
             return;
 
         this.theta += this.omega * dTime;
-        var to_rot = angleAxisToQuat (this.theta, this.axis);
-        this.object.transform.rotation = slerp (this.object.transform.rotation, to_rot, 1.0);
+        var to_rot = quat.create ();
+        quat.setAxisAngle (to_rot, this.axis, this.angle);
+        quat.slerp (this.object.transform.rotation, this.object.transform.rotation, to_rot, 1.0);
     }
 }
 
@@ -563,14 +592,14 @@ window.onload = function init () {
 
     // Instantiate the camera and light source
     cam = new camera ();
-    lightSource1 = new light (new transform (vec3 (10.0, 0.0, 10.0), vec3 (1.0, 1.0, 1.0), angleAxisToQuat (0.0, vec3 (0.0, 1.0, 0.0))),
-                              vec4 (0.2, 0.2, 0.2, 1.0),
-                              vec4 (0.0, 0.0, 1.0, 1.0),
-                              vec4 (1.0, 1.0, 1.0, 1.0));
-    lightSource2 = new light (new transform (vec3 (-10.0, 0.0, 10.0), vec3 (1.0, 1.0, 1.0), angleAxisToQuat (0.0, vec3 (0.0, 1.0, 0.0))),
-                              vec4 (0.2, 0.2, 0.2, 1.0),
-                              vec4 (1.0, 0.0, 0.0, 1.0),
-                              vec4 (1.0, 1.0, 1.0, 1.0));
+    lightSource1 = new light (new transform (vec3.fromValues (10.0, 0.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (0.0, 0.0, 1.0, 1.0),
+                              vec4.fromValues (1.0, 1.0, 1.0, 1.0));
+    lightSource2 = new light (new transform (vec3.fromValues (-10.0, 0.0, 10.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (1.0, 0.0, 0.0, 1.0),
+                              vec4.fromValues (1.0, 1.0, 1.0, 1.0));
     setupLights ();
 
     // generate each of the spheres and create a geometry instance to define it
@@ -579,13 +608,13 @@ window.onload = function init () {
     geometries.push (new geometry (pointsArray, normalsArray));
 
     // create the materials for each of the 6 bodies (sun, planet1, planet2, planet3, planet4, moon)
-    materials =         [   new material (vec4 (0.6, 0.6, 0.6, 1.0),   vec4 (0.6, 0.6, 0.6, 1.0),    vec4 (0.6, 0.6, 0.6, 1.0),    40.0,  SHADING_PHONG),
-                            new material (vec4 (0.6, 0.6, 0.6, 1.0),   vec4 (0.6, 0.6, 0.6, 1.0),    vec4 (0.6, 0.6, 0.6, 1.0),    40.0,  SHADING_PHONG)
+    materials =         [   new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0)
                         ]; 
 
     // create the transforms for each of the 6 bodies.
-    transforms =        [   new transform (vec3 (-4.0, 0.0, 0.0),     vec3 (2.0, 2.0, 2.0), angleAxisToQuat (0.0, vec3 (0.0, 1.0, 0.0))),
-                            new transform (vec3 (4.0,  0.0, 0.0),     vec3 (2.0, 2.0, 2.0), angleAxisToQuat (0.0, vec3 (0.0, 1.0, 0.0)))
+    transforms =        [   new transform (vec3.fromValues (-4.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
+                            new transform (vec3.fromValues (4.0,  0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create())
                         ];
 
     // create the object for each of the 6 bodies.
@@ -593,8 +622,8 @@ window.onload = function init () {
                             new object (transforms[1], materials[1], geometries[0])
                         ];
 
-    rot_animations =    [   new animationRotation (cubes[0], 0.0, 120.0, vec3 (0.0, 1.0, 0.0)),
-                            new animationRotation (cubes[1], 0.0, 180.0, vec3 (1.0, 0.0, 0.0))
+    rot_animations =    [   new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (0.0, 1.0, 0.0)),
+                            new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0))
                         ];
 
 
@@ -673,10 +702,21 @@ function generateCubeNormals (vertices) {
 }
 
 function AUX_generateCubeNormals (a, b, c, d, vertices) {
-    var t1 = subtract (vertices[b], vertices[a]);
-    var t2 = subtract (vertices[c], vertices[b]);
-    var normal = cross (t1, t2);
-    var normal = vec4 (normal, 0.0);
+    var storage = vec4.create ();
+    var t1 = vec4.subtract (storage, vertices[b], vertices[a]);
+    var t2 = vec4.subtract (storage, vertices[c], vertices[b]);
+    console.log (vertices[b]);
+    console.log (vertices[a]);
+    console.log (vertices[c]);
+    console.log (vertices[b]);
+    console.log (t1);
+    console.log (t2);
+
+    t1 = vec3.fromValues (t1[0], t1[1], t1[2]);
+    t2 = vec3.fromValues (t2[0], t2[1], t2[2]);
+
+    var normal = vec3.create ();
+    vec3.cross (normal, t1, t2);
 
     normalsArray.push (normal);
     normalsArray.push (normal);
@@ -740,14 +780,38 @@ function camReset () {
     cam = new camera ();
 }
 
-/** lerp: Linear Interpolation function.
- *  @param { vec3 } v1: the initial vector.
- *  @param { vec3 } v2: the vector to interpolate to.
- *  @param { float } u: the interpolation factor (0 <= u <= 1).
- *  @ret { vec3 } ret: the resulting vector.
- */
-function lerp (v1, v2, u) {
-    return add (scale2 (1 - u, v1), scale2 (u, v2));
+
+function flatten( v )
+{
+    if ( v.matrix === true ) {
+        v = transpose( v );
+    }
+
+    var n = v.length;
+    var elemsAreArrays = false;
+
+    if ( Array.isArray(v[0]) ) {
+        elemsAreArrays = true;
+        n *= v[0].length;
+    }
+
+    var floats = new Float32Array( n );
+
+    if ( elemsAreArrays ) {
+        var idx = 0;
+        for ( var i = 0; i < v.length; ++i ) {
+            for ( var j = 0; j < v[i].length; ++j ) {
+                floats[idx++] = v[i][j];
+            }
+        }
+    }
+    else {
+        for ( var i = 0; i < v.length; ++i ) {
+            floats[i] = v[i];
+        }
+    }
+
+    return floats;
 }
 
 /** @endfile: project3.js */
