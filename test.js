@@ -30,6 +30,7 @@ var normalMatrixLoc;
 var cameraMatrixLoc;
 
 // light and camera instance
+var lightSourceCount = 0;
 var lightSource1;
 var lightSource2;
 var cam;
@@ -328,14 +329,10 @@ class material {
     /** setup: enables all uniform variables to define the shading. 
      */
     setup () {
-        gl.uniform4fv (gl.getUniformLocation(program, 
-        "fAmbientMaterial"), this.ambient);
-        gl.uniform4fv (gl.getUniformLocation(program, 
-        "fDiffuseMaterial"), this.diffuse);
-        gl.uniform4fv (gl.getUniformLocation(program, 
-        "fSpecularMaterial"), this.specular);   
-        gl.uniform1f (gl.getUniformLocation (program, 
-        "fShininess"), this.shininess);
+        gl.uniform4fv (gl.getUniformLocation (program, "fAmbientMaterial"), this.ambient);
+        gl.uniform4fv (gl.getUniformLocation (program, "fDiffuseMaterial"), this.diffuse);
+        gl.uniform4fv (gl.getUniformLocation (program, "fSpecularMaterial"), this.specular);   
+        gl.uniform1f (gl.getUniformLocation (program, "fShininess"), this.shininess);
     }
 }
 
@@ -391,38 +388,19 @@ class light {
         this.ambient = _ambient     || vec4.fromValues (0.2, 0.2, 0.2, 1.0);
         this.diffuse = _diffuse     || vec4.fromValues (0.4, 0.4, 0.4, 1.0);
         this.specular = _specular   || vec4.fromValues (0.6, 0.6, 0.6, 1.0);
+        this.lightID = lightSourceCount++;
     }   
 
     /** setup: sets up the lightposition uniform in the vertex shader.
      */
     setup () {
         var pos = [ this.transform.position[0], this.transform.position[1], this.transform.position[2], 1.0 ];
-
-        gl.uniform4fv (gl.getUniformLocation (program, 
-        "fLightPosition"), pos);
-        gl.uniform4fv (gl.getUniformLocation (program, 
-        "fAmbientLight"), this.ambient);
-        gl.uniform4fv (gl.getUniformLocation (program, 
-        "fDiffuseLight"), this.diffuse);
-        gl.uniform4fv (gl.getUniformLocation (program, 
-        "fSpecularLight"), this.specular);
+        
+        gl.uniform4fv (gl.getUniformLocation (program, "fLightPosition[" + this.lightID + "]"), pos);
+        gl.uniform4fv (gl.getUniformLocation (program, "fAmbientLight["  + this.lightID + "]"), this.ambient);
+        gl.uniform4fv (gl.getUniformLocation (program, "fDiffuseLight["  + this.lightID + "]"), this.diffuse);
+        gl.uniform4fv (gl.getUniformLocation (program, "fSpecularLight[" + this.lightID + "]"), this.specular);
     }
-}
-
-function setupLights () {
-    var pos1 = [ lightSource1.transform.position[0], lightSource1.transform.position[1], lightSource1.transform.position[2], 1.0 ];
-    var pos2 = [ lightSource2.transform.position[0], lightSource2.transform.position[1], lightSource2.transform.position[2], 1.0 ];
-    var locations = [new Float32Array(pos1), new Float32Array(pos2)]; 
-
-    var ambient = [ lightSource1.ambient, lightSource2.ambient ];
-    var diffuse = [ lightSource1.diffuse, lightSource2.diffuse ];
-    var specular = [ lightSource1.specular, lightSource2.specular ];
-
-    gl.uniform4fv (gl.getUniformLocation (program, "fLightPosition"), flattenArray (locations));
-    gl.uniform4fv (gl.getUniformLocation (program, "fAmbientLight"), flattenArray (ambient));
-    gl.uniform4fv (gl.getUniformLocation (program, "fDiffuseLight"), flattenArray (diffuse));
-    gl.uniform4fv (gl.getUniformLocation (program, "fSpecularLight"), flattenArray (specular));
-
 }
 
 /** object: an abstraction for a object. Objects contain a material, geometry,
@@ -789,7 +767,8 @@ window.onload = function init () {
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (1.0, 0.0, 0.0, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0));
-    setupLights ();
+    lightSource1.setup ();
+    lightSource2.setup ();
 
     // generate each of the spheres and create a geometry instance to define it
     generateCubeNormals (cubeVertices);
