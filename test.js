@@ -45,7 +45,7 @@ var cubes = [];
 var materials = [];
 var geometries = [];
 var transforms = [];
-var boxColliders = [];
+var colliders = [];
 var rot_animations = [];
 
 var cubeVertices = [
@@ -62,6 +62,151 @@ var cubeVertices = [
 class boxCollider {
     constructor (_vertices) {
         this.vertices = _vertices;
+        this.type = "box"
+    }
+
+    inFustrum (PC, PCM) {
+        var p_prime = [];
+        for (var i = 0; i < this.vertices.length; i++) {
+            var storage = vec4.create ();
+            p_prime.push (vec4.transformMat4 (storage, this.vertices[i], PCM));
+        }
+
+        var toDraw = false;
+
+        // check right plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][0] < p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
+        }
+        toDraw = false;
+
+        // check left plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][0] > -p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
+        }
+        toDraw = false;
+
+        // check top plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][1] < p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
+        }
+        toDraw = false;
+
+        // check bottom plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][1] > -p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
+        }
+        toDraw = false;
+
+        // check far plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][2] < p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
+        }
+        toDraw = false;
+
+        // check near plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][2] > 0) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
+        }
+
+        return true;
+    }
+}
+
+class sphereCollider {
+    constructor (_center, _radius) {
+        this.center = _center;
+        this.radius = _radius;
+        this.type = "sphere"
+    }
+
+    inFustrum (PC, scaling, T) {
+        var c = vec3.create ();
+        var c = vec3.transformMat4 (c, this.center, T);
+
+        var r = this.radius * scaling;
+
+        var d;
+        var A;
+        var B;
+        var C;
+        var D;
+        var toDraw = false;
+
+        // check right plane:
+        A = PC[3]  - PC[0];
+        B = PC[7]  - PC[4];
+        C = PC[11] - PC[8];
+        D = PC[15] - PC[12];
+
+        var mag = Math.sqrt (A * A + B * B + C * C);
+        A = A / mag;
+        B = B / mag;
+        C = C / mag;
+        D = D / mag;
+        d = A * c[0] + B * c[1] + C * c[2] + D;
+
+        if (d + r < 0) {
+            console.log ("HERER");
+            return false;
+        } 
+
+        // check left plane:
+        A = PC[12] + PC[0];
+        B = PC[13] + PC[1];
+        C = PC[14] + PC[2];
+        D = PC[15] + PC[3];
+
+        var mag = Math.sqrt (A * A + B * B + C * C);
+        A = A / mag;
+        B = B / mag;
+        C = C / mag;
+        D = D / mag;
+        d = A * c[0] + B * c[1] + C * c[2] + D;
+
+        console.log (d);
+        if (d + r < 0) {
+            console.log ("HEREL");
+            return false;
+        } 
+
+        return true;
     }
 }
 
@@ -230,11 +375,11 @@ class object {
      *  @param { material } material: the material that defines an object.
      *  @param { geometry } geometry: the object's geometry to define it.
      */
-    constructor (_transform, _material, _geometry, _boxCollider) {
+    constructor (_transform, _material, _geometry, _collider) {
         this.transform = _transform || new transform ();
         this.material = _material;
         this.geometry = _geometry;
-        this.boxCollider = _boxCollider;
+        this.collider = _collider;
         this.active = true;
     }
 
@@ -259,92 +404,35 @@ class object {
         gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
         gl.uniformMatrix3fv (normalMatrixLoc, false, this.transform.NMmatrix);
 
-        var PC = mat4.create ();
-        var PCM = mat4.create ();
-        mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
-        mat4.mul (PCM, PC, this.transform.MVmatrix);
-
-        var p_prime = [];
-        for (var i = 0; i < this.boxCollider.vertices.length; i++) {
-            var storage = vec4.create ();
-            p_prime.push (vec4.transformMat4 (storage, this.boxCollider.vertices[i], PCM));
+        if (this.collider == null) {
+            gl.drawArrays (gl.TRIANGLES, 0, this.geometry.Nvertices);
+            gl.bindBuffer (gl.ARRAY_BUFFER, null);
         }
 
-        var toDraw = false;
+        else if (this.collider.type == "box") {
+            var PC = mat4.create ();
+            var PCM = mat4.create ();
+            mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
+            mat4.mul (PCM, PC, this.transform.MVmatrix);
 
-        // check right plane:
-        for (var i = 0; i < p_prime.length; i++) {
-            if (p_prime[i][0] < p_prime[i][3]) {
-                toDraw = true;
-                break;
+            if (this.collider.inFustrum (PC, PCM)) {
+                gl.drawArrays (gl.TRIANGLES, 0, this.geometry.Nvertices);
+                gl.bindBuffer (gl.ARRAY_BUFFER, null);
+            }
+
+        } 
+
+        else if (this.collider.type == "sphere") {
+            var PC = mat4.create ();
+            var T = mat4.create ();
+            mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
+            mat4.fromTranslation (T, this.transform.position);
+
+            if (this.collider.inFustrum (PC, this.transform.scale[0], T)) {
+                gl.drawArrays (gl.TRIANGLES, 0, this.geometry.Nvertices);
+                gl.bindBuffer (gl.ARRAY_BUFFER, null);
             }
         }
-        if (!toDraw) {
-            return;
-        }
-        toDraw = false;
-
-        // check left plane:
-        for (var i = 0; i < p_prime.length; i++) {
-            if (p_prime[i][0] > -p_prime[i][3]) {
-                toDraw = true;
-                break;
-            }
-        }
-        if (!toDraw) {
-            return;
-        }
-        toDraw = false;
-
-        // check top plane:
-        for (var i = 0; i < p_prime.length; i++) {
-            if (p_prime[i][1] < p_prime[i][3]) {
-                toDraw = true;
-                break;
-            }
-        }
-        if (!toDraw) {
-            return;
-        }
-        toDraw = false;
-
-        // check bottom plane:
-        for (var i = 0; i < p_prime.length; i++) {
-            if (p_prime[i][1] > -p_prime[i][3]) {
-                toDraw = true;
-                break;
-            }
-        }
-        if (!toDraw) {
-            return;
-        }
-        toDraw = false;
-
-        // check far plane:
-        for (var i = 0; i < p_prime.length; i++) {
-            if (p_prime[i][2] < p_prime[i][3]) {
-                toDraw = true;
-                break;
-            }
-        }
-        if (!toDraw) {
-            return;
-        }
-        toDraw = false;
-
-        // check near plane:
-        for (var i = 0; i < p_prime.length; i++) {
-            if (p_prime[i][2] > 0) {
-                toDraw = true;
-                break;
-            }
-        }
-        if (!toDraw) {
-            return;
-        }
-
-        gl.drawArrays (gl.TRIANGLES, 0, this.geometry.Nvertices);
-        gl.bindBuffer (gl.ARRAY_BUFFER, null);
     }
 }
 
@@ -658,13 +746,13 @@ window.onload = function init () {
                             new transform (vec3.fromValues (4.0,  0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create())
                         ];
 
-    boxColliders =      [   new boxCollider (cubeVertices),
-                            new boxCollider (cubeVertices)
+    colliders =         [   new boxCollider (cubeVertices),
+                            new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 0.5)
                         ];
 
     // create the object for each of the 6 bodies.
-    cubes  =            [   new object (transforms[0], materials[0], geometries[0], boxColliders[0]),
-                            new object (transforms[1], materials[1], geometries[0], boxColliders[1])
+    cubes  =            [   new object (transforms[0], materials[0], geometries[0], colliders[0]),
+                            new object (transforms[1], materials[1], geometries[0], colliders[1])
                         ];
 
     rot_animations =    [   new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (0.0, 1.0, 0.0)),
