@@ -78,11 +78,11 @@ class geometry {
 
         this.nBuffer = gl.createBuffer();
         gl.bindBuffer (gl.ARRAY_BUFFER, this.nBuffer);
-        gl.bufferData (gl.ARRAY_BUFFER, flattenMatrixArray (_normals), gl.STATIC_DRAW);
+        gl.bufferData (gl.ARRAY_BUFFER, flattenArray (_normals), gl.STATIC_DRAW);
 
         this.vBuffer = gl.createBuffer ();
         gl.bindBuffer (gl.ARRAY_BUFFER, this.vBuffer);
-        gl.bufferData (gl.ARRAY_BUFFER, flattenMatrixArray (_vertices), gl.STATIC_DRAW);
+        gl.bufferData (gl.ARRAY_BUFFER, flattenArray (_vertices), gl.STATIC_DRAW);
     }
 
     /** setup: enables all buffers and sets the vertex and normal attributes.
@@ -192,7 +192,7 @@ class light {
     setup () {
         var pos = [ this.transform.position, 1.0 ];
         gl.uniform4fv (gl.getUniformLocation (program, 
-        "fLightPosition"), flattenMatrixArray (pos));
+        "fLightPosition"), flattenArray (pos));
         gl.uniform4fv (gl.getUniformLocation (program, 
         "fAmbientLight"), this.ambient);
         gl.uniform4fv (gl.getUniformLocation (program, 
@@ -212,13 +212,13 @@ function setupLights () {
     var specular = [ lightSource1.specular, lightSource2.specular ];
 
     gl.uniform4fv (gl.getUniformLocation (program, 
-    "fLightPosition"), flattenMatrixArray (locations));
+    "fLightPosition"), flattenArray (locations));
     gl.uniform4fv (gl.getUniformLocation (program, 
-    "fAmbientLight"), flattenMatrixArray (ambient));
+    "fAmbientLight"), flattenArray (ambient));
     gl.uniform4fv (gl.getUniformLocation (program, 
-    "fDiffuseLight"), flattenMatrixArray (diffuse));
+    "fDiffuseLight"), flattenArray (diffuse));
     gl.uniform4fv (gl.getUniformLocation (program, 
-    "fSpecularLight"), flattenMatrixArray (specular));
+    "fSpecularLight"), flattenArray (specular));
 }
 
 /** object: an abstraction for a object. Objects contain a material, geometry,
@@ -354,8 +354,8 @@ class camera {
      */
     setCameraMatrix () {
         var storage = vec3.create ();
-        mat4.fromRotationTranslation (this.matrix, this.rotation, vec3.negate (storage, this.position));
-
+        mat4.fromRotationTranslation (this.matrix, this.rotation, this.position);
+        mat4.invert(this.matrix, this.matrix);
         gl.uniform3fv (gl.getUniformLocation (program, 
         "fCameraPosition"), this.position);
     }
@@ -785,7 +785,7 @@ function camReset () {
  *	@param { Array } array: array to be flattened
  *	@ret { Float32Array } ret: a flattened array of floats
  */
-function flattenMatrixArray(array) {
+function flattenArray(array) {
     var flattenedArray = [];
 
     for (var i = 0; i < array.length; i++) {
