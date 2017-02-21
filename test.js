@@ -23,12 +23,6 @@ var pointsArray = [];
 var normalsArray = [];
 var textureArray = [];
 
-// shading specifiers
-const SHADING_NONE = 0;
-const SHADING_PHONG = 1; 
-const SHADING_FLAT = 2;
-const SHADING_GOURAUD = 3;
-
 // webGL uniforms
 var projectionMatrixLoc;
 var modelViewMatrixLoc;
@@ -237,8 +231,8 @@ class object {
         this.geometry = _geometry;
         this.active = true;
 
-        this.LBF = [ -0.5, -0.5, -0.5, 1.0 ];
-        this.RTN = [  0.5,  0.5,  0.5, 1.0 ];
+        this.LBF = vec4.fromValues (-0.5, -0.5, -0.5, 1.0);
+        this.RTN = vec4.fromValues ( 0.5,  0.5,  0.5, 1.0);
     }
 
     /** update: event loop function. Calls the update function for the transform component.
@@ -261,13 +255,14 @@ class object {
         gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
         gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
         gl.uniformMatrix3fv (normalMatrixLoc, false, this.transform.NMmatrix);
-/*
-        var x = mult (mult (cam.perspectiveProjectionMatrix, cam.matrix), this.transform.MVmatrix);
 
-        var LBF_prime = vec4 ((x[0][0] * this.LBF[0] + x[0][1] * this.LBF[1] + x[0][2] * this.LBF[2] + x[0][3] * this.LBF[3]),
-                              (x[1][0] * this.LBF[0] + x[1][1] * this.LBF[1] + x[1][2] * this.LBF[2] + x[1][3] * this.LBF[3]),
-                              (x[2][0] * this.LBF[0] + x[2][1] * this.LBF[1] + x[2][2] * this.LBF[2] + x[2][3] * this.LBF[3]),
-                              (x[3][0] * this.LBF[0] + x[3][1] * this.LBF[1] + x[3][2] * this.LBF[2] + x[3][3] * this.LBF[3]))
+        var PC = mat4.create ();
+        var PCM = mat4.create ();
+        mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
+        mat4.mul (PCM, PC, this.transform.MVmatrix);
+
+        var LBF_prime = vec4.create ();
+        vec4.transformMat4 (LBF_prime, this.LBF, PCM);
 
         if (LBF_prime[0] > LBF_prime[3]) {
             console.log ("HERE");
@@ -282,10 +277,8 @@ class object {
             return;
         }
 
-        var RTN_prime = vec4 ((x[0][0] * this.RTN[0] + x[0][1] * this.RTN[1] + x[0][2] * this.RTN[2] + x[0][3] * this.RTN[3]),
-                              (x[1][0] * this.RTN[0] + x[1][1] * this.RTN[1] + x[1][2] * this.RTN[2] + x[1][3] * this.RTN[3]),
-                              (x[2][0] * this.RTN[0] + x[2][1] * this.RTN[1] + x[2][2] * this.RTN[2] + x[2][3] * this.RTN[3]),
-                              (x[3][0] * this.RTN[0] + x[3][1] * this.RTN[1] + x[3][2] * this.RTN[2] + x[3][3] * this.RTN[3]))
+        var RTN_prime = vec4.create ();
+        vec4.transformMat4 (RTN_prime, this.RTN, PCM);
 
         if (RTN_prime[0] + RTN_prime[3] < 0) {
             console.log ("HERE");
@@ -299,7 +292,7 @@ class object {
             console.log ("HERE");
             return;
         }
-*/
+
         gl.drawArrays (gl.TRIANGLES, 0, this.geometry.Nvertices);
         gl.bindBuffer (gl.ARRAY_BUFFER, null);
     }
@@ -600,8 +593,8 @@ window.onload = function init () {
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (1.0, 0.0, 0.0, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0));
-    setupLights ();
-
+    //setupLights ();
+    lightSource1.setup ();
     // generate each of the spheres and create a geometry instance to define it
     generateCubeNormals (cubeVertices);
     generateCubeVertices (cubeVertices);

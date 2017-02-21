@@ -34,15 +34,15 @@ varying vec3 fPos;
 varying vec3 fNormal;
 
 uniform vec4 fAmbientMaterial, fDiffuseMaterial, fSpecularMaterial;
-uniform vec4 fLightPosition[2];
-uniform vec4 fAmbientLight[2], fDiffuseLight[2], fSpecularLight[2];
+uniform vec4 fLightPosition[1];
+uniform vec4 fAmbientLight[1], fDiffuseLight[1], fSpecularLight[1];
 uniform float fShininess;
 uniform vec3 fCameraPosition;
 
 void main ()
 {
     vec4 fColor = vec4 (0.0, 0.0, 0.0, 1.0);
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 1; i++) {
 
         vec3 L;
         if (fLightPosition[i].w == 0.0) 
