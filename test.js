@@ -541,7 +541,8 @@ window.onload = function init () {
                 break;
             }
             case 82: // r
-            {
+            {	
+            	camReset();
                 for (var i = 0; i < rot_animations.length; i++) {
                     rot_animations[i].active = !rot_animations[i].active;
                 }
