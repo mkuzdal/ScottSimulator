@@ -750,14 +750,14 @@ function lerp (v1, v2, u) {
     return add (scale2 (1 - u, v1), scale2 (u, v2));
 }
 
-/**	Flattens an array of mat4's
+/**	Flattens an array of Float32Array's
  *	@param { Array } array: array to be flattened
  *	@ret { Float32Array } ret: a flattened array of floats
  */
 function flattenMatrixArray(array) {
     var flattenedArray = [];
     for (var i = 0; i < array.length; i++) {
-    	for (var j = 0; j < 16; j++) {
+    	for (var j = 0; j < array[i].length; j++) {
     		flattenedArray.push(array[i][j]);
     	}
     }
