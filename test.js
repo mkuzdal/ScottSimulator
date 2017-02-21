@@ -341,7 +341,7 @@ class camera {
     /** setPerspective: sets the perspective projection matrix.
      */
     setPerspective () {
-        mat4.perspective (this.perspectiveProjectionMatrix, this.fovy, this.aspect, this.near, this.far);
+        mat4.perspective (this.perspectiveProjectionMatrix, Math.PI * this.fovy / 180, this.aspect, this.near, this.far);
     }
 
     /** setOrthographic: sets the orthographic projection matrix.
@@ -355,7 +355,7 @@ class camera {
     setCameraMatrix () {
         var storage = vec3.create ();
         mat4.fromRotationTranslation (this.matrix, this.rotation, this.position);
-        mat4.invert(this.matrix, this.matrix);
+        mat4.invert (this.matrix, this.matrix);
         gl.uniform3fv (gl.getUniformLocation (program, 
         "fCameraPosition"), this.position);
     }
@@ -399,7 +399,7 @@ class camera {
         var direction = vec3.fromValues (storage[0], storage[1], storage[2]);
 
         var q = quat.create ();
-        quat.setAxisAngle (q, direction, -this.speed * Math.PI / 180.0)
+        quat.setAxisAngle (q, direction, this.speed * Math.PI / 180.0)
         quat.mul (this.rotation, this.rotation, q);
 
         this.setCameraMatrix ();
@@ -414,7 +414,7 @@ class camera {
         var direction = vec3.fromValues (storage[0], storage[1], storage[2]);
 
         var q = quat.create ();
-        quat.setAxisAngle (q, direction, this.speed * Math.PI / 180.0)
+        quat.setAxisAngle (q, direction, -this.speed * Math.PI / 180.0)
         quat.mul (this.rotation, this.rotation, q);
 
         this.setCameraMatrix ();
@@ -429,7 +429,7 @@ class camera {
         var direction = vec3.fromValues (storage[4], storage[5], storage[6]);
 
         var q = quat.create ();
-        quat.setAxisAngle (q, direction, -this.speed * Math.PI / 180.0)
+        quat.setAxisAngle (q, direction, this.speed * Math.PI / 180.0)
         quat.mul (this.rotation, this.rotation, q);
 
         this.setCameraMatrix ();
@@ -445,7 +445,7 @@ class camera {
         var direction = vec3.fromValues (storage[4], storage[5], storage[6]);
 
         var q = quat.create ();
-        quat.setAxisAngle (q, direction, this.speed * Math.PI / 180.0)
+        quat.setAxisAngle (q, direction, -this.speed * Math.PI / 180.0)
         quat.mul (this.rotation, this.rotation, q);
 
         this.setCameraMatrix ();
@@ -489,7 +489,7 @@ class animationRotation {
 
         this.theta += this.omega * dTime;
         var to_rot = quat.create ();
-        quat.setAxisAngle (to_rot, this.axis, this.angle);
+        quat.setAxisAngle (to_rot, this.axis, this.theta * Math.PI / 180);
         quat.slerp (this.object.transform.rotation, this.object.transform.rotation, to_rot, 1.0);
     }
 }
@@ -706,12 +706,6 @@ function AUX_generateCubeNormals (a, b, c, d, vertices) {
     var storage = vec4.create ();
     var t1 = vec4.subtract (storage, vertices[b], vertices[a]);
     var t2 = vec4.subtract (storage, vertices[c], vertices[b]);
-    console.log (vertices[b]);
-    console.log (vertices[a]);
-    console.log (vertices[c]);
-    console.log (vertices[b]);
-    console.log (t1);
-    console.log (t2);
 
     t1 = vec3.fromValues (t1[0], t1[1], t1[2]);
     t2 = vec3.fromValues (t2[0], t2[1], t2[2]);
@@ -786,16 +780,16 @@ function camReset () {
  *	@param { Array } array: array to be flattened
  *	@ret { Float32Array } ret: a flattened array of floats
  */
-function flattenArray(array) {
+function flattenArray (array) {
     var flattenedArray = [];
 
     for (var i = 0; i < array.length; i++) {
     	for (var j = 0; j < array[i].length; j++) {
-    		flattenedArray.push(array[i][j]);
+    		flattenedArray.push (array[i][j]);
     	}
     }
 
-    return new Float32Array(flattenedArray);
+    return new Float32Array (flattenedArray);
 }
 
 /** @endfile: test.js */
