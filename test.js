@@ -66,7 +66,10 @@ class boxCollider {
         this.type = "box"
     }
 
-    inFustrum (PC, PCM) {
+    inFustrum (PC, M) {
+        var PCM = mat4.create ();
+        mat4.mul (PCM, PC, M);
+
         var p_prime = [];
         for (var i = 0; i < this.vertices.length; i++) {
             var storage = vec4.create ();
@@ -149,7 +152,7 @@ class boxCollider {
         return true;
     }
 }
-
+/*
 class sphereCollider {
     constructor (_center, _radius) {
         this.center = _center;
@@ -161,8 +164,9 @@ class sphereCollider {
         var c = vec3.create ();
         vec3.transformMat4 (c, this.center, T);
 
+        //console.log (c);
         var r = this.radius * scaling;
-
+        console.log (r);
         var d, A, B, C, D;
 
         // check right plane:
@@ -269,7 +273,7 @@ class sphereCollider {
 
         return true;
     }
-}
+} */
 
 /** geometry: an abstraction for a geometry object. Geometries manage and maintain
  *  all GLSL buffers, normals, and vertex attributes. 
@@ -332,7 +336,7 @@ class material {
         gl.uniform4fv (gl.getUniformLocation (program, "fAmbientMaterial"), this.ambient);
         gl.uniform4fv (gl.getUniformLocation (program, "fDiffuseMaterial"), this.diffuse);
         gl.uniform4fv (gl.getUniformLocation (program, "fSpecularMaterial"), this.specular);   
-        gl.uniform1f (gl.getUniformLocation (program, "fShininess"), this.shininess);
+        gl.uniform1f (gl.getUniformLocation  (program, "fShininess"), this.shininess);
     }
 }
 
@@ -352,23 +356,21 @@ class transform {
         this.rotation = _rotation   || quat.create();
 
         this.MVmatrix = mat4.create ();
-        this.NMmatrix = mat3.create ();
 
-        this.setMatrices ();
+        this.setModelView ();
     }
 
     /** update: event loop function. Currently just sets the matrices for the object.
      *  @param { float } dTime: the time since the last framce callback (in seconds).
      */
     update (dTime) {
-        this.setMatrices ();
+        this.setModelView ();
     }
  
     /** setMatrices: sets the model and normal matrices for an object.
      */
-    setMatrices () {
+    setModelView () {
         mat4.fromRotationTranslationScale (this.MVmatrix, this.rotation, this.position, this.scale);
-        mat3.normalFromMat4 (this.NMmatrix, this.MVmatrix);
     }
 }
 
@@ -395,82 +397,11 @@ class light {
      */
     setup () {
         var pos = [ this.transform.position[0], this.transform.position[1], this.transform.position[2], 1.0 ];
-        
+
         gl.uniform4fv (gl.getUniformLocation (program, "fLightPosition[" + this.lightID + "]"), pos);
         gl.uniform4fv (gl.getUniformLocation (program, "fAmbientLight["  + this.lightID + "]"), this.ambient);
         gl.uniform4fv (gl.getUniformLocation (program, "fDiffuseLight["  + this.lightID + "]"), this.diffuse);
         gl.uniform4fv (gl.getUniformLocation (program, "fSpecularLight[" + this.lightID + "]"), this.specular);
-    }
-}
-
-/** object: an abstraction for a object. Objects contain a material, geometry,
- *  and transform object to define it. Objects can also be deactivated, causing
- *  their motion to still be upated, but they won't be drawn to the screen.
- */
-class object {
-    /** constructor: builds an instance of an object with given attributes.
-     *  @param { transform } transform: the orientation and position of the object.
-     *  @param { material } material: the material that defines an object.
-     *  @param { geometry } geometry: the object's geometry to define it.
-     */
-    constructor (_transform, _material, _geometry, _collider) {
-        this.transform = _transform || new transform ();
-        this.material = _material;
-        this.geometry = _geometry;
-        this.collider = _collider;
-        this.active = true;
-    }
-
-    /** update: event loop function. Calls the update function for the transform component.
-     *  @param { float } dTime: the time since the last framce callback (in seconds).
-     */
-    update (dTime) {
-        this.transform.update (dTime);
-    }
-
-    /** draw: draws the object to the screen.
-     */
-    draw () {
-        if (!this.active)
-            return;
-
-        this.geometry.setup ();
-        this.material.setup ();
-
-        gl.uniformMatrix4fv (modelViewMatrixLoc, false, this.transform.MVmatrix);
-        gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
-        gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
-        gl.uniformMatrix3fv (normalMatrixLoc, false, this.transform.NMmatrix);
-
-        if (this.collider == null) {
-            gl.drawArrays (gl.TRIANGLES, 0, this.geometry.Nvertices);
-            gl.bindBuffer (gl.ARRAY_BUFFER, null);
-        }
-
-        else if (this.collider.type == "box") {
-            var PC = mat4.create ();
-            var PCM = mat4.create ();
-            mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
-            mat4.mul (PCM, PC, this.transform.MVmatrix);
-
-            if (this.collider.inFustrum (PC, PCM)) {
-                gl.drawArrays (gl.TRIANGLES, 0, this.geometry.Nvertices);
-                gl.bindBuffer (gl.ARRAY_BUFFER, null);
-            }
-
-        } 
-
-        else if (this.collider.type == "sphere") {
-            var PC = mat4.create ();
-            var T = mat4.create ();
-            mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
-            mat4.fromTranslation (T, this.transform.position);
-
-            if (this.collider.inFustrum (PC, this.transform.scale[0], T)) {
-                gl.drawArrays (gl.TRIANGLES, 0, this.geometry.Nvertices);
-                gl.bindBuffer (gl.ARRAY_BUFFER, null);
-            }
-        }
     }
 }
 
@@ -500,7 +431,6 @@ class camera {
         this.matrix = mat4.create ();
         this.perspectiveProjectionMatrix = mat4.create ();
         this.orthoProjectionMatrix = mat4.create ();
-
 
         this.setPerspective ();
         this.setOrthographic ();
@@ -777,27 +707,33 @@ window.onload = function init () {
 
     // create the materials for each of the 6 bodies (sun, planet1, planet2, planet3, planet4, moon)
     materials =         [   new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                             new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0)
                         ]; 
 
     // create the transforms for each of the 6 bodies.
     transforms =        [   new transform (vec3.fromValues (-4.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
-                            new transform (vec3.fromValues (4.0,  0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create())
+                            new transform (vec3.fromValues (4.0,  0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create()),
+                            new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create())
                         ];
 
     colliders =         [   new boxCollider (cubeVertices),
-                            new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 0.5)
+                            new boxCollider (cubeVertices),
+                            new boxCollider (cubeVertices),
                         ];
 
     // create the object for each of the 6 bodies.
     cubes  =            [   new object (transforms[0], materials[0], geometries[0], colliders[0]),
-                            new object (transforms[1], materials[1], geometries[0], colliders[1])
+                            new object (transforms[1], materials[1], geometries[0], colliders[1]),
+                            new object (transforms[2], materials[2], geometries[0], colliders[2]),
                         ];
 
     rot_animations =    [   new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (0.0, 1.0, 0.0)),
-                            new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0))
+                            new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0)),
+                            new animationRotation (cubes[2], 0.0, 120.0, vec3.fromValues (0.0, 0.0, 1.0))
                         ];
 
+    buildSceneGraph ();
 
     for (var i = 0; i < rot_animations.length; i++) {
         rot_animations[i].active = false;
@@ -823,12 +759,8 @@ function render (current) {
     for (var i = 0; i < rot_animations.length; i++) {
         rot_animations[i].animate (deltaTime);
     }
-    
-    // update and draw all of the objects
-    for (var i = 0; i < cubes.length; i++) {
-        cubes[i].update (deltaTime);
-        cubes[i].draw ();
-    }
+
+    drawSceneGraph (deltaTime);
 
     // callback
     window.requestAnimFrame (render);
