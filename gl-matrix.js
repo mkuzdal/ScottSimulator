@@ -4344,7 +4344,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	/**
-	 * Calculates the W component of a from the X, Y, and Z components.
+	 * Calculates the W component of a quat from the X, Y, and Z components.
 	 * Assumes that quaternion is 1 unit in length.
 	 * Any existing W component will be ignored.
 	 *
