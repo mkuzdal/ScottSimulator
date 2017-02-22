@@ -45,6 +45,7 @@ var index = 0;
 var cubes = [];
 var materials = [];
 var geometries = [];
+var textures = [];
 var transforms = [];
 var colliders = [];
 var rot_animations = [];
@@ -58,6 +59,13 @@ var cubeVertices = [
      vec4.fromValues ( -0.5,  0.5, -0.5, 1.0 ),
      vec4.fromValues (  0.5,  0.5, -0.5, 1.0 ),
      vec4.fromValues (  0.5, -0.5, -0.5, 1.0 )
+];
+
+var texCoords = [
+    vec2.fromValues (0.0, 0.0),
+    vec2.fromValues (0.0, 1.0),
+    vec2.fromValues (1.0, 1.0),
+    vec2.fromValues (1.0, 0.0)
 ];
 
 class boxCollider {
@@ -152,7 +160,7 @@ class boxCollider {
         return true;
     }
 }
-/*
+
 class sphereCollider {
     constructor (_center, _radius) {
         this.center = _center;
@@ -160,13 +168,11 @@ class sphereCollider {
         this.type = "sphere"
     }
 
-    inFustrum (PC, scaling, T) {
+    inFustrum (PC, T) {
         var c = vec3.create ();
         vec3.transformMat4 (c, this.center, T);
 
-        //console.log (c);
-        var r = this.radius * scaling;
-        console.log (r);
+        var r = this.radius;
         var d, A, B, C, D;
 
         // check right plane:
@@ -273,7 +279,7 @@ class sphereCollider {
 
         return true;
     }
-} */
+} 
 
 /** geometry: an abstraction for a geometry object. Geometries manage and maintain
  *  all GLSL buffers, normals, and vertex attributes. 
@@ -337,6 +343,49 @@ class material {
         gl.uniform4fv (gl.getUniformLocation (program, "fDiffuseMaterial"), this.diffuse);
         gl.uniform4fv (gl.getUniformLocation (program, "fSpecularMaterial"), this.specular);   
         gl.uniform1f (gl.getUniformLocation  (program, "fShininess"), this.shininess);
+    }
+}
+
+/** texture: holds a set of vertices and image to define a texture. Automatically 
+ *  creates and loads buffers.
+ */
+class texture {
+    constructor (_image, _texCoords, _options) {
+        this.image = _image;
+        this.nCoords = _texCoords.length;
+        this.options = _options;
+
+        this.texture = gl.createTexture();
+        gl.bindTexture (gl.TEXTURE_2D, this.texture);
+        
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+        gl.texImage2D (gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.image);
+        gl.generateMipmap (gl.TEXTURE_2D);
+
+        gl.uniform1i (gl.getUniformLocation (program, "texture"), 0);
+
+        this.tBuffer = gl.createBuffer ();
+        gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
+        gl.bufferData (gl.ARRAY_BUFFER, flattenArray (_texCoords), gl.STATIC_DRAW);
+    }
+
+    setup () {
+        // bind textures
+        gl.bindTexture (gl.TEXTURE_2D, this.texture);
+        gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
+
+        for (var i = 0; i < this.options.length; i++) {
+            gl.texParameteri (gl.TEXTURE_2D, this.options[i][0], this.options[i][1]);
+        }
+
+        var vTexCoord = gl.getAttribLocation (program, "vTexCoord");
+        gl.vertexAttribPointer (vTexCoord, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray (vTexCoord);
+    }
+
+    bindCoordinates (texCoords) {
+        gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
+        gl.bufferData (gl.ARRAY_BUFFER, flattenArray (texCoords), gl.STATIC_DRAW);
     }
 }
 
@@ -471,6 +520,7 @@ class camera {
 
         this.position = vec3.add (this.position, this.position, direction);
 
+        console.log ("Position: " + this.position);
         this.setCameraMatrix ();
     }
 
@@ -690,19 +740,23 @@ window.onload = function init () {
     cam = new camera ();
     lightSource1 = new light (new transform (vec3.fromValues (10.0, 0.0, 10.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
-                              vec4.fromValues (0.0, 0.0, 1.0, 1.0),
-                              vec4.fromValues (1.0, 1.0, 1.0, 1.0));
+                              vec4.fromValues (0.8, 0.3, 0.3, 1.0),
+                              vec4.fromValues (0.0, 0.0, 0.0, 1.0));
 
     lightSource2 = new light (new transform (vec3.fromValues (-10.0, 0.0, 10.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
-                              vec4.fromValues (1.0, 0.0, 0.0, 1.0),
+                              vec4.fromValues (0.8, 0.8, 0.8, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0));
     lightSource1.setup ();
     lightSource2.setup ();
 
     // generate each of the spheres and create a geometry instance to define it
-    generateCubeNormals (cubeVertices);
-    generateCubeVertices (cubeVertices);
+ //   generateCubeNormals (cubeVertices);
+ //   generateCubeVertices (cubeVertices);
+//    generateCubeTexCoords (texCoords);
+
+    generateSphere (5);
+
     geometries.push (new geometry (pointsArray, normalsArray));
 
     // create the materials for each of the 6 bodies (sun, planet1, planet2, planet3, planet4, moon)
@@ -711,21 +765,26 @@ window.onload = function init () {
                             new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0)
                         ]; 
 
+    textures =          [   new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]])
+                        ];
+
     // create the transforms for each of the 6 bodies.
     transforms =        [   new transform (vec3.fromValues (-4.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
                             new transform (vec3.fromValues (4.0,  0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create()),
-                            new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (4.0, 4.0, 4.0), quat.create())
+                            new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create())
                         ];
 
-    colliders =         [   new boxCollider (cubeVertices),
-                            new boxCollider (cubeVertices),
-                            new boxCollider (cubeVertices),
+    colliders =         [   new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 2.0),
+                            new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0),
+                            new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 2.0),
                         ];
 
     // create the object for each of the 6 bodies.
-    cubes  =            [   new object (transforms[0], materials[0], geometries[0], colliders[0]),
-                            new object (transforms[1], materials[1], geometries[0], colliders[1]),
-                            new object (transforms[2], materials[2], geometries[0], colliders[2]),
+    cubes  =            [   new object (transforms[0], materials[0], geometries[0], textures[0], colliders[0]),
+                            new object (transforms[1], materials[1], geometries[0], textures[1], colliders[1]),
+                            new object (transforms[2], materials[2], geometries[0], textures[2], colliders[2]),
                         ];
 
     rot_animations =    [   new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (0.0, 1.0, 0.0)),
@@ -740,6 +799,7 @@ window.onload = function init () {
     }
 
     window.requestAnimFrame (render);
+
 }
 
 /** render: renders the current callback frame.
@@ -873,6 +933,7 @@ function quad (a, b, c, d, vertices, texCoords) {
     generateCubeTexCoords (a, b, c, d, texCoords);
 }
 
+
 /** generateSphere: function to generate the vertices for a recursive sphere 
  *  based on the complexity (i.e., the levels of recursion) and the shading type.
  *  @pre: there must be defined global arrays: pointsArray to store the vertices
@@ -891,6 +952,7 @@ function quad (a, b, c, d, vertices, texCoords) {
 function generateSphere (complexity) {
     pointsArray = [];
     normalsArray = [];
+    textureArray = [];
 
     var va = vec4.fromValues (0.0, 0.0, -1.0,1);
     var vb = vec4.fromValues (0.0, 0.942809, 0.333333, 1);
@@ -898,8 +960,6 @@ function generateSphere (complexity) {
     var vd = vec4.fromValues (0.816497, -0.471405, 0.333333,1);
 
     tetrahedron (va, vb, vc, vd, complexity);
-
-    index = 0;
 }
 
 /** triangle: generateSphere helper function.
@@ -910,11 +970,38 @@ function triangle (a, b, c) {
     pointsArray.push (b);      
     pointsArray.push (c);
 
-    normalsArray.push (a[0], a[1], a[2], 0.0);
-    normalsArray.push (b[0], b[1], b[2], 0.0);
-    normalsArray.push (c[0], c[1], c[2], 0.0);
+    var N1 = vec3.fromValues (a[0], a[1], a[2], 0.0);
+    var N2 = vec3.fromValues (b[0], b[1], b[2], 0.0);
+    var N3 = vec3.fromValues (c[0], c[1], c[2], 0.0);
 
-    index += 3;
+    normalsArray.push (N1);
+    normalsArray.push (N2);
+    normalsArray.push (N3);
+
+    var tx1 = Math.atan2(a[0], a[2]) / (2 * Math.PI) + 0.5;
+    var ty1 = Math.asin(a[1]) / Math.PI + .5;
+    var tx2 = Math.atan2(b[0], b[2]) / (2 * Math.PI) + 0.5;
+    var ty2 = Math.asin(b[1]) / Math.PI + .5;
+    var tx3 = Math.atan2(c[0], c[2]) / (2 * Math.PI) + 0.5;
+    var ty3 = Math.asin(c[1]) / Math.PI + .5;
+/*
+    var tx2 = Math.atan2 (b[0], b[2]) / (2 * Math.PI) + 0.5;
+    var ty2 = Math.asin (b[1]) / Math.PI + 0.5;
+    if (tx2 < 0.75 && tx1 > 0.75)
+        tx2 += 1.0;
+    else if(tx2 > 0.75 && tx1 < 0.75)
+        tx2 -= 1.0;
+
+    var tx3 = Math.atan2 (c[0], c[2]) / (2 * Math.PI) + 0.5;
+    var ty3 = Math.asin (c[1]) / Math.PI + 0.5;
+    if (tx3 < 0.75 && tx1 > 0.75)
+        tx3 += 1.0;
+    else if(tx2 > 0.75 && tx1 < 0.75)
+        tx3 -= 1.0; */
+
+    textureArray.push (vec2.fromValues (tx1, ty1));
+    textureArray.push (vec2.fromValues (tx2, ty2));
+    textureArray.push (vec2.fromValues (tx3, ty3));
 }
 
 /** divideTriangle: generateSphere helper function.
@@ -926,9 +1013,9 @@ function divideTriangle (a, b, c, count) {
         var ac = mix (a, c, 0.5);
         var bc = mix (b, c, 0.5);
                 
-        ab = normalize (ab, true);
-        ac = normalize (ac, true);
-        bc = normalize (bc, true);
+        vec3.normalize (ab, ab);
+        vec3.normalize (ac, ac);
+        vec3.normalize (bc, bc);
                                 
         divideTriangle (a, ab, ac, count - 1);
         divideTriangle (ab, b, bc, count - 1);
@@ -949,8 +1036,23 @@ function tetrahedron (a, b, c, d, n, type) {
     divideTriangle (a, c, d, n, type);
 }
 
+function mix (u, v, s)
+{
+    if (typeof s !== "number") {
+        throw "mix: the last paramter " + s + " must be a number";
+    }
+    
+    if (u.length != v.length) {
+        throw "vector dimension mismatch";
+    }
 
+    var result = [];
+    for (var i = 0; i < u.length; ++i) {
+        result.push ((1.0 - s) * u[i] +  s * v[i]);
+    }
 
+    return result;
+}
 
 
 /** camReset: resets the global camera to its default state.
