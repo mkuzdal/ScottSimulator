@@ -713,8 +713,8 @@ window.onload = function init () {
 
     // create the transforms for each of the 6 bodies.
     transforms =        [   new transform (vec3.fromValues (-4.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
-                            new transform (vec3.fromValues (4.0,  0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create()),
-                            new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create())
+                            new transform (vec3.fromValues (4.0,  0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create()),
+                            new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (4.0, 4.0, 4.0), quat.create())
                         ];
 
     colliders =         [   new boxCollider (cubeVertices),
@@ -872,6 +872,86 @@ function quad (a, b, c, d, vertices, texCoords) {
     generateCubeNormals (a, b, c, d, vertices);
     generateCubeTexCoords (a, b, c, d, texCoords);
 }
+
+/** generateSphere: function to generate the vertices for a recursive sphere 
+ *  based on the complexity (i.e., the levels of recursion) and the shading type.
+ *  @pre: there must be defined global arrays: pointsArray to store the vertices
+ *        and normalsArray to store the spheres normals
+ *
+ *  @param { int } vertexCount: the number of vertices to generate for the sphere.
+ *  @param { int } shadingType: the type of shading to use: 
+ *      0 => computes normals per polygon for per model shading (none).
+ *      1 => computes normals per vertex for per fragment interpolated shading (Phong).
+ *      2 => computes normals per polygon for per fragment shading (flat).
+ *      3 => computes normals per vertex for per vertex interpolated shading (Gaurard).
+ *
+ *  @post: the global arrays pointsArray and normalsArray store the vertices and 
+ *         normals for the generated sphere.
+ */
+function generateSphere (complexity) {
+    pointsArray = [];
+    normalsArray = [];
+
+    var va = vec4.fromValues (0.0, 0.0, -1.0,1);
+    var vb = vec4.fromValues (0.0, 0.942809, 0.333333, 1);
+    var vc = vec4.fromValues (-0.816497, -0.471405, 0.333333, 1);
+    var vd = vec4.fromValues (0.816497, -0.471405, 0.333333,1);
+
+    tetrahedron (va, vb, vc, vd, complexity);
+
+    index = 0;
+}
+
+/** triangle: generateSphere helper function.
+ */
+function triangle (a, b, c) {
+
+    pointsArray.push (a);
+    pointsArray.push (b);      
+    pointsArray.push (c);
+
+    normalsArray.push (a[0], a[1], a[2], 0.0);
+    normalsArray.push (b[0], b[1], b[2], 0.0);
+    normalsArray.push (c[0], c[1], c[2], 0.0);
+
+    index += 3;
+}
+
+/** divideTriangle: generateSphere helper function.
+ */
+function divideTriangle (a, b, c, count) {
+    if (count > 0) {
+                
+        var ab = mix (a, b, 0.5);
+        var ac = mix (a, c, 0.5);
+        var bc = mix (b, c, 0.5);
+                
+        ab = normalize (ab, true);
+        ac = normalize (ac, true);
+        bc = normalize (bc, true);
+                                
+        divideTriangle (a, ab, ac, count - 1);
+        divideTriangle (ab, b, bc, count - 1);
+        divideTriangle (bc, c, ac, count - 1);
+        divideTriangle (ab, bc, ac, count - 1);
+    }
+    else { 
+        triangle (a, b, c);
+    }
+}
+
+/** tetrahedron: generateSphere helper function.
+ */
+function tetrahedron (a, b, c, d, n, type) {
+    divideTriangle (a, b, c, n, type);
+    divideTriangle (d, c, b, n, type);
+    divideTriangle (a, d, b, n, type);
+    divideTriangle (a, c, d, n, type);
+}
+
+
+
+
 
 /** camReset: resets the global camera to its default state.
  */
