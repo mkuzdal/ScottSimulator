@@ -11,11 +11,10 @@ class object {
      *  @param { material } material: the material that defines an object.
      *  @param { geometry } geometry: the object's geometry to define it.
      */
-    constructor (_transform, _material, _geometry, _texture, _collider) {
+    constructor (_transform, _material, _geometry, _collider) {
         this.transform = _transform || new transform ();
         this.material = _material;
         this.geometry = _geometry;
-        this.texture = _texture
         this.collider = _collider;
         this.active = true;
         this.children = [];
@@ -69,7 +68,11 @@ class sceneGraph {
         } 
 
         else if (root.collider.type == "sphere") {
-            if (root.collider.inFustrum (PC, CTM_prime)) {
+            var T = mat4.create ();
+            mat4.fromTranslation (T, root.transform.position);
+            mat4.mul (T, T, CTM_prime);
+
+            if (root.collider.inFustrum (PC, T)) {
                 this.drawNode (root, CTM_prime);
             } else {
             	console.log ("HERE");
@@ -84,7 +87,6 @@ class sceneGraph {
 	drawNode (obj, CTM) {
 		obj.geometry.setup ();
         obj.material.setup ();
-        obj.texture.setup ();
 
         gl.uniformMatrix4fv (modelViewMatrixLoc, false, CTM);
         gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
@@ -108,6 +110,8 @@ function buildSceneGraph () {
 }
 
 function drawSceneGraph (dTime) {
+	
+	console.log ("HERE");
 	SGraph.drawTree (dTime);
 }
 
