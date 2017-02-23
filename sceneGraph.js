@@ -105,6 +105,7 @@ function buildSceneGraph () {
 	SGraph.root.children.push (cubes[0]);
 	SGraph.root.children.push (cubes[1]);
 	SGraph.root.children[1].children.push (cubes[2]);
+    SGraph.root.children[1].children[0].children.push (cubes[3]);
 }
 
 function drawSceneGraph (dTime) {

@@ -741,7 +741,7 @@ window.onload = function init () {
     lightSource1 = new light (new transform (vec3.fromValues (10.0, 0.0, 10.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (0.8, 0.3, 0.3, 1.0),
-                              vec4.fromValues (0.0, 0.0, 0.0, 1.0));
+                              vec4.fromValues (1.0, 1.0, 1.0, 1.0));
 
     lightSource2 = new light (new transform (vec3.fromValues (-10.0, 0.0, 10.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
@@ -751,45 +751,49 @@ window.onload = function init () {
     lightSource2.setup ();
 
     // generate each of the spheres and create a geometry instance to define it
- //   generateCubeNormals (cubeVertices);
- //   generateCubeVertices (cubeVertices);
-//    generateCubeTexCoords (texCoords);
-
     generateSphere (5);
+    geometries.push (new geometry (pointsArray, normalsArray));
+    textures.push (new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
+
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
 
     geometries.push (new geometry (pointsArray, normalsArray));
+    textures.push (new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
+
 
     // create the materials for each of the 6 bodies (sun, planet1, planet2, planet3, planet4, moon)
     materials =         [   new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                             new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                             new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0)
                         ]; 
-
-    textures =          [   new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
-                            new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
-                            new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]])
-                        ];
 
     // create the transforms for each of the 6 bodies.
     transforms =        [   new transform (vec3.fromValues (-4.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
                             new transform (vec3.fromValues (4.0,  0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create()),
-                            new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create())
+                            new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create()),
+                            new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create())
                         ];
 
     colliders =         [   new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 2.0),
-                            new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0),
+                            new boxCollider (cubeVertices),
                             new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 2.0),
+                            new boxCollider (cubeVertices),
                         ];
 
     // create the object for each of the 6 bodies.
     cubes  =            [   new object (transforms[0], materials[0], geometries[0], textures[0], colliders[0]),
-                            new object (transforms[1], materials[1], geometries[0], textures[1], colliders[1]),
-                            new object (transforms[2], materials[2], geometries[0], textures[2], colliders[2]),
+                            new object (transforms[1], materials[1], geometries[1], textures[1], colliders[1]),
+                            new object (transforms[2], materials[2], geometries[0], textures[0], colliders[2]),
+                            new object (transforms[3], materials[3], geometries[1], textures[1], colliders[3])
                         ];
 
     rot_animations =    [   new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (0.0, 1.0, 0.0)),
                             new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0)),
-                            new animationRotation (cubes[2], 0.0, 120.0, vec3.fromValues (0.0, 0.0, 1.0))
+                            new animationRotation (cubes[2], 0.0, 120.0, vec3.fromValues (0.0, 0.0, 1.0)),
+                            new animationRotation (cubes[3], 0.0, 360.0, vec3.fromValues (1.0, 0.0, 0.0))
                         ];
 
     buildSceneGraph ();
