@@ -796,7 +796,14 @@ window.onload = function init () {
                             new animationRotation (cubes[3], 0.0, 360.0, vec3.fromValues (1.0, 0.0, 0.0))
                         ];
 
+    var l = new object ();
+    l.loadFromObj ("testCubeOBJ", "testCubeMAT", "TEXfrance");
+    cubes.push (l);
+
     buildSceneGraph ();
+
+    l.transform = transforms[0];
+    l.drawType = gl.LINE_STRIP;
 
     for (var i = 0; i < rot_animations.length; i++) {
         rot_animations[i].active = false;
