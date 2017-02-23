@@ -89,7 +89,7 @@ class object {
         }
 
         for (var i = 0; i < points_Array.length; i++) {
-            texture_Array[i] = vec4.fromValues (texture_Array[i][0], texture_Array[i][1]);
+            texture_Array[i] = vec2.fromValues (texture_Array[i][0], texture_Array[i][1]);
         }
 
 
@@ -119,7 +119,7 @@ class object {
 
         this.geometry = new geometry (points_Array, normals_Array);
         this.material = new material (ambient, diffuse, specular, shininess);
-        this.texture = new texture (TexEle, texture_Array, []);
+        this.texture = new texture (TexEle, texture_Array);
     }
 }
 
@@ -195,7 +195,7 @@ class sceneGraph {
 
 
 function buildSceneGraph () {
-	SGraph = new sceneGraph ();
+    SGraph = new sceneGraph ();
 	SGraph.root.children.push (cubes[4]);
 	SGraph.root.children.push (cubes[1]);
 	SGraph.root.children[1].children.push (cubes[2]);
@@ -205,6 +205,5 @@ function buildSceneGraph () {
 function drawSceneGraph (dTime) {
 	SGraph.drawTree (dTime);
 }
-
 
 
