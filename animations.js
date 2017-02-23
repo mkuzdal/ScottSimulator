@@ -10,9 +10,25 @@ class animationHandler {
         }
     }
 
-    animateAllWithTag (dTime, tag) {
+    animateByAnimationTag (tag, dTime) {
         for (var i = 0; i < this.animations.length; i++) {
             if (this.animations[i].tag == tag) {
+                this.animations[i].animate (dTime);
+            }
+        }
+    }
+
+    animateByObjectTag (tag, dTime) {
+        for (var i = 0; i < this.animations.length; i++) {
+            if (this.animations[i].object.tag == tag) {
+                this.animations[i].animate (dTime);
+            }
+        }
+    }
+
+    animateByObject (object, dTime) {
+        for (var i = 0; i < this.animations.length; i++) {
+            if (this.animations[i].object === object) {
                 this.animations[i].animate (dTime);
             }
         }
@@ -24,9 +40,25 @@ class animationHandler {
         }
     }
 
-    activateAllWithTag () {
+    activateByAnimationTag (tag) {
         for (var i = 0; i < this.animations.length; i++) {
             if (this.animations[i].tag == tag) {
+                this.animations[i].active = true;
+            }
+        }
+    }
+
+    activateByObjectTag (tag) {
+        for (var i = 0; i < this.animations.length; i++) {
+            if (this.animations[i].object.tag == tag) {
+                this.animations[i].active = true;
+            }
+        }
+    }
+
+    activateByObject (object) {
+        for (var i = 0; i < this.animations.length; i++) {
+            if (this.animations[i].object === object) {
                 this.animations[i].active = true;
             }
         }
@@ -38,9 +70,25 @@ class animationHandler {
         }
     }
 
-    deactivateAllWithTag (tag) {
+    deactivateByAnimationTag (tag) {
         for (var i = 0; i < this.animations.length; i++) {
             if (this.animations[i].tag == tag) {
+                this.animations[i].active = false;
+            }
+        }
+    }
+
+    deactivateByObjectTag (tag) {
+        for (var i = 0; i < this.animations.length; i++) {
+            if (this.animations[i].object.tag == tag) {
+                this.animations[i].active = false;
+            }
+        }
+    }
+
+    deactivateByObject (object) {
+        for (var i = 0; i < this.animations.length; i++) {
+            if (this.animations[i].object === object) {
                 this.animations[i].active = false;
             }
         }
@@ -52,10 +100,26 @@ class animationHandler {
         }
     }
 
-    toggleAllWithTag (tag) {
+    togglByAnimationTag (tag) {
         for (var i = 0; i < this.animations.length; i++) {
             if (this.animations[i].tag == tag) {
                 this.animations[i].active = !this.animations[i].active;
+            }
+        }
+    }
+
+    toggleByObjectTag (tag) {
+        for (var i = 0; i < this.animations.length; i++) {
+            if (this.animations[i].object.tag == tag) {
+                this.animations[i].active = !this.animations[i].active;
+            }
+        }
+    }
+
+    toggleByObject (object) {
+        for (var i = 0; i < this.animations.length; i++) {
+            if (this.animations[i].object === object) {
+                this.animations[i].active = !this.animation[i].active;
             }
         }
     }
@@ -78,7 +142,7 @@ class animationRotation {
         this.omega = _omega;
         this.axis = _axis;
         this.active = true;
-        this.tag = "rotation";
+        this.tag = "rotate";
     }
 
     /** animate: event loop function. Applies the rotation animation to the object.

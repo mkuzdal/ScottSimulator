@@ -91,6 +91,10 @@ class boxCollider {
 
         return true;
     }
+
+    intersecting (PC, other, M1, M2) {
+
+    }
 }
 
 class sphereCollider {
@@ -100,11 +104,7 @@ class sphereCollider {
         this.type = "sphere"
     }
 
-    inFustrum (PC, T) {
-        var c = vec3.create ();
-        vec3.transformMat4 (c, this.center, T);
-
-        var r = this.radius;
+    inFustrum (PC, c, r) {
         var d, A, B, C, D;
 
         // check right plane:
@@ -211,6 +211,23 @@ class sphereCollider {
 
         return true;
     }
+
+    intersecting (PC, other, T1, T2) {
+        var c1 = vec3.create ();
+        vec3.transformMat4 (c, this.center, T1);
+
+        var c2 = vec3.create ();
+        vec3.transformMat4 (c, this.center, T2);
+
+        var d2 = vec3.squaredDistance (c2, c1);
+        var r2 = (this.radius + other.radius) * (this.radius + other.radius);
+
+        if (r2 > d2)
+            return true;
+
+        else return false;
+    }
+
 } 
 
 /** geometry: an abstraction for a geometry object. Geometries manage and maintain

@@ -31,7 +31,7 @@ var cameraMatrixLoc;
 
 var cam;
 var lightsManager;
-var animationsHander;
+var animationsManager;
 
 // previous frame time
 var prev = 0;
@@ -65,7 +65,6 @@ var texCoords = [
     vec2.fromValues (1.0, 1.0),
     vec2.fromValues (1.0, 0.0)
 ];
-
 
 
 
@@ -118,16 +117,36 @@ window.onload = function init () {
             case 82: // r
             {	
             	camReset();
-                animationsHander.toggleAll ();
+                animationsManager.toggleAll ();
                 break;
             }
             case 83: // s
             {
-                lightsManager.toggleAll ();
+                break;
+            }
+            case 81: // q
+            {
+                lightsManager.toggleByTag ("red");
+                break;
+            }
+            case 87: // w
+            {
+                lightsManager.toggleByTag ("green");
+                break;
+            }
+            case 69: // e
+            {
+                lightsManager.toggleByTag ("blue");
                 break;
             }
             case 84: // t
             {
+                lightsManager.activateAll ();
+                break;
+            }
+            case 89: // y
+            {
+                lightsManager.deactivateAll ();
                 break;
             }
             case 38: // up
@@ -165,18 +184,29 @@ window.onload = function init () {
     normalMatrixLoc = gl.getUniformLocation (program, "normalMatrix");
     cameraMatrixLoc = gl.getUniformLocation (program, "cameraMatrix");
 
-    lightsManager = new lightManager ();
-    animationsHander = new animationHandler ();
+    lightsManager = new lightHandler ();
+    animationsManager = new animationHandler ();
 
-    lightsManager.addSource (new light (new transform (vec3.fromValues (10.0, 0.0, 10.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+    lightsManager.addSource (new light (new transform (vec3.fromValues (-10.0, 0.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
-                              vec4.fromValues (0.8, 0.3, 0.3, 1.0),
+                              vec4.fromValues (1.0, 0.1, 0.1, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
 
-    lightsManager.addSource (new light (new transform (vec3.fromValues (-10.0, 0.0, 10.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    lightsManager.lightSources[0].tag = "red";
+
+    lightsManager.addSource (new light (new transform (vec3.fromValues (10.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
-                              vec4.fromValues (0.8, 0.8, 0.8, 1.0),
+                              vec4.fromValues (0.1, 0.1, 1.0, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
+
+    lightsManager.lightSources[1].tag = "blue";
+
+    lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (0.1, 1.0, 0.1, 1.0),
+                              vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
+
+    lightsManager.lightSources[2].tag = "green";
 
     lightsManager.setupAll ();
 
@@ -206,13 +236,13 @@ window.onload = function init () {
     transforms =        [   new transform (vec3.fromValues (-4.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
                             new transform (vec3.fromValues (4.0,  0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                             new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
-                            new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ())
+                            new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ())
                         ];
 
-    colliders =         [   new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 2.0),
-                            new boxCollider (cubeVertices),
-                            new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 2.0),
-                            new boxCollider (cubeVertices),
+    colliders =         [   new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0),
+                            new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 0.5),
+                            new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0),
+                            new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 0.5)
                         ];
 
     // create the object for each of the 6 bodies.
@@ -222,24 +252,27 @@ window.onload = function init () {
                             new object (transforms[3], materials[3], geometries[1], textures[1], colliders[3])
                         ];
 
-    animationsHander.animations.push (new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (1.0, 1.0, 0.0)));
-    animationsHander.animations.push (new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0)));
-    animationsHander.animations.push (new animationRotation (cubes[2], 0.0, 120.0, vec3.fromValues (0.0, 0.0, 1.0)));
-    animationsHander.animations.push (new animationRotation (cubes[3], 0.0, 360.0, vec3.fromValues (0.0, 0.0, 1.0)));
+    cubes[0] = new object ();
+    cubes[0].loadFromObj ("testCubeOBJ", "testCubeMAT", "testCubeTEX");
+    cubes[0].transform = transforms[0];
+    cubes[0].collider = colliders[0];
 
-    var l = new object ();
-    l.loadFromObj ("testCubeOBJ", "testCubeMAT", "testCubeTEX");
-    cubes.push (l);
+    animationsManager.animations.push (new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (1.0, 1.0, 0.0)));
+    animationsManager.animations.push (new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0)));
+    animationsManager.animations.push (new animationRotation (cubes[2], 0.0, 120.0, vec3.fromValues (0.0, 0.0, 1.0)));
+    animationsManager.animations.push (new animationRotation (cubes[3], 0.0, 360.0, vec3.fromValues (0.0, 0.0, 1.0)));
 
     buildSceneGraph ();
 
-    l.transform = transforms[0];
+    for (var i = 0; i < cubes.length; i++) {
+        cubes[i].tag = i;
+    }
 
-    animationsHander.deactivateAll ();
+    animationsManager.deactivateAll ();
 
     window.requestAnimFrame (render);
-
 }
+
 
 /** render: renders the current callback frame.
  *  @param: { float } current: the current frame time.
@@ -255,8 +288,8 @@ function render (current) {
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // animate all of the objects
-    animationsHander.animateAll (deltaTime);
-    lightsManager.setupAll (deltaTime);
+    animationsManager.animateAll (deltaTime);
+    lightsManager.setupAll ();
 
     drawSceneGraph (deltaTime);
 

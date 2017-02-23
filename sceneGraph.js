@@ -19,6 +19,7 @@ class object {
         this.collider = _collider;
         this.drawType = gl.TRIANGLES;
         this.active = true;
+        this.tag = "default";
         this.children = [];
     }
 
@@ -136,11 +137,11 @@ class sceneGraph {
 
 		mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
 		for (var i = 0; i < this.root.children.length; i++) {
-			this.__drawTree_AUX (dTime, this.root.children[i], CTM, PC);
+			this.__drawTree_AUX (dTime, this.root.children[i], CTM, PC, 1.0);
 		}
 	}
 
-	__drawTree_AUX (dTime, root, CTM, PC) {
+	__drawTree_AUX (dTime, root, CTM, PC, scaling) {
 		if (!root.active)
 			return;
 
@@ -148,8 +149,8 @@ class sceneGraph {
 
 		var CTM_prime = mat4.create ();
 		mat4.mul (CTM_prime, CTM, root.transform.MVmatrix);
+        var scaling_prime = scaling * root.transform.scale[0];
 
-		var toDraw = false;
 		if (root.collider == null) {
             this.drawNode (root, CTM_prime);
         }
@@ -163,7 +164,12 @@ class sceneGraph {
         } 
 
         else if (root.collider.type == "sphere") {
-            if (root.collider.inFustrum (PC, CTM_prime)) {
+            var c = vec3.create ();
+            vec3.transformMat4 (c, root.collider.center, CTM_prime);
+            
+            var r = root.collider.radius * scaling_prime;
+
+            if (root.collider.inFustrum (PC, c, r)) {
                 this.drawNode (root, CTM_prime);
             } else {
             	console.log ("HERE");
@@ -171,7 +177,7 @@ class sceneGraph {
         } 
 
         for (var i = 0; i < root.children.length; i++) {
-			this.__drawTree_AUX (dTime, root.children[i], CTM_prime, PC);
+			this.__drawTree_AUX (dTime, root.children[i], CTM_prime, PC, scaling_prime);
 		}
 	}
 
@@ -191,12 +197,47 @@ class sceneGraph {
         gl.drawArrays (obj.drawType, 0, obj.geometry.Nvertices);
         gl.bindBuffer (gl.ARRAY_BUFFER, null);
 	}
+
+    getObjectsByTag (tag) {
+        var objects = [];
+        for (var i = 0; i < this.root.children.length; i++) {
+            this.__getObjectsByTag_AUX (tag, this.root.children[i], objects);
+        }
+
+        return objects;
+    }
+
+    __getObjectsByTag_AUX (tag, root, objects) {
+        if (root.tag == tag) {
+            objects.push (root);
+        }
+
+        for (var i = 0; i < root.children.length; i++) {
+            this.__getObjectsByTag_AUX (tag, root.children[i], objects);
+        }
+    }
+
+    getObjectByTag (tag) {
+        for (var i = 0; i < this.root.children.length; i++) {
+            return this.__getObjectByTag_AUX (tag, this.root.children[i]);
+        }
+    }
+
+    __getObjectByTag_AUX (tag, root) {
+        if (root.tag == tag) {
+            return root;
+        }
+
+        for (var i = 0; i < root.children.length; i++) {
+            this.__getObjectByTag_AUX (tag, root.children[i]);
+        }
+    }
 }
 
 
 function buildSceneGraph () {
     SGraph = new sceneGraph ();
-	SGraph.root.children.push (cubes[4]);
+	SGraph.root.children.push (cubes[0]);
 	SGraph.root.children.push (cubes[1]);
 	SGraph.root.children[1].children.push (cubes[2]);
     SGraph.root.children[1].children[0].children.push (cubes[3]);

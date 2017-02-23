@@ -2,7 +2,7 @@
 var MAX_LIGHT_COUNT = 5;
 
 
-class lightManager {
+class lightHandler {
     constructor () {
         this.lightCount = 0;
         this.lightSources = [];
@@ -39,7 +39,7 @@ class lightManager {
         }
     }
 
-    setupAllWithTag (tag) {
+    setupByTag (tag) {
         for (var i = 0; i < this.lightCount; i++) {
             if (this.lightSources[i].tag == tag) {
                 this.lightSources[i].setup ();
@@ -53,7 +53,7 @@ class lightManager {
         }
     }
 
-    activateAllWithTag (tag) {
+    activateByTag (tag) {
         for (var i = 0; i < this.lightCount; i++) {
             if (this.lightSources[i].tag == tag) {
                 this.lightSources[i].active = true;
@@ -67,7 +67,7 @@ class lightManager {
         }
     }
 
-    deactivateAllWithTag (tag) {
+    deactivateByTag (tag) {
         for (var i = 0; i < this.lightCount; i++) {
             if (this.lightSources[i].tag == tag) {
                 this.lightSources[i].active = false;
@@ -81,7 +81,7 @@ class lightManager {
         }
     }
 
-    toggleAllWithTag () {
+    toggleByTag (tag) {
         for (var i = 0; i < this.lightCount; i++) {
             if (this.lightSources[i].tag == tag) {
                 this.lightSources[i].active = !this.lightSources[i].active;
