@@ -159,7 +159,7 @@ class sceneGraph {
             if (root.collider.inFustrum (PC, CTM_prime)) {
                 this.drawNode (root, CTM_prime);
             } else {
-            	console.log ("HERE");
+            	// console.log ("HERE");
             }
         } 
 
@@ -172,7 +172,7 @@ class sceneGraph {
             if (root.collider.inFustrum (PC, c, r)) {
                 this.drawNode (root, CTM_prime);
             } else {
-            	console.log ("HERE");
+            	// console.log ("HERE");
             }
         } 
 
@@ -187,7 +187,6 @@ class sceneGraph {
         obj.texture.setup ();
 
         gl.uniformMatrix4fv (modelViewMatrixLoc, false, CTM);
-        gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
         gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
 
         var CTMN = mat3.create ();

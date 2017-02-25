@@ -84,23 +84,37 @@ window.onload = function init () {
     
     gl.enable (gl.DEPTH_TEST);
 
+    // Setting up pointerlock
+    canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
+    document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
+
+    canvas.onclick = function() {
+        canvas.requestPointerLock();
+    };
+
+    document.addEventListener('pointerlockchange', lockChange, false);
+    document.addEventListener('mozpointerlockchange', lockChange, false);
+
+    function lockChange() {
+      if (document.pointerLockElement === canvas || document.mozPointerLockElement === canvas) {
+            console.log('The pointer lock status is now locked');
+            document.addEventListener("mousemove", updateCamera, false);
+        } else {
+            console.log('The pointer lock status is now unlocked');  
+            document.removeEventListener("mousemove", updateCamera, false);
+        }
+    }
+
+    function updateCamera(e) {
+        cam.mouseLook(e.movementX, e.movementY);
+    }
+
+    // Assigning keys
     window.addEventListener ("keydown", function (e) {
         switch (event.keyCode) {
             case 32: // space
-            {
-                cam.camMoveForward ();
-                break;
-            }
             case 73: // i
-            {
-                cam.camMoveForward ();
-                break;
-            }
             case 79: // o
-            {
-                cam.camMoveBackwards ();
-                break;
-            }
             case 49: // 1
             case 50: // 2
             case 51: // 3
@@ -110,65 +124,37 @@ window.onload = function init () {
             case 55: // 7
             case 56: // 8
             case 57: // 9
+            case 82: // r
+            case 81: // q
+
+            break;
+            case 87: // w
             {
-                cam.camSetSpeed (event.keyCode - 48);
+                cam.camMoveForward(1);
                 break;
             }
-            case 82: // r
-            {	
-            	camReset();
-                animationsManager.toggleAll ();
+            case 65: // a
+            {
+                cam.camMoveLeft(1);
                 break;
             }
             case 83: // s
-            {
+            {   
+                cam.camMoveBackward(1);
                 break;
             }
-            case 81: // q
+            case 68: // d
             {
-                lightsManager.toggleByTag ("red");
-                break;
-            }
-            case 87: // w
-            {
-                lightsManager.toggleByTag ("green");
+                cam.camMoveRight(1);
                 break;
             }
             case 69: // e
-            {
-                lightsManager.toggleByTag ("blue");
-                break;
-            }
             case 84: // t
-            {
-                lightsManager.activateAll ();
-                break;
-            }
             case 89: // y
-            {
-                lightsManager.deactivateAll ();
-                break;
-            }
             case 38: // up
-            { 
-                cam.camPitchUp ();
-                break;
-            }
             case 40: // down 
-            {
-                cam.camPitchDown ();
-                break;
-            }
             case 37: // left
-            {
-                cam.camYawLeft ();
-                break;
-            }
             case 39: // right
-            {
-                cam.camYawRight ();
-                break;
-            }
             default:
                 break;
         }
@@ -291,6 +277,14 @@ function render (current) {
     animationsManager.animateAll (deltaTime);
     lightsManager.setupAll ();
 
+    // animate the camera rotation
+    cam.updateRotation (deltaTime);
+    cam.updateCameraMatrix();
+    gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
+    gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), cam.position);
+
+
+    // draw
     drawSceneGraph (deltaTime);
 
     // callback
