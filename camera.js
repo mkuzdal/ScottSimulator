@@ -51,8 +51,7 @@ class camera {
         mat4.fromRotationTranslation (this.matrix, this.rotation, this.position);
         mat4.invert (this.matrix, this.matrix);
 
-        gl.uniform3fv (gl.getUniformLocation (program, 
-        "fCameraPosition"), this.position);
+        gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), this.position);
     }
 
     /** camMoveForward: moves the camera in the forwards direction by 'speed' many units.
@@ -74,7 +73,7 @@ class camera {
      */
     camMoveBackwards () {
         var storage = mat4.create ();
-        mat4.Quat (storage, this.rotation);
+        mat4.fromQuat (storage, this.rotation);
             
         var direction = vec3.fromValues (storage[8], storage[9], storage[10]);
         vec3.scale (direction, direction, this.speed);
