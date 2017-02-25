@@ -253,16 +253,23 @@ class geometry {
 
     /** setup: enables all buffers and sets the vertex and normal attributes.
      */
-    setup () {
-        gl.bindBuffer (gl.ARRAY_BUFFER, this.vBuffer);
-        var vPosition = gl.getAttribLocation (program, "vPosition");
-        gl.vertexAttribPointer (vPosition, 4, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray (vPosition);
+    setup (type) {
+        if (type == "main") {
+            gl.bindBuffer (gl.ARRAY_BUFFER, this.vBuffer);
+            var vPosition = gl.getAttribLocation (program, "vPosition");
+            gl.vertexAttribPointer (vPosition, 4, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray (vPosition);
 
-        gl.bindBuffer (gl.ARRAY_BUFFER, this.nBuffer);
-        var vNormal = gl.getAttribLocation (program, "vNormal");
-        gl.vertexAttribPointer (vNormal, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray (vNormal);
+            gl.bindBuffer (gl.ARRAY_BUFFER, this.nBuffer);
+            var vNormal = gl.getAttribLocation (program, "vNormal");
+            gl.vertexAttribPointer (vNormal, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray (vNormal);
+        } else if (type == "shadow") {
+            gl.bindBuffer (gl.ARRAY_BUFFER, this.vBuffer);
+            var vPosition = gl.getAttribLocation (shadowProgram, "vPosition");
+            gl.vertexAttribPointer (vPosition, 4, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray (vPosition);
+        }
     }
 }
 
@@ -352,7 +359,7 @@ class transform {
     constructor (_position, _scale, _rotation) {
         this.position = _position   || vec3.fromValues (0.0, 0.0, 0.0);
         this.scale = _scale         || vec3.fromValues (1.0, 1.0, 1.0);
-        this.rotation = _rotation   || quat.create();
+        this.rotation = _rotation   || quat.create ();
 
         this.MVmatrix = mat4.create ();
 

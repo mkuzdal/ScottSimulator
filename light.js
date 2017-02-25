@@ -106,8 +106,12 @@ class light {
         this.ambient = _ambient     || vec4.fromValues (0.2, 0.2, 0.2, 1.0);
         this.diffuse = _diffuse     || vec4.fromValues (0.4, 0.4, 0.4, 1.0);
         this.specular = _specular   || vec4.fromValues (0.6, 0.6, 0.6, 1.0);
+
         this.tag = "light"
         this.active = true;
+
+        this.perspectiveProjectionMatrix = mat4.create ();
+        this.matrix = mat4.create ();
     }   
 
     /** setup: sets up the lightposition uniform in the vertex shader.
@@ -125,6 +129,21 @@ class light {
             gl.uniform4fv (gl.getUniformLocation (program, "fDiffuseLight["  + this.lightID + "]"), vec4.fromValues (0.0, 0.0, 0.0, 0.0));
             gl.uniform4fv (gl.getUniformLocation (program, "fSpecularLight[" + this.lightID + "]"), vec4.fromValues (0.0, 0.0, 0.0, 0.0));
         }
+
+        this.setPerspective ();
+        this.setLightMatrix ();
+    }
+
+    /** setPerspective: sets the perspective projection matrix.
+     */
+    setPerspective () {
+        mat4.perspective (this.perspectiveProjectionMatrix, Math.PI * 70.0 / 180, OFFSCREEN_WIDTH / OFFSCREEN_HEIGHT, 1.0, 1000.0);
+    }
+
+    /** setLightMatrix: sets the light view matrix.
+     */
+    setLightMatrix () {
+        mat4.lookAt (this.matrix, this.transform.position, vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (0.0, 1.0, 0.0));
     }
 }
 

@@ -17,6 +17,12 @@
 var canvas;
 var gl;
 var program;
+var shadowProgram;
+
+var frameBufferObject;
+
+var OFFSCREEN_WIDTH = 1024;
+var OFFSCREEN_HEIGHT = 1024;
 
 // storage for global vertices and normals
 var pointsArray = [];
@@ -28,6 +34,12 @@ var projectionMatrixLoc;
 var modelViewMatrixLoc;
 var normalMatrixLoc;
 var cameraMatrixLoc;
+var lightProjectionMatrixLoc;
+var lightMatrixLoc;
+
+var modelViewMatrixSha;
+var lightProjectionMatrixSha;
+var lightMatrixSha;
 
 var cam;
 var lightsManager;
@@ -66,8 +78,12 @@ var texCoords = [
     vec2.fromValues (1.0, 0.0)
 ];
 
-
-
+var planeVertices = [
+    vec4.fromValues (-10.0, 0.0, 10.0, 1.0),
+    vec4.fromValues (-10.0, 0.0, -10.0, 1.0),
+    vec4.fromValues (10.0, 0.0, -10.0, 1.0),
+    vec4.fromValues (10.0, 0.0, 10.0, 1.0)
+];
 
 /** init: intialization function.
  */
@@ -83,6 +99,7 @@ window.onload = function init () {
     gl.clearColor (0.0, 0.0, 0.0, 1.0);
     
     gl.enable (gl.DEPTH_TEST);
+    //gl.cullFace ('back');
 
     // Setting up pointerlock
     canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
@@ -162,13 +179,24 @@ window.onload = function init () {
 
     // Create the shader and vertex program
     program = initShaders (gl, "vertex-shader", "fragment-shader");
+    shadowProgram = initShaders (gl, "vertex-shader-shadowmap", "fragment-shader-shadowmap");
+
     gl.useProgram (program);
+    frameBufferObject = initFramebufferObject ();
+    gl.activeTexture (gl.TEXTURE0);
+    gl.bindTexture (gl.TEXTURE_2D, frameBufferObject.texture);
 
     // Get the local variable for each of the matrix uniforms
     modelViewMatrixLoc = gl.getUniformLocation (program, "modelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation (program, "projectionMatrix");
     normalMatrixLoc = gl.getUniformLocation (program, "normalMatrix");
     cameraMatrixLoc = gl.getUniformLocation (program, "cameraMatrix");
+    lightMatrixLoc = gl.getUniformLocation (program, "lightMatrix");
+    lightProjectionMatrixLoc = gl.getUniformLocation (program, "lightProjectionMatrix");
+
+    modelViewMatrixSha = gl.getUniformLocation (shadowProgram, "modelViewMatrix");
+    lightMatrixSha = gl.getUniformLocation (shadowProgram, "lightMatrix");
+    lightProjectionMatrixSha = gl.getUniformLocation (shadowProgram, "lightProjectionMatrix");
 
     lightsManager = new lightHandler ();
     animationsManager = new animationHandler ();
@@ -193,8 +221,6 @@ window.onload = function init () {
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
 
     lightsManager.lightSources[2].tag = "green";
-
-    lightsManager.setupAll ();
 
     // generate each of the spheres and create a geometry instance to define it
     generateSphere (5);
@@ -248,6 +274,13 @@ window.onload = function init () {
     animationsManager.animations.push (new animationRotation (cubes[2], 0.0, 120.0, vec3.fromValues (0.0, 0.0, 1.0)));
     animationsManager.animations.push (new animationRotation (cubes[3], 0.0, 360.0, vec3.fromValues (0.0, 0.0, 1.0)));
 
+    generatePlane ();
+    cubes.push (new object (new transform (vec3.fromValues (0.0, -3.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray),
+                            new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]))
+                );
+
     buildSceneGraph ();
 
     for (var i = 0; i < cubes.length; i++) {
@@ -270,7 +303,6 @@ function render (current) {
     var deltaTime = current - prev;
     prev = current;
 
-    // clear the screen
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // animate all of the objects
@@ -289,6 +321,14 @@ function render (current) {
 
     // callback
     window.requestAnimFrame (render);
+}
+
+function generatePlane () {
+    pointsArray = [];
+    normalsArray = [];
+    textureArray = [];
+
+    quad (1, 0, 3, 2, planeVertices, texCoords);
 }
 
 /** generateCube: function to generate the vertices for a recursive sphere 
@@ -311,12 +351,12 @@ function generateCube () {
     normalsArray = [];
     textureArray = [];
 
-    quad (1, 0, 3, 2, cubeVertices, texCoord);
-    quad (2, 3, 7, 6, cubeVertices, texCoord);
-    quad (0, 4, 7, 3, cubeVertices, texCoord);
-    quad (5, 1, 2, 6, cubeVertices, texCoord);
-    quad (4, 5, 6, 7, cubeVertices, texCoord);
-    quad (5, 4, 0, 1, cubeVertices, texCoord);
+    quad (1, 0, 3, 2, cubeVertices, texCoords);
+    quad (2, 3, 7, 6, cubeVertices, texCoords);
+    quad (0, 4, 7, 3, cubeVertices, texCoords);
+    quad (5, 1, 2, 6, cubeVertices, texCoords);
+    quad (4, 5, 6, 7, cubeVertices, texCoords);
+    quad (5, 4, 0, 1, cubeVertices, texCoords);
 }
 
 function generateCubeNormals (vertices) {
@@ -393,9 +433,10 @@ function AUX_generateCubeVertices (a, b, c, d, vertices) {
 /** quad: generateCube helper function.
  */
 function quad (a, b, c, d, vertices, texCoords) {
-    generateCubeVertices (a, b, c, d, vertices);
-    generateCubeNormals (a, b, c, d, vertices);
-    generateCubeTexCoords (a, b, c, d, texCoords);
+
+    AUX_generateCubeTexCoords (1, 0, 3, 2, texCoords);
+    AUX_generateCubeVertices (1, 0, 3, 2, vertices);
+    AUX_generateCubeNormals (1, 0, 3, 2, vertices);
 }
 
 
@@ -449,20 +490,6 @@ function triangle (a, b, c) {
     var ty2 = Math.asin(b[1]) / Math.PI + .5;
     var tx3 = Math.atan2(c[0], c[2]) / (2 * Math.PI) + 0.5;
     var ty3 = Math.asin(c[1]) / Math.PI + .5;
-/*
-    var tx2 = Math.atan2 (b[0], b[2]) / (2 * Math.PI) + 0.5;
-    var ty2 = Math.asin (b[1]) / Math.PI + 0.5;
-    if (tx2 < 0.75 && tx1 > 0.75)
-        tx2 += 1.0;
-    else if(tx2 > 0.75 && tx1 < 0.75)
-        tx2 -= 1.0;
-
-    var tx3 = Math.atan2 (c[0], c[2]) / (2 * Math.PI) + 0.5;
-    var ty3 = Math.asin (c[1]) / Math.PI + 0.5;
-    if (tx3 < 0.75 && tx1 > 0.75)
-        tx3 += 1.0;
-    else if(tx2 > 0.75 && tx1 < 0.75)
-        tx3 -= 1.0; */
 
     textureArray.push (vec2.fromValues (tx1, ty1));
     textureArray.push (vec2.fromValues (tx2, ty2));
@@ -533,6 +560,34 @@ function flattenArray (array) {
     }
 
     return new Float32Array (flattenedArray);
+}
+
+function initFramebufferObject () {
+    var texture, depthBuffer;
+    var framebuffer = gl.createFramebuffer();
+
+    texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); 
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+
+    gl.bindFramebuffer (gl.FRAMEBUFFER, framebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, texture, 0);
+    depthBuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer); 
+
+    framebuffer.texture = texture;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+
+    return framebuffer;
 }
 
 /** @endfile: test.js */
