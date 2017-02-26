@@ -222,6 +222,7 @@ window.onload = function init () {
 
     lightsManager = new lightHandler ();
     animationsManager = new animationHandler ();
+    clickManager = new triggerHandler ();
 
     lightsManager.addSource (new light (new transform (vec3.fromValues (-40.0, 0.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
@@ -254,7 +255,6 @@ window.onload = function init () {
     generateCubeTexCoords (texCoords);
 
     cam = new camera ();
-    clickManager = new onClickHandler ();
 
     geometries.push (new geometry (pointsArray, normalsArray));
     textures.push (new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
@@ -287,13 +287,26 @@ window.onload = function init () {
                             new object (transforms[3], materials[3], geometries[1], textures[1], colliders[3])
                         ];
 
-    var click1 = new onClickTrigger (cubes[1], function (object) {
+    cubes[1].addOnMouseClickTrigger (function (object) {
         console.log (object.tag);
         return;
     });
+   
+    cubes[1].addOnMouseClickTrigger (function (object) {
+        console.log ("Click");
+    });
 
-    console.log (click1.ID);
+    cubes[1].addOnMouseHoverTrigger (function (object) {
+        console.log ("Hover");
+    });
 
+    cubes[1].addOnMouseEnterTrigger (function (object) {
+        console.log ("Enter");
+    });
+
+    cubes[1].addOnMouseExitTrigger (function (object) {
+        console.log ("Exit");
+    });
 
     cubes[0] = new object ();
     cubes[0].loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
@@ -317,6 +330,10 @@ window.onload = function init () {
     buildSceneGraph ();
 
     animationsManager.deactivateAll ();
+
+    for (var i = 0; i < cubes.length; i++) {
+        cubes[i].tag = i;
+    }
 
     window.requestAnimFrame (render);
 }
