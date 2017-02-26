@@ -66,11 +66,6 @@ class camera {
     updateCameraMatrix () {
         mat4.fromRotationTranslation (this.matrix, this.rotation, this.position);
         mat4.invert (this.matrix, this.matrix);
-<<<<<<< HEAD
-=======
-
-        gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), this.position);
->>>>>>> 818561f023fbd8253a2633ee2246afa650c93fc6
     }
 
     /** camMoveForward: moves the camera in the forwards direction by 'speed' many units.
