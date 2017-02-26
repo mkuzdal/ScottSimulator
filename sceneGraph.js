@@ -17,6 +17,8 @@ class object {
         this.geometry = _geometry;
         this.texture = _texture
         this.collider = _collider;
+        this.onClick = null;
+
         this.drawType = gl.TRIANGLES;
         this.active = true;
         this.tag = "default";
@@ -186,6 +188,12 @@ class sceneGraph {
         obj.material.setup ();
         obj.texture.setup ();
 
+        if (obj.onClick) {
+            obj.onClick.setup ();
+        } else {
+            gl.uniform4fv (gl.getUniformLocation (program, "fTriggerID"), vec4.fromValues (0.0, 0.0, 0.0, 1.0));   
+        }
+
         gl.uniformMatrix4fv (modelViewMatrixLoc, false, CTM);
         gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
         gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
@@ -292,10 +300,11 @@ function drawSceneGraph (dTime) {
     gl.bindFramebuffer (gl.FRAMEBUFFER, colorFramebuffer);
     gl.uniform1i (gl.getUniformLocation (program, "fOffscreen"), true);
     SGraph.drawTree ("color");
-    if (clicked) {
-        gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, color);
-        clicked = false;
-        handleClick (color);
+
+    if (clickManager.clicked) {
+        gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, clickManager.pixel);
+        clickManager.clicked = false;
+        clickManager.handleClicks ();
     }
 
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);

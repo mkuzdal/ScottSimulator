@@ -2,13 +2,17 @@
 
 class onClickTrigger {
     constructor (_object, _function) {
+        this.onClickFunc = _function;
         this.object = _object;
-        this.function = _function;
+        this.object.onClick = this;
+        clickManager.addOnClickTrigger (this);
     }
-}
 
-class onHoverTrigger {
-
+    setup () {
+        var storage = vec4.create ();
+        vec4.divide (storage, this.ID, vec4.fromValues (255.0, 255.0, 255.0, 255.0));
+        gl.uniform4fv (gl.getUniformLocation (program, "fTriggerID"), storage);   
+    }
 }
 
 class onClickHandler {
@@ -16,34 +20,31 @@ class onClickHandler {
         this.clicked = false;
         this.pixel = new Uint8Array (4);
         this.triggers = [];
-        this.currentID = vec4.fromValues (0.0, 0.0, 0.0, 0.0);
+        this.currentID = vec4.fromValues (0.0, 0.0, 0.0, 255.0);
     }
 
     addOnClickTrigger (trigger) {
         trigger.ID = this.currentID;
 
-        for (var i = 0; i < 4; i++) {
-            if (this.currentID[i] == 256.0)
+        for (var i = 0; i < 3; i++) {
+            if (this.currentID[i] == 255.0)
                 continue;
-
-            this.currentID[i] += 16;
+            else {
+                this.currentID[i] += 16;
+                break;
+            }
         }
 
         this.triggers.push (trigger);
-        trigger.object.trigger.
     }
 
-    handleClick () {
+    handleClicks () {
         for (var i = 0; i < this.triggers.length; i++) {
-            if (this.pixel == this.trigger[i].ID) {
-                this.trigger[i].onClick (this.trigger[i].object);
+            if (vec4.equals(this.pixel, this.triggers[i].ID)) {
+                this.triggers[i].onClickFunc (this.triggers[i].object);
             }
         }
     }
-}
-
-class onHoverHandler {
-
 }
 
 class boxCollider {
