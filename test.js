@@ -1,13 +1,6 @@
 /** @file: test.js
- *  Created by Matthew P. Kuzdal 
- *  ID:404564296
- *  CS174A - Introduction to Computer Graphics - Project 3
- *  Feb. 18, 2017
- *  
- *  Simple WebGL application utilizing features such as perspective / orthographic
- *  projections, quaternion camera controls, lighting and shading (Phong, Gaurad and Flat). 
- *  
- *  All requirements were attemped with no known bugs.
+ *  Main runtime code for ScottSimulator
+ *  MIT license here
  *
  **/
 
@@ -37,7 +30,10 @@ var cameraMatrixLoc;
 var lightProjectionMatrixLoc;
 var lightMatrixLoc;
 
-var cam;
+var modelViewMatrixSha;
+var lightProjectionMatrixSha;
+var lightMatrixSha;
+
 var lightsManager;
 var animationsManager;
 var clickManager;
@@ -59,6 +55,16 @@ var transforms = [];
 var colliders = [];
 var clickEvents = [];
 
+// player variables; consider abstracting into a player class
+var cam;
+var movingforward = false;
+var movingbackward = false;
+var movingleft = false;
+var movingright = false;
+var movingup = false;
+var movingdown = false;
+
+// some objects
 var color = new Uint8Array (4);
 
 var cubeVertices = [
@@ -136,16 +142,6 @@ window.onload = function init () {
     // Assigning keys
     window.addEventListener ("keydown", function (e) {
         switch (event.keyCode) {
-            case 32: // space
-            {
-                cam.camMoveUp (1);
-                break;
-            }
-            case 16: // shift
-            {
-                cam.camMoveDown (1);
-                break;
-            }
             case 187: // =
             {
                 ch.active = !ch.active;
@@ -171,28 +167,7 @@ window.onload = function init () {
                 break;
             }
             case 81: // q
-
             break;
-            case 87: // w
-            {
-                cam.camMoveForward(1);
-                break;
-            }
-            case 65: // a
-            {
-                cam.camMoveLeft(1);
-                break;
-            }
-            case 83: // s
-            {   
-                cam.camMoveBackward(1);
-                break;
-            }
-            case 68: // d
-            {
-                cam.camMoveRight(1);
-                break;
-            }
             case 69: // e
             case 84: // t
             case 89: // y
@@ -201,6 +176,52 @@ window.onload = function init () {
             case 37: // left
             case 39: // right
             default:
+                break;
+        }
+    }); 
+
+    // Camera movement - consider abstracting into a player class
+    window.addEventListener ("keydown", function (e) {
+        switch (event.keyCode) {
+            case 32: // space
+            		movingup = true;
+                break;
+            case 16: // shift
+            		movingdown = true;
+                break;
+            case 87: // w
+            		movingforward = true;
+                break;
+            case 65: // a
+            		movingleft = true;
+                break;
+            case 83: // s
+            		movingbackward = true;
+                break;
+            case 68: // d
+            		movingright = true;
+                break;
+        }
+    }); 
+    window.addEventListener ("keyup", function (e) {
+        switch (event.keyCode) {
+            case 32: // space
+            		movingup = false;
+                break;
+            case 16: // shift
+            		movingdown = false;
+                break;
+            case 87: // w
+            		movingforward = false;
+                break;
+            case 65: // a
+            		movingleft = false;
+                break;
+            case 83: // s
+            		movingbackward = false;
+                break;
+            case 68: // d
+            		movingright = false;
                 break;
         }
     }); 
@@ -358,6 +379,13 @@ function render (current) {
     cam.updateRotation (deltaTime);
     gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
     gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), cam.position);
+
+    if (movingforward) cam.camMoveForward(deltaTime * 4);
+    if (movingbackward) cam.camMoveBackward(deltaTime * 4);
+    if (movingleft) cam.camMoveLeft(deltaTime * 4);
+    if (movingright) cam.camMoveRight(deltaTime * 4);
+    if (movingup) cam.camMoveUp(deltaTime * 4);
+    if (movingdown) cam.camMoveDown(deltaTime * 4);
 
     // draw
     drawSceneGraph (deltaTime);
