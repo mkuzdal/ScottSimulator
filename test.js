@@ -307,7 +307,7 @@ window.onload = function init () {
                             new object (transforms[2], materials[2], geometries[0], textures[0], colliders[2]),
                             new object (transforms[3], materials[3], geometries[1], textures[1], colliders[3])
                         ];
-
+/*
     cubes[1].addOnMouseClickTrigger (function (object) {
         console.log (object.tag);
         return;
@@ -327,12 +327,16 @@ window.onload = function init () {
 
     cubes[1].addOnMouseExitTrigger (function (object) {
         console.log ("Exit");
-    });
+    }); */
 
     cubes[0] = new object ();
     cubes[0].loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
     cubes[0].transform = transforms[0];
     cubes[0].collider = colliders[0];
+
+    cubes[0].addOnMouseClickTrigger (function (object) {
+        animationsManager.animations.push (new animationHold (object));
+    }); 
 
     animationsManager.animations.push (new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (1.0, 1.0, 0.0)));
     animationsManager.animations.push (new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0)));
@@ -368,6 +372,7 @@ function render (current) {
     current *= 0.001;
     var deltaTime = current - prev;
     prev = current;
+
 
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 

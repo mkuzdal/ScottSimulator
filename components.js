@@ -1,5 +1,4 @@
 
-
 class mouseTrigger {
     constructor (_object, _function, type) {
         this.func = _function;
@@ -22,7 +21,7 @@ class triggerHandler {
         this.pixel = new Uint8Array (4);
         this.triggers = [];
         this.hover = [];
-        this.currentID = vec4.fromValues (0.0, 0.0, 0.0, 255.0);
+        this.currentID = vec4.fromValues (16.0, 0.0, 0.0, 255.0);
     }
 
     addTrigger (trigger) {
@@ -34,7 +33,8 @@ class triggerHandler {
             }
         }
 
-        trigger.ID = this.currentID;
+        trigger.ID = vec4.clone (this.currentID);
+
         for (var i = 0; i < 3; i++) {
             if (this.currentID[i] == 255.0)
                 continue;
@@ -44,22 +44,6 @@ class triggerHandler {
             }
         }
         this.triggers.push (trigger);
-    }
-
-    handleClick () {
-        for (var i = 0; i < this.triggers.length; i++) {
-            if (this.triggers[i].type == "click" && vec4.equals(this.pixel, this.triggers[i].ID)) {
-                this.triggers[i].func (this.triggers[i].object);
-            }
-        }
-    }
-
-    handleHover () {
-        for (var i = 0; i < this.triggers.length; i++) {
-            if (this.triggers[i].type == "hover" && vec4.equals(this.pixel, this.triggers[i].ID)) {
-                this.triggers[i].func (this.triggers[i].object);
-            }
-        }
     }
 
     handleMouseEvents () {
@@ -84,20 +68,19 @@ class triggerHandler {
                         }
                         this.hover.push (this.triggers[i]);
                     }
-                } else if (this.triggers[i].type == "exit") {
-                    this.hover.push (this.triggers[i]);
                 }
             } else {
                 for (var j = 0; j < this.hover.length; j++) {
-                    if (this.hover[j].type == "exit") {
-                        this.hover[j].func (this.hover[j].object);
+                    if (vec4.equals (this.hover[j].ID, this.triggers[i].ID)) {
+                        if (this.hover[j].type == "exit") {
+                            this.hover[j].func (this.hover[j].object);
+                        }
+                        this.hover.splice (j, 1);
                     }
-                    this.hover.splice (j, 1);                  
                 }
             }
         } 
-
-        this.clicked = false;               
+        this.clicked = false;    
     }
 }
 
