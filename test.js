@@ -17,9 +17,9 @@
 var canvas;
 var gl;
 var program;
-var shadowProgram;
 
 var frameBufferObject;
+var colorFramebuffer;
 
 var OFFSCREEN_WIDTH = 1024;
 var OFFSCREEN_HEIGHT = 1024;
@@ -44,6 +44,8 @@ var lightMatrixSha;
 var lightsManager;
 var animationsManager;
 
+var clicked = false;
+
 // previous frame time
 var prev = 0;
 
@@ -66,6 +68,9 @@ var movingleft = false;
 var movingright = false;
 var movingup = false;
 var movingdown = false;
+
+// some objects
+var color = new Uint8Array (4);
 
 var cubeVertices = [
      vec4.fromValues ( -0.5, -0.5,  0.5, 1.0 ),
@@ -105,8 +110,10 @@ window.onload = function init () {
     gl.viewport (0, 0, canvas.width, canvas.height);
     gl.clearColor (0.0, 0.0, 0.0, 1.0);
     
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+
     gl.enable (gl.DEPTH_TEST);
-    //gl.cullFace ('back');
 
     // Setting up pointerlock
     canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
@@ -133,10 +140,28 @@ window.onload = function init () {
         cam.mouseLook (e.movementX, e.movementY);
     }
 
+    canvas.addEventListener ("mousedown", function (e) {
+        clicked = true;
+    });
+
     // Assigning keys
     window.addEventListener ("keydown", function (e) {
         switch (event.keyCode) {
             case 32: // space
+            {
+                cam.camMoveUp (1);
+                break;
+            }
+            case 16: // shift
+            {
+                cam.camMoveDown (1);
+                break;
+            }
+            case 187: // =
+            {
+                ch.active = !ch.active;
+                break;
+            }
             case 73: // i
             case 79: // o
             case 49: // 1
@@ -193,12 +218,10 @@ window.onload = function init () {
 
     // Create the shader and vertex program
     program = initShaders (gl, "vertex-shader", "fragment-shader");
-    shadowProgram = initShaders (gl, "vertex-shader-shadowmap", "fragment-shader-shadowmap");
-
     gl.useProgram (program);
-    frameBufferObject = initFramebufferObject ();
-    gl.activeTexture (gl.TEXTURE0);
-    gl.bindTexture (gl.TEXTURE_2D, frameBufferObject.texture);
+
+    colorFramebuffer = initColorFramebuffer ();
+    frameBufferObject = initShadowFramebuffer ();
 
     // Get the local variable for each of the matrix uniforms
     modelViewMatrixLoc = gl.getUniformLocation (program, "modelViewMatrix");
@@ -208,14 +231,10 @@ window.onload = function init () {
     lightMatrixLoc = gl.getUniformLocation (program, "lightMatrix");
     lightProjectionMatrixLoc = gl.getUniformLocation (program, "lightProjectionMatrix");
 
-    modelViewMatrixSha = gl.getUniformLocation (shadowProgram, "modelViewMatrix");
-    lightMatrixSha = gl.getUniformLocation (shadowProgram, "lightMatrix");
-    lightProjectionMatrixSha = gl.getUniformLocation (shadowProgram, "lightProjectionMatrix");
-
     lightsManager = new lightHandler ();
     animationsManager = new animationHandler ();
 
-    lightsManager.addSource (new light (new transform (vec3.fromValues (-10.0, 0.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+    lightsManager.addSource (new light (new transform (vec3.fromValues (-40.0, 0.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (1.0, 0.1, 0.1, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
@@ -259,7 +278,7 @@ window.onload = function init () {
                         ]; 
 
     // create the transforms for each of the 6 bodies.
-    transforms =        [   new transform (vec3.fromValues (-4.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
+    transforms =        [   new transform (vec3.fromValues (-4.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                             new transform (vec3.fromValues (4.0,  0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                             new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
                             new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ())
@@ -295,11 +314,9 @@ window.onload = function init () {
                             new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]))
                 );
 
-    buildSceneGraph ();
+    cubes[4].collider = new boxCollider (planeVertices);
 
-    for (var i = 0; i < cubes.length; i++) {
-        cubes[i].tag = i;
-    }
+    buildSceneGraph ();
 
     animationsManager.deactivateAll ();
 
@@ -574,8 +591,8 @@ function flattenArray (array) {
     return new Float32Array (flattenedArray);
 }
 
-function initFramebufferObject () {
-    var texture, depthBuffer;
+function initShadowFramebuffer () {
+    /*var texture, depthBuffer;
     var framebuffer = gl.createFramebuffer();
 
     texture = gl.createTexture();
@@ -588,6 +605,7 @@ function initFramebufferObject () {
 
     gl.bindFramebuffer (gl.FRAMEBUFFER, framebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, texture, 0);
+
     depthBuffer = gl.createRenderbuffer();
     gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
@@ -598,6 +616,60 @@ function initFramebufferObject () {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+
+    return framebuffer; */
+
+    // Query the extension
+    var depthTextureExt = gl.getExtension("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
+    if(!depthTextureExt) { doSomeFallbackInstead(); return; }
+
+    // Create a color texture
+    var colorTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, colorTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+    // Create the depth texture
+    var depthTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, depthTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
+
+    var framebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
+
+    framebuffer.texture = colorTexture;
+
+    return framebuffer;
+}
+
+function initColorFramebuffer () {
+    var texture;
+    var framebuffer = gl.createFramebuffer();
+
+    texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.generateMipmap (gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); 
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+
+    gl.bindFramebuffer (gl.FRAMEBUFFER, framebuffer);
+    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+
+    framebuffer.texture = texture;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     return framebuffer;
 }

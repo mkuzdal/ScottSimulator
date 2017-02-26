@@ -137,7 +137,8 @@ class light {
     /** setPerspective: sets the perspective projection matrix.
      */
     setPerspective () {
-        mat4.perspective (this.perspectiveProjectionMatrix, Math.PI * 70.0 / 180, OFFSCREEN_WIDTH / OFFSCREEN_HEIGHT, 1.0, 1000.0);
+        mat4.ortho (this.perspectiveProjectionMatrix, -1.0, 1.0, -1.0, 1.0, 1.0, 100.0);
+        //mat4.perspective (this.perspectiveProjectionMatrix, Math.PI * 70.0 / 180, OFFSCREEN_WIDTH / OFFSCREEN_HEIGHT, 1.0, 1000.0);
     }
 
     /** setLightMatrix: sets the light view matrix.

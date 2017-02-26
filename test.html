@@ -8,6 +8,8 @@ attribute vec4 vPosition;
 attribute vec3 vNormal;
 attribute vec2 vTexCoord;
 
+uniform bool uShadow;
+
 uniform mat4 modelViewMatrix;
 uniform mat4 cameraMatrix;
 uniform mat4 projectionMatrix;
@@ -21,7 +23,13 @@ varying vec2 fTexCoord;
 varying vec4 fPositionFromLight;
 
 void main ()
-{
+{    
+    if (uShadow) {
+        fPositionFromLight = lightProjectionMatrix * lightMatrix * modelViewMatrix * vPosition;
+        gl_Position = lightProjectionMatrix * lightMatrix * modelViewMatrix * vPosition;
+        return;
+    }
+
     fPos = (modelViewMatrix * vPosition).xyz;
     fNormal = (normalMatrix * vNormal);
     fTexCoord = vTexCoord;
@@ -37,6 +45,9 @@ precision mediump float;
 
 uniform sampler2D texture;
 uniform sampler2D shadowMap;
+
+uniform bool fOffscreen;
+uniform bool fShadow;
 
 varying vec3 fPos;
 varying vec3 fNormal;
@@ -64,6 +75,21 @@ float ShadowCalculation (vec4 fPositionFromLight) {
 }
 
 void main () { 
+
+    if (fOffscreen) {
+        gl_FragColor = fAmbientMaterial;
+        return;
+    }
+
+    if (fShadow) {
+        vec3 projCoords = fPositionFromLight.xyz / fPositionFromLight.w;
+        projCoords = projCoords * 0.5 + 0.5;
+
+        float closestDepth = texture2D (shadowMap, projCoords.xy).r;
+        float currentDepth = projCoords.z;
+        gl_FragColor = vec4 (currentDepth); 
+        return;
+    }
 
     vec4 fColor = vec4 (0.0, 0.0, 0.0, 1.0);
 
@@ -94,8 +120,8 @@ void main () {
         if (dot (L, N) < 0.0)
             specular = vec4 (0.0, 0.0, 0.0, 1.0);
 
-        //float shadow = ShadowCalculation (fPositionFromLight);
-        float shadow = 0.0;
+        float shadow = ShadowCalculation (fPositionFromLight);
+        //float shadow = 0.0;
         vec4 fLighting = (ambient + (1.0 - shadow) * (diffuse + specular));
         fColor = fColor + fLighting;
         fColor.a = 1.0;

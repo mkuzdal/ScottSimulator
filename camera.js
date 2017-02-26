@@ -98,15 +98,6 @@ class camera {
     /** camMoveLeft: moves the camera in the left direction by 'speed' many units
      */
     camMoveLeft (speed) {
-    	/*var qx = this.rotation[0], qy = this.rotation[1], qz = this.rotation[2], qw = this.rotation[3];
-  		var x = 1 - 2 * (qy * qy + qz * qz);
-  		var y =     2 * (qx * qy + qw * qz);
-  		var z =     2 * (qx * qz - qw * qy);
-  		var right = vec3.fromValues(x, y, z);
-  		vec3.normalize(right, right);
-  		vec3.negate(right, right);
-  		vec3.scale (right, right, speed); */
-
         var storage = mat4.create ();
         mat4.fromQuat (storage, this.rotation);
             
@@ -119,15 +110,6 @@ class camera {
     /** camMoveRight: moves the camera in the right direction by 'speed' many units
      */
     camMoveRight (speed) {
-        /*
-    	var qx = this.rotation[0], qy = this.rotation[1], qz = this.rotation[2], qw = this.rotation[3];
-  		var x = 1 - 2 * (qy * qy + qz * qz);
-  		var y =     2 * (qx * qy + qw * qz);
-  		var z =     2 * (qx * qz - qw * qy);
-  		var right = vec3.fromValues(x, y, z);
-  		vec3.normalize(right, right);
-  		vec3.scale (right, right, speed); */
-
         var storage = mat4.create ();
         mat4.fromQuat (storage, this.rotation);
             
@@ -137,12 +119,28 @@ class camera {
   		vec3.add (this.position, this.position, direction);
     }
 
-   	mouseLook (deltaX, deltaY) {
-		this.yaw += glMatrix.toRadian(-deltaX * this.sensitivity);
-		this.pitch += glMatrix.toRadian(-deltaY * this.sensitivity);
-		if (this.pitch > glMatrix.toRadian(90))
-			this.pitch = glMatrix.toRadian(90);
-		if (this.pitch < glMatrix.toRadian(-90))
-			this.pitch = glMatrix.toRadian(-90);
-	}
+    /** camMoveUp: moves the camera in the upwards direction by 'speed' many units
+     */
+    camMoveUp (speed) {
+        var direction = vec3.fromValues (0.0, speed, 0.0);
+
+        vec3.add (this.position, this.position, direction);
+    }
+
+    /** camMoveDown: moves the camera in the downwards direction by 'speed' many units
+     */
+    camMoveDown (speed) {
+        var direction = vec3.fromValues (0.0, -speed, 0.0);
+
+        vec3.add (this.position, this.position, direction);
+    }
+
+    mouseLook (deltaX, deltaY) {
+	   this.yaw += glMatrix.toRadian(-deltaX * this.sensitivity);
+	   this.pitch += glMatrix.toRadian(-deltaY * this.sensitivity);
+	   if (this.pitch > glMatrix.toRadian(90))
+		  this.pitch = glMatrix.toRadian(90);
+	   if (this.pitch < glMatrix.toRadian(-90))
+		  this.pitch = glMatrix.toRadian(-90);
+    }
 }

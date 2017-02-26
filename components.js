@@ -1,5 +1,51 @@
 
 
+class onClickTrigger {
+    constructor (_object, _function) {
+        this.object = _object;
+        this.function = _function;
+    }
+}
+
+class onHoverTrigger {
+
+}
+
+class onClickHandler {
+    constructor () {
+        this.clicked = false;
+        this.pixel = new Uint8Array (4);
+        this.triggers = [];
+        this.currentID = vec4.fromValues (0.0, 0.0, 0.0, 0.0);
+    }
+
+    addOnClickTrigger (trigger) {
+        trigger.ID = this.currentID;
+
+        for (var i = 0; i < 4; i++) {
+            if (this.currentID[i] == 256.0)
+                continue;
+
+            this.currentID[i] += 16;
+        }
+
+        this.triggers.push (trigger);
+        trigger.object.trigger.
+    }
+
+    handleClick () {
+        for (var i = 0; i < this.triggers.length; i++) {
+            if (this.pixel == this.trigger[i].ID) {
+                this.trigger[i].onClick (this.trigger[i].object);
+            }
+        }
+    }
+}
+
+class onHoverHandler {
+
+}
+
 class boxCollider {
     constructor (_vertices) {
         this.vertices = _vertices;
@@ -92,8 +138,45 @@ class boxCollider {
         return true;
     }
 
-    intersecting (PC, other, M1, M2) {
+    intersectingBox (PC, other, M1, M2) {
+        var PCM1 = mat4.create ();
+        mat4.mul (PCM, PC, M1);
 
+        var PCM2 = mat4.create ();
+        mat4.mul (PCM, PC, M2);
+
+        var p1_prime = [];
+        for (var i = 0; i < this.vertices.length; i++) {
+            var storage = vec4.create ();
+            p1_prime.push (vec4.transformMat4 (storage, this.vertices[i], PCM1));
+        }
+
+        var other_maxX = 0;
+        var other_minX = 10000;
+        var other_maxY = 0;
+        var other_minY = 10000;
+        var other_maxZ = 0;
+        var other_minZ = 10000;
+
+        for (var i = 0; i < other.vertices.length; i++) {
+            var p2_prime = vec4.create ();
+            vec4.transformMat4 (p2_prime, other.vertices[i], PCM2);
+            other_maxX = Math.max (other_maxX, p2_prime[0]);
+            other_minX = Math.min (other_minX, p2_prime[0]);
+            other_maxY = Math.max (other_maxY, p2_prime[1]);
+            other_minY = Math.min (other_minY, p2_prime[1]);
+            other_maxZ = Math.max (other_maxZ, p2_prime[2]);
+            other_minZ = Math.min (other_minZ, p2_prime[2]);
+        }
+
+        for (var i = 0; i < p1_prime.length; i++) {
+            if ((p1_prime[i][0] >= other_minX && p1_prime[i][0] <= other_maxX) &&
+                (p1_prime[i][1] >= other_minY && p1_prime[i][1] <= other_maxY) &&
+                (p1_prime[i][2] >= other_minZ && p1_prime[i][2] <= other_maxZ))
+                return true;
+        }
+
+        return false;
     }
 }
 
@@ -212,7 +295,7 @@ class sphereCollider {
         return true;
     }
 
-    intersecting (PC, other, T1, T2) {
+    intersectingSphere (PC, other, T1, T2) {
         var c1 = vec3.create ();
         vec3.transformMat4 (c, this.center, T1);
 
@@ -253,23 +336,16 @@ class geometry {
 
     /** setup: enables all buffers and sets the vertex and normal attributes.
      */
-    setup (type) {
-        if (type == "main") {
-            gl.bindBuffer (gl.ARRAY_BUFFER, this.vBuffer);
-            var vPosition = gl.getAttribLocation (program, "vPosition");
-            gl.vertexAttribPointer (vPosition, 4, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray (vPosition);
+    setup () {
+        gl.bindBuffer (gl.ARRAY_BUFFER, this.vBuffer);
+        var vPosition = gl.getAttribLocation (program, "vPosition");
+        gl.vertexAttribPointer (vPosition, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray (vPosition);
 
-            gl.bindBuffer (gl.ARRAY_BUFFER, this.nBuffer);
-            var vNormal = gl.getAttribLocation (program, "vNormal");
-            gl.vertexAttribPointer (vNormal, 3, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray (vNormal);
-        } else if (type == "shadow") {
-            gl.bindBuffer (gl.ARRAY_BUFFER, this.vBuffer);
-            var vPosition = gl.getAttribLocation (shadowProgram, "vPosition");
-            gl.vertexAttribPointer (vPosition, 4, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray (vPosition);
-        }
+        gl.bindBuffer (gl.ARRAY_BUFFER, this.nBuffer);
+        var vNormal = gl.getAttribLocation (program, "vNormal");
+        gl.vertexAttribPointer (vNormal, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray (vNormal); 
     }
 }
 

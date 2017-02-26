@@ -139,11 +139,11 @@ class sceneGraph {
 
 		mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
 		for (var i = 0; i < this.root.children.length; i++) {
-			this.__drawTree_AUX (this.root.children[i], CTM, PC, 1.0, type);
+			this.__drawTree_AUX (this.root.children[i], CTM, PC, 1.0);
 		}
 	}
 
-	__drawTree_AUX (root, CTM, PC, scaling, type) {
+	__drawTree_AUX (root, CTM, PC, scaling) {
 		if (!root.active)
 			return;
 
@@ -152,20 +152,14 @@ class sceneGraph {
         var scaling_prime = scaling * root.transform.scale[0];
 
 		if (root.collider == null) {
-            if (type == "shadow")
-                    this.drawNodeShadow (root, CTM_prime);
-            else if (type == "main")
-                this.drawNode (root, CTM_prime);
+            this.drawNode (root, CTM_prime);
         }
 
         else if (root.collider.type == "box") {
             if (root.collider.inFustrum (PC, CTM_prime)) {
-                if (type == "shadow")
-                    this.drawNodeShadow (root, CTM_prime);
-                else if (type == "main")
-                    this.drawNode (root, CTM_prime);
+                this.drawNode (root, CTM_prime);
             } else {
-            	console.log ("HERE");
+            	//console.log ("HERE");
             }
         } 
 
@@ -176,22 +170,19 @@ class sceneGraph {
             var r = root.collider.radius * scaling_prime;
 
             if (root.collider.inFustrum (PC, c, r)) {
-                if (type == "shadow")
-                    this.drawNodeShadow (root, CTM_prime);
-                else if (type == "main")
-                    this.drawNode (root, CTM_prime);
+                this.drawNode (root, CTM_prime);
             } else {
-            	console.log ("HERE");
+            	//console.log ("HERE");
             }
         } 
 
         for (var i = 0; i < root.children.length; i++) {
-			this.__drawTree_AUX (root.children[i], CTM_prime, PC, scaling_prime, type);
+			this.__drawTree_AUX (root.children[i], CTM_prime, PC, scaling_prime);
 		}
 	}
 
 	drawNode (obj, CTM) {
-		obj.geometry.setup ("main");
+		obj.geometry.setup ();
         obj.material.setup ();
         obj.texture.setup ();
 
@@ -210,16 +201,6 @@ class sceneGraph {
         gl.drawArrays (obj.drawType, 0, obj.geometry.Nvertices);
         gl.bindBuffer (gl.ARRAY_BUFFER, null);
 	}
-
-    drawNodeShadow (obj, CTM) {
-        obj.geometry.setup ("shadow");
-        gl.uniformMatrix4fv (modelViewMatrixSha, false, CTM);
-        gl.uniformMatrix4fv (lightMatrixSha, false, lightsManager.lightSources[0].matrix);
-        gl.uniformMatrix4fv (lightProjectionMatrixSha, false, lightsManager.lightSources[0].perspectiveProjectionMatrix); 
-
-        gl.drawArrays (obj.drawType, 0, obj.geometry.Nvertices);
-        gl.bindBuffer (gl.ARRAY_BUFFER, null);
-    }
 
     getObjectsByTag (tag) {
         var objects = [];
@@ -291,19 +272,37 @@ function drawSceneGraph (dTime) {
     gl.bindFramebuffer (gl.FRAMEBUFFER, frameBufferObject);
     gl.viewport (0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.useProgram (shadowProgram);
-	
-    gl.cullFace (gl.FRONT);
-    SGraph.drawTree ("shadow");
-    gl.cullFace (gl.BACK);
+
+    gl.uniform1i (gl.getUniformLocation (program, "uShadow"), true); 
+    gl.uniform1i (gl.getUniformLocation (program, "fShadow"), true); 
+    SGraph.drawTree ("main");
+    //gl.readPixels (498, 144, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, color);
+    //console.log (color);
+
+    gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), frameBufferObject.texture);
+
+    gl.clear (gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+    gl.viewport (0, 0, canvas.width, canvas.height);
+    gl.uniform1i (gl.getUniformLocation (program, "uShadow"), null); 
+    gl.uniform1i (gl.getUniformLocation (program, "fShadow"), null); 
     gl.bindFramebuffer (gl.FRAMEBUFFER, null);
 
-    gl.viewport (0, 0, canvas.width, canvas.height);
-    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.useProgram (program);
-
     lightsManager.setupAll ();
+
+    gl.bindFramebuffer (gl.FRAMEBUFFER, colorFramebuffer);
+    gl.uniform1i (gl.getUniformLocation (program, "fOffscreen"), true);
+    SGraph.drawTree ("color");
+    if (clicked) {
+        gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, color);
+        clicked = false;
+        handleClick (color);
+    }
+
+    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.uniform1i (gl.getUniformLocation (program, "fOffscreen"), null);
+    gl.bindFramebuffer (gl.FRAMEBUFFER, null);
     SGraph.drawTree ("main");
+
 }
 
 
