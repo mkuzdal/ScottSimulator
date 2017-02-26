@@ -133,5 +133,5 @@ class camera {
 		this.pitch = glMatrix.toRadian(90);
 	if (this.pitch < glMatrix.toRadian(-90))
 		this.pitch = glMatrix.toRadian(-90);
-};
+	}
 }
