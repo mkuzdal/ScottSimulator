@@ -142,16 +142,6 @@ window.onload = function init () {
     // Assigning keys
     window.addEventListener ("keydown", function (e) {
         switch (event.keyCode) {
-            case 32: // space
-            {
-                cam.camMoveUp (1);
-                break;
-            }
-            case 16: // shift
-            {
-                cam.camMoveDown (1);
-                break;
-            }
             case 187: // =
             {
                 ch.active = !ch.active;
@@ -177,28 +167,7 @@ window.onload = function init () {
                 break;
             }
             case 81: // q
-
             break;
-            case 87: // w
-            {
-                cam.camMoveForward(1);
-                break;
-            }
-            case 65: // a
-            {
-                cam.camMoveLeft(1);
-                break;
-            }
-            case 83: // s
-            {
-                cam.camMoveBackward(1);
-                break;
-            }
-            case 68: // d
-            {
-                cam.camMoveRight(1);
-                break;
-            }
             case 69: // e
             case 84: // t
             case 89: // y
@@ -231,6 +200,28 @@ window.onload = function init () {
                 break;
             case 68: // d
             		movingright = true;
+                break;
+        }
+    }); 
+    window.addEventListener ("keyup", function (e) {
+        switch (event.keyCode) {
+            case 32: // space
+            		movingup = false;
+                break;
+            case 16: // shift
+            		movingdown = false;
+                break;
+            case 87: // w
+            		movingforward = false;
+                break;
+            case 65: // a
+            		movingleft = false;
+                break;
+            case 83: // s
+            		movingbackward = false;
+                break;
+            case 68: // d
+            		movingright = false;
                 break;
         }
     }); 
@@ -371,6 +362,13 @@ function render (current) {
     cam.updateRotation (deltaTime);
     gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
     gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), cam.position);
+
+    if (movingforward) cam.camMoveForward(deltaTime * 4);
+    if (movingbackward) cam.camMoveBackward(deltaTime * 4);
+    if (movingleft) cam.camMoveLeft(deltaTime * 4);
+    if (movingright) cam.camMoveRight(deltaTime * 4);
+    if (movingup) cam.camMoveUp(deltaTime * 4);
+    if (movingdown) cam.camMoveDown(deltaTime * 4);
 
     // draw
     drawSceneGraph (deltaTime);
