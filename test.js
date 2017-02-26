@@ -1,13 +1,6 @@
 /** @file: test.js
- *  Created by Matthew P. Kuzdal 
- *  ID:404564296
- *  CS174A - Introduction to Computer Graphics - Project 3
- *  Feb. 18, 2017
- *  
- *  Simple WebGL application utilizing features such as perspective / orthographic
- *  projections, quaternion camera controls, lighting and shading (Phong, Gaurad and Flat). 
- *  
- *  All requirements were attemped with no known bugs.
+ *  Main runtime code for ScottSimulator
+ *  MIT license here
  *
  **/
 
@@ -195,7 +188,7 @@ window.onload = function init () {
                 break;
             }
             case 83: // s
-            {   
+            {
                 cam.camMoveBackward(1);
                 break;
             }
@@ -212,6 +205,30 @@ window.onload = function init () {
             case 37: // left
             case 39: // right
             default:
+                break;
+        }
+    }); 
+
+    // Camera movement - consider abstracting into a player class
+    window.addEventListener ("keydown", function (e) {
+        switch (event.keyCode) {
+            case 32: // space
+            		movingup = true;
+                break;
+            case 16: // shift
+            		movingdown = true;
+                break;
+            case 87: // w
+            		movingforward = true;
+                break;
+            case 65: // a
+            		movingleft = true;
+                break;
+            case 83: // s
+            		movingbackward = true;
+                break;
+            case 68: // d
+            		movingright = true;
                 break;
         }
     }); 
