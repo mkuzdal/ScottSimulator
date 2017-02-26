@@ -41,7 +41,6 @@ var modelViewMatrixSha;
 var lightProjectionMatrixSha;
 var lightMatrixSha;
 
-var cam;
 var lightsManager;
 var animationsManager;
 
@@ -59,6 +58,14 @@ var textures = [];
 var transforms = [];
 var colliders = [];
 
+// player variables; consider abstracting into a player class
+var cam;
+var movingforward = false;
+var movingbackward = false;
+var movingleft = false;
+var movingright = false;
+var movingup = false;
+var movingdown = false;
 
 var cubeVertices = [
      vec4.fromValues ( -0.5, -0.5,  0.5, 1.0 ),
