@@ -100,7 +100,7 @@ class animationHandler {
         }
     }
 
-    togglByAnimationTag (tag) {
+    toggleByAnimationTag (tag) {
         for (var i = 0; i < this.animations.length; i++) {
             if (this.animations[i].tag == tag) {
                 this.animations[i].active = !this.animations[i].active;

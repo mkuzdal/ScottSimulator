@@ -123,7 +123,7 @@ window.onload = function init () {
     }
 
     function updateCamera(e) {
-        cam.mouseLook(e.movementX, e.movementY);
+        cam.mouseLook (e.movementX, e.movementY);
     }
 
     // Assigning keys
@@ -141,7 +141,14 @@ window.onload = function init () {
             case 55: // 7
             case 56: // 8
             case 57: // 9
+            {
+                break;
+            }
             case 82: // r
+            {
+                animationsManager.toggleByAnimationTag ("rotate");
+                break;
+            }
             case 81: // q
 
             break;
@@ -311,10 +318,8 @@ function render (current) {
 
     // animate the camera rotation
     cam.updateRotation (deltaTime);
-    cam.updateCameraMatrix();
     gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
     gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), cam.position);
-
 
     // draw
     drawSceneGraph (deltaTime);
