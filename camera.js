@@ -135,12 +135,12 @@ class camera {
         vec3.add (this.position, this.position, direction);
     }
 
-   mouseLook (deltaX, deltaY) {
-	this.yaw += glMatrix.toRadian(-deltaX * this.sensitivity);
-	this.pitch += glMatrix.toRadian(-deltaY * this.sensitivity);
-	if (this.pitch > glMatrix.toRadian(90))
-		this.pitch = glMatrix.toRadian(90);
-	if (this.pitch < glMatrix.toRadian(-90))
-		this.pitch = glMatrix.toRadian(-90);
-};
+    mouseLook (deltaX, deltaY) {
+	   this.yaw += glMatrix.toRadian(-deltaX * this.sensitivity);
+	   this.pitch += glMatrix.toRadian(-deltaY * this.sensitivity);
+	   if (this.pitch > glMatrix.toRadian(90))
+		  this.pitch = glMatrix.toRadian(90);
+	   if (this.pitch < glMatrix.toRadian(-90))
+		  this.pitch = glMatrix.toRadian(-90);
+    }
 }
