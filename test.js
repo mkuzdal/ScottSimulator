@@ -40,6 +40,7 @@ var lightMatrixLoc;
 var cam;
 var lightsManager;
 var animationsManager;
+var clickManager;
 
 var clicked = false;
 
@@ -56,9 +57,9 @@ var geometries = [];
 var textures = [];
 var transforms = [];
 var colliders = [];
+var clickEvents = [];
 
 var color = new Uint8Array (4);
-
 
 var cubeVertices = [
      vec4.fromValues ( -0.5, -0.5,  0.5, 1.0 ),
@@ -115,7 +116,7 @@ window.onload = function init () {
     document.addEventListener('mozpointerlockchange', lockChange, false);
 
     function lockChange() {
-      if (document.pointerLockElement === canvas || document.mozPointerLockElement === canvas) {
+        if (document.pointerLockElement === canvas || document.mozPointerLockElement === canvas) {
             console.log('The pointer lock status is now locked');
             document.addEventListener("mousemove", updateCamera, false);
         } else {
@@ -129,7 +130,7 @@ window.onload = function init () {
     }
 
     canvas.addEventListener ("mousedown", function (e) {
-        clicked = true;
+        clickManager.clicked = true;
     });
 
     // Assigning keys
@@ -253,6 +254,7 @@ window.onload = function init () {
     generateCubeTexCoords (texCoords);
 
     cam = new camera ();
+    clickManager = new onClickHandler ();
 
     geometries.push (new geometry (pointsArray, normalsArray));
     textures.push (new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
@@ -285,6 +287,14 @@ window.onload = function init () {
                             new object (transforms[3], materials[3], geometries[1], textures[1], colliders[3])
                         ];
 
+    var click1 = new onClickTrigger (cubes[1], function (object) {
+        console.log (object.tag);
+        return;
+    });
+
+    console.log (click1.ID);
+
+
     cubes[0] = new object ();
     cubes[0].loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
     cubes[0].transform = transforms[0];
@@ -310,7 +320,6 @@ window.onload = function init () {
 
     window.requestAnimFrame (render);
 }
-
 
 /** render: renders the current callback frame.
  *  @param: { float } current: the current frame time.

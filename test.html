@@ -49,6 +49,8 @@ uniform sampler2D shadowMap;
 uniform bool fOffscreen;
 uniform bool fShadow;
 
+uniform vec4 fTriggerID;
+
 varying vec3 fPos;
 varying vec3 fNormal;
 varying vec2 fTexCoord;
@@ -77,7 +79,7 @@ float ShadowCalculation (vec4 fPositionFromLight) {
 void main () { 
 
     if (fOffscreen) {
-        gl_FragColor = fAmbientMaterial;
+        gl_FragColor = fTriggerID;
         return;
     }
 
