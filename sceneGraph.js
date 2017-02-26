@@ -165,7 +165,7 @@ class sceneGraph {
                 else if (type == "main")
                     this.drawNode (root, CTM_prime);
             } else {
-            	console.log ("HERE");
+            	// console.log ("HERE");
             }
         } 
 
@@ -181,7 +181,7 @@ class sceneGraph {
                 else if (type == "main")
                     this.drawNode (root, CTM_prime);
             } else {
-            	console.log ("HERE");
+            	// console.log ("HERE");
             }
         } 
 
@@ -196,7 +196,6 @@ class sceneGraph {
         obj.texture.setup ();
 
         gl.uniformMatrix4fv (modelViewMatrixLoc, false, CTM);
-        gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
         gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
         //gl.uniformMatrix4fv (cameraMatrixLoc, false, lightsManager.lightSources[0].matrix);
         //gl.uniformMatrix4fv (projectionMatrixLoc, false, lightsManager.lightSources[0].perspectiveProjectionMatrix); 

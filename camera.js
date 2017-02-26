@@ -14,147 +14,129 @@ class camera {
      *  @param { float } far: the far clipping plane.
      *  @param { float } near: the near clipping place.
      */
-    constructor (_position, _rotation, _speed, _fovy, _aspect, _far, _near) {
+    constructor (_position, _yaw, _pitch, _sensitivity, _smoothness, _fovy, _aspect, _far, _near) {
         this.position = _position   || vec3.fromValues (0.0, 0.0, 15.0);
-        this.rotation = _rotation   || quat.create ();
-        this.speed = _speed         || 1.0;
+        this.yaw = _yaw 			|| 0.0;
+        this.pitch = _pitch			|| 0.0;
         this.fovy = _fovy           || 50.0;
         this.aspect = _aspect       || canvas.width / canvas.height;
         this.far = _far             || 1000.0;
         this.near = _near           || 0.0001;
+        this.up = [0,1,0];
+        this.sensitivity = _sensitivity || 0.2;
+        this.smoothness = _smoothness || 10;
 
+        this.rotation = quat.create();
+        this.desRotation = quat.create();
         this.matrix = mat4.create ();
         this.perspectiveProjectionMatrix = mat4.create ();
         this.orthoProjectionMatrix = mat4.create ();
 
-        this.setPerspective ();
-        this.setOrthographic ();
-        this.setCameraMatrix ();
+        this.updatePerspective ();
+        this.updateOrthographic ();
+        this.updateCameraMatrix ();
     }
 
-    /** setPerspective: sets the perspective projection matrix.
+    /** updatePerspective: sets the perspective projection matrix.
      */
-    setPerspective () {
+    updatePerspective () {
         mat4.perspective (this.perspectiveProjectionMatrix, Math.PI * this.fovy / 180, this.aspect, this.near, this.far);
     }
 
-    /** setOrthographic: sets the orthographic projection matrix.
+    /** updateOrthographic: sets the orthographic projection matrix.
      */
-    setOrthographic () {
+    updateOrthographic () {
         mat4.ortho (this.orthoProjectionMatrix, -this.aspect, this.aspect, -1.0, 1.0, -1.0, 1.0);
     }
 
-    /** setCameraMatrix: sets the camera view matrix.
+    /** updateRotation: updates the camera rotations with a slerp
      */
-    setCameraMatrix () {
-        var storage = vec3.create ();
+    updateRotation (deltaT) {
+	    var yawQuat = quat.create();
+		var pitchQuat = quat.create();
+		quat.setAxisAngle(yawQuat, this.up, this.yaw);
+		quat.setAxisAngle(pitchQuat, [1,0,0], this.pitch);
+		quat.mul(this.desRotation, yawQuat, pitchQuat);
+		quat.normalize(this.desRotation, this.desRotation);
+		quat.slerp(this.rotation, this.rotation, this.desRotation, deltaT * this.smoothness);
+    }
+
+    /** updateCameraMatrix: sets the camera view matrix.
+     */
+    updateCameraMatrix () {
         mat4.fromRotationTranslation (this.matrix, this.rotation, this.position);
         mat4.invert (this.matrix, this.matrix);
+<<<<<<< HEAD
+=======
 
         gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), this.position);
+>>>>>>> 818561f023fbd8253a2633ee2246afa650c93fc6
     }
 
     /** camMoveForward: moves the camera in the forwards direction by 'speed' many units.
      */
-    camMoveForward () {
+    camMoveForward (speed) {
         var storage = mat4.create ();
         mat4.fromQuat (storage, this.rotation);
             
         var direction = vec3.fromValues (-storage[8], -storage[9], -storage[10]);
-        vec3.scale (direction, direction, this.speed);
+        vec3.scale (direction, direction, speed);
 
-        this.position = vec3.add (this.position, this.position, direction);
+        vec3.add (this.position, this.position, direction);
 
-        console.log ("Position: " + this.position);
-        this.setCameraMatrix ();
+        this.updateCameraMatrix ();
     }
 
-    /** camMoveForward: moves the camera in the forwards direction by 'speed' many units.
+    /** camMoveBackward: moves the camera in the backwards direction by 'speed' many units.
      */
-    camMoveBackwards () {
+    camMoveBackward (speed) {
         var storage = mat4.create ();
         mat4.fromQuat (storage, this.rotation);
             
         var direction = vec3.fromValues (storage[8], storage[9], storage[10]);
-        vec3.scale (direction, direction, this.speed);
+        vec3.scale (direction, direction, speed);
+        vec3.add (this.position, this.position, direction);
 
-        this.position = vec3.add (this.position, this.position, direction);
-
-        this.setCameraMatrix ();
+        this.updateCameraMatrix ();
     }
 
-    /** camPitchUp: pitches the camera in the upwards direction by speed many units.
+    /** camMoveLeft: moves the camera in the left direction by 'speed' many units
      */
-    camPitchUp () {
-        var storage = mat4.create ();
-        mat4.fromQuat (storage, this.rotation);
+    camMoveLeft (speed) {
+    	var qx = this.rotation[0], qy = this.rotation[1], qz = this.rotation[2], qw = this.rotation[3];
+  		var x = 1 - 2 * (qy * qy + qz * qz);
+  		var y =     2 * (qx * qy + qw * qz);
+  		var z =     2 * (qx * qz - qw * qy);
+  		var right = vec3.fromValues(x, y, z);
+  		vec3.normalize(right, right);
+  		vec3.negate(right, right);
+  		vec3.scale (right, right, speed);
+  		vec3.add (this.position, this.position, right);
 
-        var direction = vec3.fromValues (storage[0], storage[1], storage[2]);
-
-        var q = quat.create ();
-        quat.setAxisAngle (q, direction, this.speed * Math.PI / 180.0)
-        quat.mul (this.rotation, this.rotation, q);
-
-        this.setCameraMatrix ();
+  		this.updateCameraMatrix ();
     }
 
-    /** camPitchDown: pitches the camera in the downwards direction by speed many units.
+    /** camMoveRight: moves the camera in the right direction by 'speed' many units
      */
-    camPitchDown () {
-        var storage = mat4.create ();
-        mat4.fromQuat (storage, this.rotation);
+    camMoveRight (speed) {
+    	var qx = this.rotation[0], qy = this.rotation[1], qz = this.rotation[2], qw = this.rotation[3];
+  		var x = 1 - 2 * (qy * qy + qz * qz);
+  		var y =     2 * (qx * qy + qw * qz);
+  		var z =     2 * (qx * qz - qw * qy);
+  		var right = vec3.fromValues(x, y, z);
+  		vec3.normalize(right, right);
+  		vec3.scale (right, right, speed);
+  		vec3.add (this.position, this.position, right);
 
-        var direction = vec3.fromValues (storage[0], storage[1], storage[2]);
-
-        var q = quat.create ();
-        quat.setAxisAngle (q, direction, -this.speed * Math.PI / 180.0)
-        quat.mul (this.rotation, this.rotation, q);
-
-        this.setCameraMatrix ();
+  		this.updateCameraMatrix ();
     }
 
-    /** camYawLeft: yaws the camera to the left by speed many units.
-     */
-    camYawLeft () {
-        var storage = mat4.create ();
-        mat4.fromQuat (storage, this.rotation);
-
-        var direction = vec3.fromValues (storage[4], storage[5], storage[6]);
-
-        var q = quat.create ();
-        quat.setAxisAngle (q, direction, this.speed * Math.PI / 180.0)
-        quat.mul (this.rotation, this.rotation, q);
-
-        this.setCameraMatrix ();
-    }
-
-    /** camYawLeft: yaws the camera to the right by speed many units.
-     */
-    camYawRight () {
-        var storage = mat4.create ();
-        mat4.fromQuat (storage, this.rotation);
-
-        var direction = vec3.fromValues (storage[4], storage[5], storage[6]);
-
-        var q = quat.create ();
-        quat.setAxisAngle (q, direction, -this.speed * Math.PI / 180.0)
-        quat.mul (this.rotation, this.rotation, q);
-
-        this.setCameraMatrix ();
-    }
-
-    /** camSetSpeed: sets the camera speed.
-     *  @param: { float } speed: the speed to set the camera to.
-     */
-    camSetSpeed (speed) {
-        this.speed = speed;
-    }
+   mouseLook (deltaX, deltaY) {
+	this.yaw += glMatrix.toRadian(-deltaX * this.sensitivity);
+	this.pitch += glMatrix.toRadian(-deltaY * this.sensitivity);
+	if (this.pitch > glMatrix.toRadian(90))
+		this.pitch = glMatrix.toRadian(90);
+	if (this.pitch < glMatrix.toRadian(-90))
+		this.pitch = glMatrix.toRadian(-90);
+};
 }
-
-/** camReset: resets the global camera to its default state.
- */
-function camReset () {
-    cam = new camera ();
-}
-
-
