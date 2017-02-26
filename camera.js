@@ -28,6 +28,7 @@ class camera {
 
         this.rotation = quat.create();
         this.desRotation = quat.create();
+
         this.matrix = mat4.create ();
         this.perspectiveProjectionMatrix = mat4.create ();
         this.orthoProjectionMatrix = mat4.create ();
@@ -51,14 +52,16 @@ class camera {
 
     /** updateRotation: updates the camera rotations with a slerp
      */
-    updateRotation (deltaT) {
+    updateRotation (dTime) {
 	    var yawQuat = quat.create();
 		var pitchQuat = quat.create();
 		quat.setAxisAngle(yawQuat, this.up, this.yaw);
 		quat.setAxisAngle(pitchQuat, [1,0,0], this.pitch);
 		quat.mul(this.desRotation, yawQuat, pitchQuat);
 		quat.normalize(this.desRotation, this.desRotation);
-		quat.slerp(this.rotation, this.rotation, this.desRotation, deltaT * this.smoothness);
+		quat.slerp(this.rotation, this.rotation, this.desRotation, dTime * this.smoothness);
+
+        this.updateCameraMatrix ();
     }
 
     /** updateCameraMatrix: sets the camera view matrix.
@@ -78,8 +81,6 @@ class camera {
         vec3.scale (direction, direction, speed);
 
         vec3.add (this.position, this.position, direction);
-
-        this.updateCameraMatrix ();
     }
 
     /** camMoveBackward: moves the camera in the backwards direction by 'speed' many units.
@@ -90,40 +91,50 @@ class camera {
             
         var direction = vec3.fromValues (storage[8], storage[9], storage[10]);
         vec3.scale (direction, direction, speed);
-        vec3.add (this.position, this.position, direction);
 
-        this.updateCameraMatrix ();
+        vec3.add (this.position, this.position, direction);
     }
 
     /** camMoveLeft: moves the camera in the left direction by 'speed' many units
      */
     camMoveLeft (speed) {
-    	var qx = this.rotation[0], qy = this.rotation[1], qz = this.rotation[2], qw = this.rotation[3];
+    	/*var qx = this.rotation[0], qy = this.rotation[1], qz = this.rotation[2], qw = this.rotation[3];
   		var x = 1 - 2 * (qy * qy + qz * qz);
   		var y =     2 * (qx * qy + qw * qz);
   		var z =     2 * (qx * qz - qw * qy);
   		var right = vec3.fromValues(x, y, z);
   		vec3.normalize(right, right);
   		vec3.negate(right, right);
-  		vec3.scale (right, right, speed);
-  		vec3.add (this.position, this.position, right);
+  		vec3.scale (right, right, speed); */
 
-  		this.updateCameraMatrix ();
+        var storage = mat4.create ();
+        mat4.fromQuat (storage, this.rotation);
+            
+        var direction = vec3.fromValues (-storage[0], -storage[1], -storage[2]);
+        vec3.scale (direction, direction, speed);
+
+  		vec3.add (this.position, this.position, direction);
     }
 
     /** camMoveRight: moves the camera in the right direction by 'speed' many units
      */
     camMoveRight (speed) {
+        /*
     	var qx = this.rotation[0], qy = this.rotation[1], qz = this.rotation[2], qw = this.rotation[3];
   		var x = 1 - 2 * (qy * qy + qz * qz);
   		var y =     2 * (qx * qy + qw * qz);
   		var z =     2 * (qx * qz - qw * qy);
   		var right = vec3.fromValues(x, y, z);
   		vec3.normalize(right, right);
-  		vec3.scale (right, right, speed);
-  		vec3.add (this.position, this.position, right);
+  		vec3.scale (right, right, speed); */
 
-  		this.updateCameraMatrix ();
+        var storage = mat4.create ();
+        mat4.fromQuat (storage, this.rotation);
+            
+        var direction = vec3.fromValues (storage[0], storage[1], storage[2]);
+        vec3.scale (direction, direction, speed);
+
+  		vec3.add (this.position, this.position, direction);
     }
 
    	mouseLook (deltaX, deltaY) {
