@@ -279,7 +279,7 @@ window.onload = function init () {
                         ];
 
     cubes[0] = new object ();
-    cubes[0].loadFromObj ("testCubeOBJ", "testCubeMAT", "testCubeTEX");
+    cubes[0].loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
     cubes[0].transform = transforms[0];
     cubes[0].collider = colliders[0];
 
