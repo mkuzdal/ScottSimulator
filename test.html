@@ -10,7 +10,7 @@ attribute vec2 vTexCoord;
 
 uniform bool uShadow;
 
-uniform mat4 modelViewMatrix;
+uniform mat4 modelMatrix;
 uniform mat4 cameraMatrix;
 uniform mat4 projectionMatrix;
 uniform mat3 normalMatrix;
@@ -25,17 +25,17 @@ varying vec4 fPositionFromLight;
 void main ()
 {    
     if (uShadow) {
-        fPositionFromLight = lightProjectionMatrix * lightMatrix * modelViewMatrix * vPosition;
-        gl_Position = lightProjectionMatrix * lightMatrix * modelViewMatrix * vPosition;
+        fPositionFromLight = lightProjectionMatrix * lightMatrix * modelMatrix * vPosition;
+        gl_Position = fPositionFromLight;
         return;
     }
 
-    fPos = (modelViewMatrix * vPosition).xyz;
+    fPos = (modelMatrix * vPosition).xyz;
     fNormal = (normalMatrix * vNormal);
     fTexCoord = vTexCoord;
 
-    fPositionFromLight = lightProjectionMatrix * lightMatrix * modelViewMatrix * vPosition;
-    gl_Position = projectionMatrix * cameraMatrix * modelViewMatrix * vPosition;
+    fPositionFromLight = lightProjectionMatrix * lightMatrix * modelMatrix * vPosition;
+    gl_Position = projectionMatrix * cameraMatrix * modelMatrix * vPosition;
 }
 </script>
 
@@ -63,15 +63,14 @@ uniform vec4 fAmbientLight[5], fDiffuseLight[5], fSpecularLight[5];
 uniform vec3 fCameraPosition;
 
 float ShadowCalculation (vec4 fPositionFromLight) {
-    
     vec3 projCoords = fPositionFromLight.xyz / fPositionFromLight.w;
     projCoords = projCoords * 0.5 + 0.5;
 
     float closestDepth = texture2D (shadowMap, projCoords.xy).r;
     float currentDepth = projCoords.z;
 
-    float bias = 0.005;
-    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+    float bias = 0.003;
+    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.5;
 
     return shadow; 
 }
@@ -83,13 +82,13 @@ void main () {
         return;
     }
 
-    if (fShadow) {
+    if (fShadow) {/*
         vec3 projCoords = fPositionFromLight.xyz / fPositionFromLight.w;
         projCoords = projCoords * 0.5 + 0.5;
 
         float closestDepth = texture2D (shadowMap, projCoords.xy).r;
-        float currentDepth = projCoords.z;
-        gl_FragColor = vec4 (currentDepth); 
+        float currentDepth = projCoords.z; 
+        gl_FragColor = vec4 (closestDepth); */
         return;
     }
 
@@ -122,11 +121,10 @@ void main () {
         if (dot (L, N) < 0.0)
             specular = vec4 (0.0, 0.0, 0.0, 1.0);
 
-        //float shadow = ShadowCalculation (fPositionFromLight);
-        float shadow = 0.0;
+        float shadow = ShadowCalculation (fPositionFromLight);
+        //float shadow = 0.0;
         vec4 fLighting = (ambient + (1.0 - shadow) * (diffuse + specular));
         fColor = fColor + fLighting;
-        fColor.a = 1.0;
     }
 
     gl_FragColor = fColor * texture2D (texture, fTexCoord);
@@ -138,12 +136,12 @@ void main () {
 
 attribute vec4 vPosition;
 
-uniform mat4 modelViewMatrix;
+uniform mat4 modelMatrix;
 uniform mat4 lightMatrix;
 uniform mat4 lightProjectionMatrix;
 
 void main () {
-    gl_Position = lightProjectionMatrix * lightMatrix * modelViewMatrix * vPosition;
+    gl_Position = lightProjectionMatrix * lightMatrix * modelMatrix * vPosition;
 }
 </script>
 
