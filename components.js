@@ -226,42 +226,100 @@ class boxCollider {
 
         this.min = vec4.fromValues (this.min[0], this.min[1], this.min[2], 1.0);
         this.max = vec4.fromValues (this.max[0], this.max[1], this.max[2], 1.0);
+
+        this.vertices = [];
+        this.vertices.push (vec4.fromValues (this.min[0], this.min[1], this.min[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.min[0], this.min[1], this.max[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.min[0], this.max[1], this.min[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.min[0], this.max[1], this.max[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.max[0], this.min[1], this.min[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.max[0], this.min[1], this.max[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.max[0], this.max[1], this.min[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.max[0], this.max[1], this.max[2], 1.0));
     }
 
     inFustrum (PC, M) {
         var PCM = mat4.create ();
         mat4.mul (PCM, PC, M);
 
-        var storage = vec4.create ();
-
-        var min_prime = vec4.transformMat4 (storage, this.min, PCM);
-        var max_prime = vec4.transformMat4 (storage, this.max, PCM);
+        var p_prime = [];
+        for (var i = 0; i < this.vertices.length; i++) {
+            var storage = vec4.create ();
+            p_prime.push (vec4.transformMat4 (storage, this.vertices[i], PCM));
+        }
 
         var toDraw = false;
 
         // check right plane:
-        if (max_prime[0] >= max_prime[3] && min_prime[0] >= min_prime[3])
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][0] < p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
             return false;
+        }
+        toDraw = false;
 
         // check left plane:
-        if (max_prime[0] <= -max_prime[3] && min_prime[0] <= -min_prime[3])
-            return false;        
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][0] > -p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
+        }
+        toDraw = false;
 
         // check top plane:
-        if (max_prime[1] >= max_prime[3] && min_prime[1] >= min_prime[3])
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][1] < p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
             return false;
+        }
+        toDraw = false;
 
         // check bottom plane:
-        if (max_prime[1] <= -max_prime[3] && min_prime[1] <= -min_prim[3])
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][1] > -p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
             return false;
+        }
+        toDraw = false;
 
         // check far plane:
-        if (max_prime[2] >= max_prime[3] && min_prime[2] >= min_prime[3])
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][2] < p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
             return false;
+        }
+        toDraw = false;
 
         // check near plane:
-        if (max_prime[2] <= 0 && min_prime[2] <= 0)
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][2] > 0) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
             return false;
+        }
 
         return true;
     }

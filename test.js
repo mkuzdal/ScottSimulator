@@ -109,11 +109,7 @@ window.onload = function init () {
     gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.enable (gl.DEPTH_TEST);
-/*
-    gl.enable (gl.CULL_FACE);
-    gl.frontFace (gl.CW);
-    gl.cullFace (gl.BACK); 
-*/
+
     // Setting up pointerlock
     canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
     document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
@@ -249,13 +245,13 @@ window.onload = function init () {
     animationsManager = new animationHandler ();
     clickManager = new triggerHandler ();
 
-    lightsManager.addSource (new light (new transform (vec3.fromValues (-40.0, 0.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+    lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 10.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
-                              vec4.fromValues (1.0, 0.1, 0.1, 1.0),
+                              vec4.fromValues (0.6, 0.6, 0.6, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
 
     lightsManager.lightSources[0].tag = "red";
-
+/*
     lightsManager.addSource (new light (new transform (vec3.fromValues (10.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (0.1, 0.1, 1.0, 1.0),
@@ -269,7 +265,7 @@ window.onload = function init () {
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
 
     lightsManager.lightSources[2].tag = "green";
-
+*/
     // generate each of the spheres and create a geometry instance to define it
     generateSphere (5);
     geometries.push (new geometry (pointsArray, normalsArray));
@@ -335,8 +331,7 @@ window.onload = function init () {
  */
     cubes[0] = new object ();
     cubes[0].loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
-    cubes[0].transform = transforms[0];
-    //cubes[0].collider = colliders[0];
+    cubes[0].transform = new transform (vec3.fromValues (7.6, -7.0, -15.6), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
 
     cubes[0].addOnMouseClickTrigger (function (object) {
         animationsManager.animations.push (new animationHold (object));
@@ -354,11 +349,11 @@ window.onload = function init () {
                             new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]))
                 );
 
-    cubes[4].collider = new polygonCollider (planeVertices);
+    cubes[4].collider = new polygonCollider (planeVertices); 
 
     cubes.push (new object ());
     cubes[5].loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
-    cubes[5].transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ());
+    cubes[5].transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
 
     buildSceneGraph ();
 
@@ -367,6 +362,9 @@ window.onload = function init () {
     for (var i = 0; i < cubes.length; i++) {
         cubes[i].tag = i;
     }
+
+    cubes[5].tag = "world";
+
 
     window.requestAnimFrame (render);
 }

@@ -15,8 +15,8 @@ class camera {
      *  @param { float } near: the near clipping place.
      */
     constructor (_position, _yaw, _pitch, _sensitivity, _smoothness, _fovy, _aspect, _far, _near) {
-        this.position = _position   || vec3.fromValues (0.0, 0.0, 15.0);
-        this.yaw = _yaw 			|| 0.0;
+        this.position = _position   || vec3.fromValues (0.0, 9.0, 14.6);
+        this.yaw = _yaw 			|| 80.0;
         this.pitch = _pitch			|| 0.0;
         this.fovy = _fovy           || 50.0;
         this.aspect = _aspect       || canvas.width / canvas.height;

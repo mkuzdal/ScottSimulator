@@ -215,48 +215,50 @@ class sceneGraph {
         }
 		mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
 		for (var i = 0; i < this.root.children.length; i++) {
-			this.__drawTree_AUX (this.root.children[i], CTM, PC, 1.0);
+			this.__drawTree_AUX (this.root.children[i], CTM, PC, 1.0, type);
 		}
 	}
 
-	__drawTree_AUX (root, CTM, PC, scaling) {
+	__drawTree_AUX (root, CTM, PC, scaling, type) {
 		if (!root.active)
 			return;
 
-		var CTM_prime = mat4.create ();
-		mat4.mul (CTM_prime, CTM, root.transform.matrix);
-        var scaling_prime = scaling * root.transform.scale[0];
+        if (type != "color" || root.tag != "world") {
+    		var CTM_prime = mat4.create ();
+    		mat4.mul (CTM_prime, CTM, root.transform.matrix);
+            var scaling_prime = scaling * root.transform.scale[0];
 
-		if (root.collider == null) {
-            this.drawNode (root, CTM_prime);
-        } else if (root.collider.type == "box") {
-            if (root.collider.inFustrum (PC, CTM_prime)) {
+    		if (root.collider == null) {
                 this.drawNode (root, CTM_prime);
-            } else {
-                console.log ("HERE");
-            }
-        } else if (root.collider.type == "sphere") {
-            var c = vec3.create ();
-            vec3.transformMat4 (c, root.collider.center, CTM_prime);
+            } else if (root.collider.type == "box") {
+                if (root.collider.inFustrum (PC, CTM_prime)) {
+                    this.drawNode (root, CTM_prime);
+                } else {
+                    //console.log ("HERE");
+                }
+            } else if (root.collider.type == "sphere") {
+                var c = vec3.create ();
+                vec3.transformMat4 (c, root.collider.center, CTM_prime);
 
-            var r = root.collider.radius * scaling_prime;
+                var r = root.collider.radius * scaling_prime;
 
-            if (root.collider.inFustrum (PC, c, r)) {
-                this.drawNode (root, CTM_prime);
-            } else {
-                console.log ("HERE");
+                if (root.collider.inFustrum (PC, c, r)) {
+                    this.drawNode (root, CTM_prime);
+                } else {
+                    //console.log ("HERE");
+                }
+            } else if (root.collider.type == "polygon") {
+                if (root.collider.inFustrum (PC, CTM_prime)) {
+                    this.drawNode (root, CTM_prime);
+                } else {
+                    //console.log ("HERE");
+                }
             }
-        } else if (root.collider.type == "polygon") {
-            if (root.collider.inFustrum (PC, CTM_prime)) {
-                this.drawNode (root, CTM_prime);
-            } else {
-                console.log ("HERE");
-            }
-        }
 
-        for (var i = 0; i < root.children.length; i++) {
-			this.__drawTree_AUX (root.children[i], CTM_prime, PC, scaling_prime);
-		}
+            for (var i = 0; i < root.children.length; i++) {
+    			this.__drawTree_AUX (root.children[i], CTM_prime, PC, scaling_prime);
+    		}
+    }
 	}
 
 	drawNode (obj, CTM) {
@@ -344,7 +346,7 @@ function buildSceneGraph () {
     SGraph = new sceneGraph ();
 	SGraph.root.children.push (cubes[0]);
 	SGraph.root.children.push (cubes[1]);
-    SGraph.root.children.push (cubes[4]);
+    //SGraph.root.children.push (cubes[4]);
     SGraph.root.children.push (cubes[5]);
 
 	SGraph.root.children[1].children.push (cubes[2]);
