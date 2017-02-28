@@ -24,13 +24,13 @@ var textureArray = [];
 
 // webGL uniforms
 var projectionMatrixLoc;
-var modelViewMatrixLoc;
+var modelMatrixLoc;
 var normalMatrixLoc;
 var cameraMatrixLoc;
 var lightProjectionMatrixLoc;
 var lightMatrixLoc;
 
-var modelViewMatrixSha;
+var modelMatrixSha;
 var lightProjectionMatrixSha;
 var lightMatrixSha;
 
@@ -105,11 +105,15 @@ window.onload = function init () {
     gl.viewport (0, 0, canvas.width, canvas.height);
     gl.clearColor (0.0, 0.0, 0.0, 1.0);
     
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+    gl.enable (gl.BLEND);
+    gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.enable (gl.DEPTH_TEST);
-
+/*
+    gl.enable (gl.CULL_FACE);
+    gl.frontFace (gl.CW);
+    gl.cullFace (gl.BACK); 
+*/
     // Setting up pointerlock
     canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
     document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
@@ -234,7 +238,7 @@ window.onload = function init () {
     frameBufferObject = initShadowFramebuffer ();
 
     // Get the local variable for each of the matrix uniforms
-    modelViewMatrixLoc = gl.getUniformLocation (program, "modelViewMatrix");
+    modelMatrixLoc = gl.getUniformLocation (program, "modelMatrix");
     projectionMatrixLoc = gl.getUniformLocation (program, "projectionMatrix");
     normalMatrixLoc = gl.getUniformLocation (program, "normalMatrix");
     cameraMatrixLoc = gl.getUniformLocation (program, "cameraMatrix");
@@ -326,9 +330,10 @@ window.onload = function init () {
     });
 
     cubes[1].addOnMouseExitTrigger (function (object) {
+        object.material = 
         console.log ("Exit");
-    }); */
-
+    });  
+ */
     cubes[0] = new object ();
     cubes[0].loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
     cubes[0].transform = transforms[0];
@@ -693,7 +698,7 @@ function initShadowFramebuffer () {
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture, 0);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
 
-    framebuffer.texture = colorTexture;
+    framebuffer.texture = depthTexture;
 
     return framebuffer;
 }

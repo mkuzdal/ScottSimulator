@@ -15,7 +15,7 @@ class object {
         this.transform = _transform || new transform ();
         this.material = _material;
         this.geometry = _geometry;
-        this.texture = _texture
+        this.texture = _texture;
         this.collider = _collider;
         this.mouseTriggers = [];
 
@@ -140,6 +140,43 @@ class object {
     addOnMouseExitTrigger (_function) {
         this.mouseTriggers.push (new mouseTrigger (this, _function, "exit"));
     }
+
+    clone () {
+        var newTransform = new transform (vec3.clone (this.transform.position), 
+                                          vec3.clone (this.transform.scale),
+                                          quat.clone (this.transform.rotation));
+
+        var newMaterial = new material (vec4.clone (this.material.ambient),
+                                        vec4.clone (this.material.diffuse),
+                                        vec4.clone (this.material.specular),
+                                        this.material.shininess);
+
+        var newGeometry = this.geometry;
+        var newTexture = this.texture;
+        var newCollider = this.collider;
+        var newObject = new object (newTransform, newMaterial, newGeometry, newTexture, newCollider);
+        newObject.drawType = this.drawType;
+        newObject.tag = this.tag;
+        newObject.active = this.active;
+
+        for (var i = 0; i < this.mouseTriggers.length; i++) {
+            if (this.mouseTriggers[i].type == "click") {
+                newObject.addOnMouseClickTrigger (this.mouseTriggers[i].func);
+            } else if (this.mouseTriggers[i].type == "hover") {
+                newObject.addOnMouseHoverTrigger (this.mouseTriggers[i].func);
+            } else if (this.mouseTriggers[i].type == "enter") {
+                newObject.addOnMouseEnterTrigger (this.mouseTriggers[i].func);
+            } else if (this.mouseTriggers[i].type == "exit") {
+                newObject.addOnMouseExitTrigger (this.mouseTriggers[i].func);
+            } 
+        }
+
+        for (var i = 0; i < this.children.length; i++) {
+            newObject.children.push (this.children[i].clone ());
+        }
+
+        return newObject;
+    }
 }
 
 
@@ -155,6 +192,11 @@ class sceneGraph {
 		var CTM = mat4.create ();
 		var PC = mat4.create ();
 
+        if (type == "shadow") {
+            mat4.mul (PC, lightsManager.lightSources[0].perspectiveProjectionMatrix, lightsManager.lightSources[0].matrix);
+        } else {
+            mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
+        }
 		mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
 		for (var i = 0; i < this.root.children.length; i++) {
 			this.__drawTree_AUX (this.root.children[i], CTM, PC, 1.0);
@@ -166,7 +208,7 @@ class sceneGraph {
 			return;
 
 		var CTM_prime = mat4.create ();
-		mat4.mul (CTM_prime, CTM, root.transform.MVmatrix);
+		mat4.mul (CTM_prime, CTM, root.transform.matrix);
         var scaling_prime = scaling * root.transform.scale[0];
 
 		if (root.collider == null) {
@@ -210,7 +252,7 @@ class sceneGraph {
             gl.uniform4fv (gl.getUniformLocation (program, "fTriggerID"), vec4.fromValues (0.0, 0.0, 0.0, 1.0));   
         }
 
-        gl.uniformMatrix4fv (modelViewMatrixLoc, false, CTM);
+        gl.uniformMatrix4fv (modelMatrixLoc, false, CTM);
         gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
         gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
         //gl.uniformMatrix4fv (cameraMatrixLoc, false, lightsManager.lightSources[0].matrix);
@@ -299,11 +341,9 @@ function drawSceneGraph (dTime) {
 
     gl.uniform1i (gl.getUniformLocation (program, "uShadow"), true); 
     gl.uniform1i (gl.getUniformLocation (program, "fShadow"), true); 
-    SGraph.drawTree ("main");
+    SGraph.drawTree ("shadow");
     //gl.readPixels (498, 144, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, color);
     //console.log (color);
-
-    gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), frameBufferObject.texture);
 
     gl.clear (gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
     gl.viewport (0, 0, canvas.width, canvas.height);
@@ -323,8 +363,12 @@ function drawSceneGraph (dTime) {
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.uniform1i (gl.getUniformLocation (program, "fOffscreen"), null);
     gl.bindFramebuffer (gl.FRAMEBUFFER, null);
-    SGraph.drawTree ("main");
 
+    gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 1);
+    gl.activeTexture (gl.TEXTURE1);
+    gl.bindTexture (gl.TEXTURE_2D, frameBufferObject.texture);
+
+    SGraph.drawTree ("main");
 }
 
 

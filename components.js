@@ -433,8 +433,6 @@ class texture {
         gl.texImage2D (gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.image);
         gl.generateMipmap (gl.TEXTURE_2D);
 
-        gl.uniform1i (gl.getUniformLocation (program, "texture"), 0);
-
         this.tBuffer = gl.createBuffer ();
         gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
         gl.bufferData (gl.ARRAY_BUFFER, flattenArray (_texCoords), gl.STATIC_DRAW);
@@ -442,7 +440,11 @@ class texture {
 
     setup () {
         // bind textures
+        gl.uniform1i (gl.getUniformLocation (program, "texture"), 0);
+        gl.activeTexture (gl.TEXTURE0);
         gl.bindTexture (gl.TEXTURE_2D, this.texture);
+
+
         gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
 
         for (var i = 0; i < this.options.length; i++) {
@@ -475,22 +477,22 @@ class transform {
         this.scale = _scale         || vec3.fromValues (1.0, 1.0, 1.0);
         this.rotation = _rotation   || quat.create ();
 
-        this.MVmatrix = mat4.create ();
+        this.matrix = mat4.create ();
 
-        this.setModelView ();
+        this.setMatrix();
     }
 
     /** update: event loop function. Currently just sets the matrices for the object.
      *  @param { float } dTime: the time since the last framce callback (in seconds).
      */
     update (dTime) {
-        this.setModelView ();
+        this.setMatrix ();
     }
  
     /** setMatrices: sets the model and normal matrices for an object.
      */
-    setModelView () {
-        mat4.fromRotationTranslationScale (this.MVmatrix, this.rotation, this.position, this.scale);
+    setMatrix () {
+        mat4.fromRotationTranslationScale (this.matrix, this.rotation, this.position, this.scale);
     }
 }
 
