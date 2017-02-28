@@ -17,7 +17,7 @@ class object {
         this.geometry = _geometry;
         this.texture = _texture
         this.collider = _collider;
-        this.onClick = null;
+        this.mouseTriggers = [];
 
         this.drawType = gl.TRIANGLES;
         this.active = true;
@@ -124,6 +124,22 @@ class object {
         this.material = new material (ambient, diffuse, specular, shininess);
         this.texture = new texture (TexEle, texture_Array);
     }
+
+    addOnMouseClickTrigger (_function) {
+        this.mouseTriggers.push (new mouseTrigger (this, _function, "click"));
+    }
+
+    addOnMouseHoverTrigger (_function) {
+        this.mouseTriggers.push (new mouseTrigger (this, _function, "hover"));
+    }
+
+    addOnMouseEnterTrigger (_function) {
+        this.mouseTriggers.push (new mouseTrigger (this, _function, "enter"));
+    }
+
+    addOnMouseExitTrigger (_function) {
+        this.mouseTriggers.push (new mouseTrigger (this, _function, "exit"));
+    }
 }
 
 
@@ -188,8 +204,8 @@ class sceneGraph {
         obj.material.setup ();
         obj.texture.setup ();
 
-        if (obj.onClick) {
-            obj.onClick.setup ();
+        if (obj.mouseTriggers.length) {
+            obj.mouseTriggers[0].setup ();
         } else {
             gl.uniform4fv (gl.getUniformLocation (program, "fTriggerID"), vec4.fromValues (0.0, 0.0, 0.0, 1.0));   
         }
@@ -301,11 +317,8 @@ function drawSceneGraph (dTime) {
     gl.uniform1i (gl.getUniformLocation (program, "fOffscreen"), true);
     SGraph.drawTree ("color");
 
-    if (clickManager.clicked) {
-        gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, clickManager.pixel);
-        clickManager.clicked = false;
-        clickManager.handleClicks ();
-    }
+    gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, clickManager.pixel);
+    clickManager.handleMouseEvents ();
 
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.uniform1i (gl.getUniformLocation (program, "fOffscreen"), null);

@@ -160,4 +160,30 @@ class animationRotation {
     }
 }
 
+class animationHold {
+    constructor (_object) {
+        this.object = _object;
+
+        this.distance = vec3.distance (this.object.transform.position, cam.position);
+        this.active = true;
+        this.tag = "hold";
+    }
+
+    animate (dTime) {
+        if (!this.active)
+            return;
+
+        var storage = mat4.create ();
+        mat4.fromQuat (storage, cam.rotation);
+            
+        var direction = vec3.fromValues (-storage[8], -storage[9], -storage[10]);
+        vec3.normalize (direction, direction);
+        vec3.scale (direction, direction, this.distance);
+
+        vec3.add (direction, direction, cam.position);
+        this.object.transform.position = direction;
+    }
+}
+
+
 

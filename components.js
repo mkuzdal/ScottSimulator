@@ -1,11 +1,11 @@
 
-
-class onClickTrigger {
-    constructor (_object, _function) {
-        this.onClickFunc = _function;
+class mouseTrigger {
+    constructor (_object, _function, type) {
+        this.func = _function;
         this.object = _object;
-        this.object.onClick = this;
-        clickManager.addOnClickTrigger (this);
+        this.type = type;
+
+        clickManager.addTrigger (this);
     }
 
     setup () {
@@ -15,16 +15,25 @@ class onClickTrigger {
     }
 }
 
-class onClickHandler {
+class triggerHandler {
     constructor () {
         this.clicked = false;
         this.pixel = new Uint8Array (4);
         this.triggers = [];
-        this.currentID = vec4.fromValues (0.0, 0.0, 0.0, 255.0);
+        this.hover = [];
+        this.currentID = vec4.fromValues (16.0, 0.0, 0.0, 255.0);
     }
 
-    addOnClickTrigger (trigger) {
-        trigger.ID = this.currentID;
+    addTrigger (trigger) {
+        for (var i = 0; i < this.triggers.length; i++) {
+            if (this.triggers[i].object == trigger.object) {
+                trigger.ID = this.triggers[i].ID;
+                this.triggers.push (trigger);
+                return;
+            }
+        }
+
+        trigger.ID = vec4.clone (this.currentID);
 
         for (var i = 0; i < 3; i++) {
             if (this.currentID[i] == 255.0)
@@ -34,16 +43,44 @@ class onClickHandler {
                 break;
             }
         }
-
         this.triggers.push (trigger);
     }
 
-    handleClicks () {
+    handleMouseEvents () {
+        
         for (var i = 0; i < this.triggers.length; i++) {
-            if (vec4.equals(this.pixel, this.triggers[i].ID)) {
-                this.triggers[i].onClickFunc (this.triggers[i].object);
+            if (vec4.equals(this.pixel, this.triggers[i].ID)) { 
+                if (this.triggers[i].type == "click" && this.clicked == true) {
+                    this.triggers[i].func (this.triggers[i].object);
+                } else if (this.triggers[i].type == "hover") {
+                    this.triggers[i].func (this.triggers[i].object);
+                } else if (this.triggers[i].type == "enter" || this.triggers[i].type == "exit") {
+                    var inHover = false;
+                    for (var j = 0; j < this.hover.length; j++) {
+                        if (this.hover[j] == this.triggers[i]) {
+                            inHover = true;
+                            break;
+                        }
+                    }
+                    if (!inHover) {
+                        if (this.triggers[i].type == "enter") {
+                            this.triggers[i].func (this.triggers[i].object);
+                        }
+                        this.hover.push (this.triggers[i]);
+                    }
+                }
+            } else {
+                for (var j = 0; j < this.hover.length; j++) {
+                    if (vec4.equals (this.hover[j].ID, this.triggers[i].ID)) {
+                        if (this.hover[j].type == "exit") {
+                            this.hover[j].func (this.hover[j].object);
+                        }
+                        this.hover.splice (j, 1);
+                    }
+                }
             }
-        }
+        } 
+        this.clicked = false;    
     }
 }
 
