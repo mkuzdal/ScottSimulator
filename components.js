@@ -84,10 +84,10 @@ class triggerHandler {
     }
 }
 
-class boxCollider {
+class polygonCollider {
     constructor (_vertices) {
         this.vertices = _vertices;
-        this.type = "box"
+        this.type = "polygon"
     }
 
     inFustrum (PC, M) {
@@ -215,6 +215,55 @@ class boxCollider {
         }
 
         return false;
+    }
+}
+
+class boxCollider {
+    constructor (_min, _max) {
+        this.min = _min;
+        this.max = _max;
+        this.type = "box";
+
+        this.min = vec4.fromValues (this.min[0], this.min[1], this.min[2], 1.0);
+        this.max = vec4.fromValues (this.max[0], this.max[1], this.max[2], 1.0);
+    }
+
+    inFustrum (PC, M) {
+        var PCM = mat4.create ();
+        mat4.mul (PCM, PC, M);
+
+        var storage = vec4.create ();
+
+        var min_prime = vec4.transformMat4 (storage, this.min, PCM);
+        var max_prime = vec4.transformMat4 (storage, this.max, PCM);
+
+        var toDraw = false;
+
+        // check right plane:
+        if (max_prime[0] >= max_prime[3] && min_prime[0] >= min_prime[3])
+            return false;
+
+        // check left plane:
+        if (max_prime[0] <= -max_prime[3] && min_prime[0] <= -min_prime[3])
+            return false;        
+
+        // check top plane:
+        if (max_prime[1] >= max_prime[3] && min_prime[1] >= min_prime[3])
+            return false;
+
+        // check bottom plane:
+        if (max_prime[1] <= -max_prime[3] && min_prime[1] <= -min_prim[3])
+            return false;
+
+        // check far plane:
+        if (max_prime[2] >= max_prime[3] && min_prime[2] >= min_prime[3])
+            return false;
+
+        // check near plane:
+        if (max_prime[2] <= 0 && min_prime[2] <= 0)
+            return false;
+
+        return true;
     }
 }
 

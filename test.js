@@ -330,14 +330,13 @@ window.onload = function init () {
     });
 
     cubes[1].addOnMouseExitTrigger (function (object) {
-        object.material = 
         console.log ("Exit");
     });  
  */
     cubes[0] = new object ();
     cubes[0].loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
     cubes[0].transform = transforms[0];
-    cubes[0].collider = colliders[0];
+    //cubes[0].collider = colliders[0];
 
     cubes[0].addOnMouseClickTrigger (function (object) {
         animationsManager.animations.push (new animationHold (object));
@@ -355,7 +354,11 @@ window.onload = function init () {
                             new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]))
                 );
 
-    cubes[4].collider = new boxCollider (planeVertices);
+    cubes[4].collider = new polygonCollider (planeVertices);
+
+    cubes.push (new object ());
+    cubes[5].loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
+    cubes[5].transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ());
 
     buildSceneGraph ();
 

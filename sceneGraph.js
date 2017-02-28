@@ -83,9 +83,25 @@ class object {
             }
         }
 
+        var min_X = 10000;
+        var min_Y = 10000;
+        var min_Z = 10000;
+        var max_X = -10000;
+        var max_Y = -10000;
+        var max_Z = -10000;
+
         for (var i = 0; i < points_Array.length; i++) {
             points_Array[i] = vec4.fromValues (points_Array[i][0], points_Array[i][1], points_Array[i][2], 1.0);
+            min_X = Math.min (min_X, points_Array[i][0]);
+            min_Y = Math.min (min_Y, points_Array[i][1]);
+            min_Z = Math.min (min_Z, points_Array[i][2]);
+
+            max_X = Math.max (max_X, points_Array[i][0]);
+            max_Y = Math.max (max_Y, points_Array[i][1]);
+            max_Z = Math.max (max_Z, points_Array[i][2]);
         }
+
+        this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z));
 
         for (var i = 0; i < points_Array.length; i++) {
             normals_Array[i] = vec3.fromValues (normals_Array[i][0], normals_Array[i][1], normals_Array[i][2]);
@@ -193,7 +209,7 @@ class sceneGraph {
 		var PC = mat4.create ();
 
         if (type == "shadow") {
-            mat4.mul (PC, lightsManager.lightSources[0].perspectiveProjectionMatrix, lightsManager.lightSources[0].matrix);
+            mat4.mul (PC, lightsManager.lightSources[0].projectionMatrix, lightsManager.lightSources[0].matrix);
         } else {
             mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
         }
@@ -213,17 +229,13 @@ class sceneGraph {
 
 		if (root.collider == null) {
             this.drawNode (root, CTM_prime);
-        }
-
-        else if (root.collider.type == "box") {
+        } else if (root.collider.type == "box") {
             if (root.collider.inFustrum (PC, CTM_prime)) {
                 this.drawNode (root, CTM_prime);
             } else {
-            	//console.log ("HERE");
+                console.log ("HERE");
             }
-        } 
-
-        else if (root.collider.type == "sphere") {
+        } else if (root.collider.type == "sphere") {
             var c = vec3.create ();
             vec3.transformMat4 (c, root.collider.center, CTM_prime);
 
@@ -232,9 +244,15 @@ class sceneGraph {
             if (root.collider.inFustrum (PC, c, r)) {
                 this.drawNode (root, CTM_prime);
             } else {
-            	//console.log ("HERE");
+                console.log ("HERE");
             }
-        } 
+        } else if (root.collider.type == "polygon") {
+            if (root.collider.inFustrum (PC, CTM_prime)) {
+                this.drawNode (root, CTM_prime);
+            } else {
+                console.log ("HERE");
+            }
+        }
 
         for (var i = 0; i < root.children.length; i++) {
 			this.__drawTree_AUX (root.children[i], CTM_prime, PC, scaling_prime);
@@ -256,8 +274,8 @@ class sceneGraph {
         gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
         gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
         //gl.uniformMatrix4fv (cameraMatrixLoc, false, lightsManager.lightSources[0].matrix);
-        //gl.uniformMatrix4fv (projectionMatrixLoc, false, lightsManager.lightSources[0].perspectiveProjectionMatrix); 
-        gl.uniformMatrix4fv (lightProjectionMatrixLoc, false, lightsManager.lightSources[0].perspectiveProjectionMatrix);
+        //gl.uniformMatrix4fv (projectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix); 
+        gl.uniformMatrix4fv (lightProjectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix);
         gl.uniformMatrix4fv (lightMatrixLoc, false, lightsManager.lightSources[0].matrix);
 
         var CTMN = mat3.create ();
@@ -327,6 +345,7 @@ function buildSceneGraph () {
 	SGraph.root.children.push (cubes[0]);
 	SGraph.root.children.push (cubes[1]);
     SGraph.root.children.push (cubes[4]);
+    SGraph.root.children.push (cubes[5]);
 
 	SGraph.root.children[1].children.push (cubes[2]);
     SGraph.root.children[1].children[0].children.push (cubes[3]);

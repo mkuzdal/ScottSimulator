@@ -110,7 +110,7 @@ class light {
         this.tag = "light"
         this.active = true;
 
-        this.perspectiveProjectionMatrix = mat4.create ();
+        this.projectionMatrix = mat4.create ();
         this.matrix = mat4.create ();
     }   
 
@@ -137,8 +137,8 @@ class light {
     /** setPerspective: sets the perspective projection matrix.
      */
     setPerspective () {
-        //mat4.ortho (this.perspectiveProjectionMatrix, -10.0, 10.0, -10.0, 10.0, 1.0, 100.0);
-        mat4.perspective (this.perspectiveProjectionMatrix, Math.PI * 70.0 / 180, OFFSCREEN_WIDTH / OFFSCREEN_HEIGHT, 1.0, 1000.0);
+        //mat4.ortho (this.projectionMatrix, -10.0, 10.0, -10.0, 10.0, 1.0, 100.0);
+        mat4.perspective (this.projectionMatrix, Math.PI * 70.0 / 180, OFFSCREEN_WIDTH / OFFSCREEN_HEIGHT, 1.0, 1000.0);
     }
 
     /** setLightMatrix: sets the light view matrix.
