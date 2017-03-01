@@ -242,7 +242,7 @@ window.onload = function init () {
     lightProjectionMatrixLoc = gl.getUniformLocation (program, "lightProjectionMatrix");
 
     SGraph = new sceneGraph ();
-    CollisionManager = new sceneCollisionManager ();
+    //CollisionManager = new sceneCollisionManager ();
     lightsManager = new lightHandler ();
     animationsManager = new animationHandler ();
     clickManager = new triggerHandler ();
@@ -281,7 +281,6 @@ window.onload = function init () {
 
     geometries.push (new geometry (pointsArray, normalsArray));
     textures.push (new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
-
 
     // create the materials for each of the 6 bodies (sun, planet1, planet2, planet3, planet4, moon)
     materials =         [   new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
@@ -333,11 +332,16 @@ window.onload = function init () {
  */
     cubes[0] = new object ();
     cubes[0].loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
-    cubes[0].transform = transforms[0]; //new transform (vec3.fromValues (7.6, -7.0, -15.6), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    cubes[0].transform = transforms[0];
 
     cubes[0].addOnMouseClickTrigger (function (object) {
         animationsManager.animations.push (new animationHold (object));
     }); 
+
+    cubes[1].addOnMouseClickTrigger (function (object) {
+        animationsManager.animations.push (new animationHold (object));
+    }); 
+
 
     animationsManager.animations.push (new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (1.0, 1.0, 0.0)));
     animationsManager.animations.push (new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0)));
@@ -369,7 +373,7 @@ window.onload = function init () {
     }
 
     cubes[5].tag = "world";
-
+    cubes[4].tag = "world";
 
     window.requestAnimFrame (render);
 }

@@ -63,16 +63,19 @@ uniform vec4 fAmbientLight[5], fDiffuseLight[5], fSpecularLight[5];
 uniform vec3 fCameraPosition;
 
 float ShadowCalculation (vec4 fPositionFromLight) {
-    vec3 projCoords = fPositionFromLight.xyz / fPositionFromLight.w;
+  /*    vec3 projCoords = fPositionFromLight.xyz / fPositionFromLight.w;
     projCoords = projCoords * 0.5 + 0.5;
-/*
+
     float closestDepth = texture2D (shadowMap, projCoords.xy).r;
     float currentDepth = projCoords.z;
 
-    float bias = 0.005;
+    float bias = 0.002;
     float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 
-    return shadow;  */
+    return shadow; 
+*/
+    vec3 projCoords = fPositionFromLight.xyz / fPositionFromLight.w;
+    projCoords = projCoords * 0.5 + 0.5; 
 
     float bias = 0.0005;
     float visibility = 0.0;
@@ -90,6 +93,29 @@ float ShadowCalculation (vec4 fPositionFromLight) {
     }
 
     return visibility; 
+} 
+
+vec4 pack (const float depth) {
+  const vec4 bitShift = vec4(255.0 * 255.0 * 255.0, 255.0 * 255.0, 255.0, 1.0);
+  const vec4 bitMask = vec4(0.0, 1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0);
+
+  vec4 res = fract(depth * bitShift);
+  res -= res.xxyz * bitMask;
+
+  return res;
+}
+
+float unpack (vec4 color) {
+   const vec4 bitShift = vec4 (1.0 / (255.0 * 255.0 * 255.0), 1.0 / (255.0 * 255.0), 1.0 / 255.0, 1.0);
+   return dot (color, bitShift);
+}
+
+float omnidirectionalShadow (vec3 lightPosition, float bias, float darkness, sampler2D sampler) {
+    vec3 direction = fPos - lightPosition;
+    float vertexDepth = clamp (length (direction), 0.0, 1.0);
+    float shadowMapDepth = unpack (texture2D (sampler, direction.xy)) + bias;
+
+    return (vertexDepth > shadowMapDepth) ? 1.0 : darkness;
 }
 
 void main () { 
@@ -100,6 +126,7 @@ void main () {
     }
 
     if (fShadow) {
+        gl_FragColor = pack(gl_FragCoord.z);
         return;
     }
 
@@ -132,6 +159,7 @@ void main () {
         if (dot (L, N) < 0.0)
             specular = vec4 (0.0, 0.0, 0.0, 1.0);
 
+        //float shadow = omnidirectionalShadow (fLightPosition[0].xyz, 10.0, 0.0, shadowMap);
         float shadow = ShadowCalculation (fPositionFromLight);
         //float shadow = 0.0;
         vec4 fLighting = (ambient + (1.0 - shadow) * (diffuse + specular));
@@ -176,6 +204,12 @@ void main () {
 <script type="text/javascript" src="camera.js"></script>
 <script type="text/javascript" src="components.js"></script>
 <script type="text/javascript" src="sceneCollisionManager.js"></script>
+
+<img id = "TEXfrance" src="France.png" hidden></img>
+
+<audio id="AUDIOWOOHOO" src="Audio/woohoo.wav"></audio>
+
+
 
 <script type="text/plain" id="testCubeOBJ"> 
 # Blender v2.78 (sub 0) OBJ File: 'testcube.blend'
@@ -3831,12 +3865,6 @@ d 1.000000
 illum 2
 </script>
 <img id= "chairTEX" src="Meshes/chair_texture.png" hidden></img>
-
-
-
-
-
-<img id = "TEXfrance" src="France.png" hidden></img>
 
 <body>
 <canvas id="gl-canvas" width="960" height="540">

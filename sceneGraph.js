@@ -33,11 +33,11 @@ class object {
     }
 
     setup (CTM) {
-        if (this.material != null) {
+        if (this.material) {
             this.material.setup ();
-        } if (this.geometry != null) {
+        } if (this.geometry) {
             this.geometry.setup ();
-        } if (this.texture != null) {
+        } if (this.texture) {
             this.texture.setup (); 
         }
 
@@ -58,6 +58,11 @@ class object {
         var CTMN = mat3.create ();
         mat3.normalFromMat4 (CTMN, this.collider.matrix);
         gl.uniformMatrix3fv (normalMatrixLoc, false, CTMN);
+    }
+
+    draw () {
+        if (this.geometry)
+            gl.drawArrays (this.drawType, 0, this.geometry.Nvertices);
     }
 
     loadFromObj (ObjID, MatID, TexID) {
@@ -129,7 +134,16 @@ class object {
             max_Z = Math.max (max_Z, points_Array[i][2]);
         }
 
-        this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z));
+        var collider = [];
+        collider.push (vec4.fromValues (min_X, min_Y, min_Z, 1.0));
+        collider.push (vec4.fromValues (min_X, min_Y, max_Z, 1.0));
+        collider.push (vec4.fromValues (min_X, max_Y, min_Z, 1.0));
+        collider.push (vec4.fromValues (min_X, max_Y, max_Z, 1.0));
+        collider.push (vec4.fromValues (max_X, min_Y, min_Z, 1.0));
+        collider.push (vec4.fromValues (max_X, min_Y, max_Z, 1.0));
+        collider.push (vec4.fromValues (max_X, max_Y, min_Z, 1.0));
+        collider.push (vec4.fromValues (max_X, max_Y, max_Z, 1.0));
+        this.collider = new polygonCollider (collider);
 
         for (var i = 0; i < points_Array.length; i++) {
             normals_Array[i] = vec3.fromValues (normals_Array[i][0], normals_Array[i][1], normals_Array[i][2]);
@@ -282,7 +296,7 @@ class sceneGraph {
                     //console.log ("HERE");
                 }
             }
-            CollisionManager.objects.push (root);
+            //CollisionManager.objects.push (root);
             for (var i = 0; i < root.children.length; i++) {
                 this.__drawTree_AUX (root.children[i], CTM_prime, PC, PL, scaling_prime);
             }
@@ -317,9 +331,7 @@ class sceneGraph {
 
 	drawNode (obj) {
         obj.setup ();
-
-        gl.drawArrays (obj.drawType, 0, obj.geometry.Nvertices);
-        gl.bindBuffer (gl.ARRAY_BUFFER, null);
+        obj.draw ();
 	}
 
     getObjectsByTag (tag) {
@@ -379,37 +391,41 @@ class sceneGraph {
 function buildSceneGraph () {
 	SGraph.root.children.push (cubes[0]);
 	SGraph.root.children.push (cubes[1]);
-    SGraph.root.children.push (cubes[4]);
-    //SGraph.root.children.push (cubes[5]);
+    //SGraph.root.children.push (cubes[4]);
+    SGraph.root.children.push (cubes[5]);
 
 	SGraph.root.children[1].children.push (cubes[2]);
     SGraph.root.children[1].children[0].children.push (cubes[3]);
 }
 
 function drawSceneGraph (dTime) {
-
+   
+    //CollisionManager.detectAllColisions ();
     SGraph.updateTree (dTime);
-    CollisionManager.objects = [];
     lightsManager.setupAll ();
-    
+    //CollisionManager.objects = [];
+
+    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
     gl.enable (gl.CULL_FACE);
     gl.cullFace (gl.FRONT);
-    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.bindFramebuffer (gl.FRAMEBUFFER, frameBufferObject);
     gl.viewport (0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
     gl.uniform1i (gl.getUniformLocation (program, "uShadow"), true); 
     gl.uniform1i (gl.getUniformLocation (program, "fShadow"), true); 
+
     SGraph.drawTree ("shadow");
 
     gl.disable (gl.CULL_FACE);
     gl.clear (gl.DEPTH_BUFFER_BIT);
     gl.bindFramebuffer (gl.FRAMEBUFFER, null);
-    gl.viewport (0, 0, canvas.width, canvas.height);
     gl.uniform1i (gl.getUniformLocation (program, "uShadow"), null); 
     gl.uniform1i (gl.getUniformLocation (program, "fShadow"), null); 
 
+    gl.viewport (0, 0, canvas.width, canvas.height);
     gl.bindFramebuffer (gl.FRAMEBUFFER, colorFramebuffer);
     gl.uniform1i (gl.getUniformLocation (program, "fOffscreen"), true);
+
     SGraph.drawTree ("color");
 
     gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, clickManager.pixel);
