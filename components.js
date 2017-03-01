@@ -92,6 +92,7 @@ class nullCollider {
     }
 }
 
+
 class polygonCollider {
     constructor (_vertices) {
         this.vertices = _vertices;
