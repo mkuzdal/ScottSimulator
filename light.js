@@ -144,7 +144,7 @@ class light {
     /** setLightMatrix: sets the light view matrix.
      */
     setLightMatrix () {
-        mat4.lookAt (this.matrix, this.transform.position, vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (0.0, 1.0, 0.0));
+        mat4.lookAt (this.matrix, this.transform.position, vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 0.0, 0.0));
     }
 }
 

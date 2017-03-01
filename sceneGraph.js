@@ -16,7 +16,7 @@ class object {
         this.material = _material;
         this.geometry = _geometry;
         this.texture = _texture;
-        this.collider = _collider;
+        this.collider = _collider || new nullCollider ();
         this.mouseTriggers = [];
 
         this.drawType = gl.TRIANGLES;
@@ -30,6 +30,39 @@ class object {
      */
     update (dTime) {
         this.transform.update (dTime);
+    }
+
+    setup (CTM) {
+        if (this.material) {
+            this.material.setup ();
+        } if (this.geometry) {
+            this.geometry.setup ();
+        } if (this.texture) {
+            this.texture.setup (); 
+        }
+
+        if (this.mouseTriggers.length) {
+            this.mouseTriggers[0].setup ();
+        } else {
+            gl.uniform4fv (gl.getUniformLocation (program, "fTriggerID"), vec4.fromValues (0.0, 0.0, 0.0, 1.0));   
+        }
+
+        gl.uniformMatrix4fv (modelMatrixLoc, false, this.collider.matrix);
+        gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
+        gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
+        //gl.uniformMatrix4fv (cameraMatrixLoc, false, lightsManager.lightSources[0].matrix);
+        //gl.uniformMatrix4fv (projectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix); 
+        gl.uniformMatrix4fv (lightProjectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix);
+        gl.uniformMatrix4fv (lightMatrixLoc, false, lightsManager.lightSources[0].matrix);
+
+        var CTMN = mat3.create ();
+        mat3.normalFromMat4 (CTMN, this.collider.matrix);
+        gl.uniformMatrix3fv (normalMatrixLoc, false, CTMN);
+    }
+
+    draw () {
+        if (this.geometry)
+            gl.drawArrays (this.drawType, 0, this.geometry.Nvertices);
     }
 
     loadFromObj (ObjID, MatID, TexID) {
@@ -101,7 +134,16 @@ class object {
             max_Z = Math.max (max_Z, points_Array[i][2]);
         }
 
-        this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z));
+        var collider = [];
+        collider.push (vec4.fromValues (min_X, min_Y, min_Z, 1.0));
+        collider.push (vec4.fromValues (min_X, min_Y, max_Z, 1.0));
+        collider.push (vec4.fromValues (min_X, max_Y, min_Z, 1.0));
+        collider.push (vec4.fromValues (min_X, max_Y, max_Z, 1.0));
+        collider.push (vec4.fromValues (max_X, min_Y, min_Z, 1.0));
+        collider.push (vec4.fromValues (max_X, min_Y, max_Z, 1.0));
+        collider.push (vec4.fromValues (max_X, max_Y, min_Z, 1.0));
+        collider.push (vec4.fromValues (max_X, max_Y, max_Z, 1.0));
+        this.collider = new polygonCollider (collider);
 
         for (var i = 0; i < points_Array.length; i++) {
             normals_Array[i] = vec3.fromValues (normals_Array[i][0], normals_Array[i][1], normals_Array[i][2]);
@@ -207,85 +249,89 @@ class sceneGraph {
 	drawTree (type) {
 		var CTM = mat4.create ();
 		var PC = mat4.create ();
+        var PL = mat4.create ();
 
         if (type == "shadow") {
             mat4.mul (PC, lightsManager.lightSources[0].projectionMatrix, lightsManager.lightSources[0].matrix);
+            mat4.mul (PL, lightsManager.lightSources[0].projectionMatrix, lightsManager.lightSources[0].matrix);
         } else {
             mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
+            mat4.mul (PL, lightsManager.lightSources[0].projectionMatrix, lightsManager.lightSources[0].matrix);
         }
 		mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.matrix);
+
 		for (var i = 0; i < this.root.children.length; i++) {
-			this.__drawTree_AUX (this.root.children[i], CTM, PC, 1.0, type);
+			this.__drawTree_AUX (this.root.children[i], CTM, PC, PL, 1.0, type);
 		}
 	}
 
-	__drawTree_AUX (root, CTM, PC, scaling, type) {
+	__drawTree_AUX (root, CTM, PC, PL, scaling, type) {
 		if (!root.active)
 			return;
 
-        if (type != "color" || root.tag != "world") {
-    		var CTM_prime = mat4.create ();
-    		mat4.mul (CTM_prime, CTM, root.transform.matrix);
+        if (type == "shadow") {
+            var CTM_prime = mat4.create ();
+            mat4.mul (CTM_prime, CTM, root.transform.matrix);
             var scaling_prime = scaling * root.transform.scale[0];
-
-    		if (root.collider == null) {
-                this.drawNode (root, CTM_prime);
+            root.collider.matrix = mat4.clone (CTM_prime);
+            if (root.collider.type == "null") {
+                this.drawNode (root);
             } else if (root.collider.type == "box") {
-                if (root.collider.inFustrum (PC, CTM_prime)) {
-                    this.drawNode (root, CTM_prime);
+                if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
+                    this.drawNode (root);
                 } else {
                     //console.log ("HERE");
                 }
             } else if (root.collider.type == "sphere") {
-                var c = vec3.create ();
-                vec3.transformMat4 (c, root.collider.center, CTM_prime);
-
-                var r = root.collider.radius * scaling_prime;
-
-                if (root.collider.inFustrum (PC, c, r)) {
-                    this.drawNode (root, CTM_prime);
+                root.collider.scaling = scaling_prime;
+                if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
+                    this.drawNode (root);
                 } else {
                     //console.log ("HERE");
                 }
             } else if (root.collider.type == "polygon") {
-                if (root.collider.inFustrum (PC, CTM_prime)) {
-                    this.drawNode (root, CTM_prime);
+                if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
+                    this.drawNode (root);
                 } else {
                     //console.log ("HERE");
                 }
             }
-
+            //CollisionManager.objects.push (root);
             for (var i = 0; i < root.children.length; i++) {
-    			this.__drawTree_AUX (root.children[i], CTM_prime, PC, scaling_prime);
-    		}
-    }
-	}
-
-	drawNode (obj, CTM) {
-		obj.geometry.setup ();
-        obj.material.setup ();
-        obj.texture.setup ();
-
-        if (obj.mouseTriggers.length) {
-            obj.mouseTriggers[0].setup ();
-        } else {
-            gl.uniform4fv (gl.getUniformLocation (program, "fTriggerID"), vec4.fromValues (0.0, 0.0, 0.0, 1.0));   
+                this.__drawTree_AUX (root.children[i], CTM_prime, PC, PL, scaling_prime);
+            }
+       } else if (type != "color" || root.tag != "world") {
+    		if (root.collider.type == "null") {
+                this.drawNode (root);
+            } else if (root.collider.type == "box") {
+                if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
+                    this.drawNode (root);
+                } else {
+                    //console.log ("HERE");
+                }
+            } else if (root.collider.type == "sphere") {
+                if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
+                    this.drawNode (root);
+                } else {
+                    //console.log ("HERE");
+                }
+            } else if (root.collider.type == "polygon") {
+                if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
+                    this.drawNode (root);
+                } else {
+                    //console.log ("HERE");
+                }
+            }
         }
 
-        gl.uniformMatrix4fv (modelMatrixLoc, false, CTM);
-        gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
-        gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
-        //gl.uniformMatrix4fv (cameraMatrixLoc, false, lightsManager.lightSources[0].matrix);
-        //gl.uniformMatrix4fv (projectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix); 
-        gl.uniformMatrix4fv (lightProjectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix);
-        gl.uniformMatrix4fv (lightMatrixLoc, false, lightsManager.lightSources[0].matrix);
+        for (var i = 0; i < root.children.length; i++) {
+            this.__drawTree_AUX (root.children[i], CTM_prime, PC, PL, scaling_prime, type);
+        }
+	}
 
-        var CTMN = mat3.create ();
-        mat3.normalFromMat4 (CTMN, CTM);
-        gl.uniformMatrix3fv (normalMatrixLoc, false, CTMN);
-
-        gl.drawArrays (obj.drawType, 0, obj.geometry.Nvertices);
-        gl.bindBuffer (gl.ARRAY_BUFFER, null);
+	drawNode (obj) {
+        obj.setup ();
+        obj.draw ();
 	}
 
     getObjectsByTag (tag) {
@@ -343,7 +389,6 @@ class sceneGraph {
 
 
 function buildSceneGraph () {
-    SGraph = new sceneGraph ();
 	SGraph.root.children.push (cubes[0]);
 	SGraph.root.children.push (cubes[1]);
     //SGraph.root.children.push (cubes[4]);
@@ -354,28 +399,33 @@ function buildSceneGraph () {
 }
 
 function drawSceneGraph (dTime) {
+   
+    //CollisionManager.detectAllColisions ();
     SGraph.updateTree (dTime);
+    lightsManager.setupAll ();
+    //CollisionManager.objects = [];
 
-    gl.bindFramebuffer (gl.FRAMEBUFFER, frameBufferObject);
-    gl.viewport (0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    gl.enable (gl.CULL_FACE);
+    gl.cullFace (gl.FRONT);
+    gl.bindFramebuffer (gl.FRAMEBUFFER, frameBufferObject);
+    gl.viewport (0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
     gl.uniform1i (gl.getUniformLocation (program, "uShadow"), true); 
     gl.uniform1i (gl.getUniformLocation (program, "fShadow"), true); 
-    SGraph.drawTree ("shadow");
-    //gl.readPixels (498, 144, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, color);
-    //console.log (color);
 
-    gl.clear (gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
-    gl.viewport (0, 0, canvas.width, canvas.height);
+    SGraph.drawTree ("shadow");
+
+    gl.disable (gl.CULL_FACE);
+    gl.clear (gl.DEPTH_BUFFER_BIT);
+    gl.bindFramebuffer (gl.FRAMEBUFFER, null);
     gl.uniform1i (gl.getUniformLocation (program, "uShadow"), null); 
     gl.uniform1i (gl.getUniformLocation (program, "fShadow"), null); 
-    gl.bindFramebuffer (gl.FRAMEBUFFER, null);
 
-    lightsManager.setupAll ();
-
+    gl.viewport (0, 0, canvas.width, canvas.height);
     gl.bindFramebuffer (gl.FRAMEBUFFER, colorFramebuffer);
     gl.uniform1i (gl.getUniformLocation (program, "fOffscreen"), true);
+
     SGraph.drawTree ("color");
 
     gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, clickManager.pixel);
@@ -385,8 +435,8 @@ function drawSceneGraph (dTime) {
     gl.uniform1i (gl.getUniformLocation (program, "fOffscreen"), null);
     gl.bindFramebuffer (gl.FRAMEBUFFER, null);
 
-    gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 1);
     gl.activeTexture (gl.TEXTURE1);
+    gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 1);
     gl.bindTexture (gl.TEXTURE_2D, frameBufferObject.texture);
 
     SGraph.drawTree ("main");

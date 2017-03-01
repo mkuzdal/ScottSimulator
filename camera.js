@@ -15,13 +15,13 @@ class camera {
      *  @param { float } near: the near clipping place.
      */
     constructor (_position, _yaw, _pitch, _sensitivity, _smoothness, _fovy, _aspect, _far, _near) {
-        this.position = _position   || vec3.fromValues (0.0, 9.0, 14.6);
-        this.yaw = _yaw 			|| 80.0;
+        this.position = _position   || vec3.fromValues (0.0, 0.0, 15.0);
+        this.yaw = _yaw 			|| 0.0;
         this.pitch = _pitch			|| 0.0;
         this.fovy = _fovy           || 50.0;
         this.aspect = _aspect       || canvas.width / canvas.height;
-        this.far = _far             || 1000.0;
-        this.near = _near           || 0.0001;
+        this.far = _far             || 100;
+        this.near = _near           || 0.1;
         this.up = [0,1,0];
         this.sensitivity = _sensitivity || 0.2;
         this.smoothness = _smoothness || 10;
@@ -81,6 +81,7 @@ class camera {
         vec3.scale (direction, direction, speed);
 
         vec3.add (this.position, this.position, direction);
+        //console.log (this.position);
     }
 
     /** camMoveBackward: moves the camera in the backwards direction by 'speed' many units.
