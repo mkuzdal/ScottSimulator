@@ -84,15 +84,25 @@ class triggerHandler {
     }
 }
 
+class nullCollider {
+    constructor () {
+        this.type = "null";
+
+        this.matrix = mat4.create ();
+    }
+}
+
 class polygonCollider {
     constructor (_vertices) {
         this.vertices = _vertices;
         this.type = "polygon"
+
+        this.matrix = mat4.create ();
     }
 
-    inFustrum (PC, M) {
+    inFustrum (PC) {
         var PCM = mat4.create ();
-        mat4.mul (PCM, PC, M);
+        mat4.mul (PCM, PC, this.matrix);
 
         var p_prime = [];
         for (var i = 0; i < this.vertices.length; i++) {
@@ -236,11 +246,13 @@ class boxCollider {
         this.vertices.push (vec4.fromValues (this.max[0], this.min[1], this.max[2], 1.0));
         this.vertices.push (vec4.fromValues (this.max[0], this.max[1], this.min[2], 1.0));
         this.vertices.push (vec4.fromValues (this.max[0], this.max[1], this.max[2], 1.0));
+
+        this.matrix = mat4.create ();
     }
 
-    inFustrum (PC, M) {
+    inFustrum (PC) {
         var PCM = mat4.create ();
-        mat4.mul (PCM, PC, M);
+        mat4.mul (PCM, PC, this.matrix);
 
         var p_prime = [];
         for (var i = 0; i < this.vertices.length; i++) {
@@ -330,9 +342,16 @@ class sphereCollider {
         this.center = _center;
         this.radius = _radius;
         this.type = "sphere"
+
+        this.matrix = mat4.create ();
+        this.scaling = 1.0;
     }
 
-    inFustrum (PC, c, r) {
+    inFustrum (PC) {
+        var c = vec3.create ();
+        vec3.transformMat4 (c, this.center, this.matrix);
+        var r = this.radius * this.scaling;
+
         var d, A, B, C, D;
 
         // check right plane:
@@ -550,7 +569,6 @@ class texture {
         gl.uniform1i (gl.getUniformLocation (program, "texture"), 0);
         gl.activeTexture (gl.TEXTURE0);
         gl.bindTexture (gl.TEXTURE_2D, this.texture);
-
 
         gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
 
