@@ -98,15 +98,15 @@ window.onload = function init () {
 
     // Get the canvas variable and set it up
     canvas = document.getElementById ("gl-canvas");
-    gl = WebGLUtils.setupWebGL (canvas);
+    gl = WebGLUtils.setupWebGL (canvas, {antialias: true});
     if (!gl) { alert ("WebGL isn't available"); }
 
     // GL setup for viewport and background color
     gl.viewport (0, 0, canvas.width, canvas.height);
     gl.clearColor (0.0, 0.0, 0.0, 1.0);
     
-    gl.enable (gl.BLEND);
-    gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    //gl.enable (gl.BLEND);
+    //gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.enable (gl.DEPTH_TEST);
 
