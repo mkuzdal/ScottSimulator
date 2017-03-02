@@ -24,13 +24,13 @@ var textureArray = [];
 
 // webGL uniforms
 var projectionMatrixLoc;
-var modelViewMatrixLoc;
+var modelMatrixLoc;
 var normalMatrixLoc;
 var cameraMatrixLoc;
 var lightProjectionMatrixLoc;
 var lightMatrixLoc;
 
-var modelViewMatrixSha;
+var modelMatrixSha;
 var lightProjectionMatrixSha;
 var lightMatrixSha;
 
@@ -68,14 +68,14 @@ var movingdown = false;
 var color = new Uint8Array (4);
 
 var cubeVertices = [
-     vec4.fromValues ( -0.5, -0.5,  0.5, 1.0 ),
-     vec4.fromValues ( -0.5,  0.5,  0.5, 1.0 ),
-     vec4.fromValues (  0.5,  0.5,  0.5, 1.0 ),
-     vec4.fromValues (  0.5, -0.5,  0.5, 1.0 ),
-     vec4.fromValues ( -0.5, -0.5, -0.5, 1.0 ),
-     vec4.fromValues ( -0.5,  0.5, -0.5, 1.0 ),
-     vec4.fromValues (  0.5,  0.5, -0.5, 1.0 ),
-     vec4.fromValues (  0.5, -0.5, -0.5, 1.0 )
+    vec4.fromValues ( -0.5, -0.5,  0.5, 1.0 ),
+    vec4.fromValues ( -0.5,  0.5,  0.5, 1.0 ),
+    vec4.fromValues (  0.5,  0.5,  0.5, 1.0 ),
+    vec4.fromValues (  0.5, -0.5,  0.5, 1.0 ),
+    vec4.fromValues ( -0.5, -0.5, -0.5, 1.0 ),
+    vec4.fromValues ( -0.5,  0.5, -0.5, 1.0 ),
+    vec4.fromValues (  0.5,  0.5, -0.5, 1.0 ),
+    vec4.fromValues (  0.5, -0.5, -0.5, 1.0 )
 ];
 
 var texCoords = [
@@ -98,15 +98,15 @@ window.onload = function init () {
 
     // Get the canvas variable and set it up
     canvas = document.getElementById ("gl-canvas");
-    gl = WebGLUtils.setupWebGL (canvas);
+    gl = WebGLUtils.setupWebGL (canvas, {antialias: true});
     if (!gl) { alert ("WebGL isn't available"); }
 
     // GL setup for viewport and background color
     gl.viewport (0, 0, canvas.width, canvas.height);
     gl.clearColor (0.0, 0.0, 0.0, 1.0);
     
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+    //gl.enable (gl.BLEND);
+    //gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.enable (gl.DEPTH_TEST);
 
@@ -234,24 +234,26 @@ window.onload = function init () {
     frameBufferObject = initShadowFramebuffer ();
 
     // Get the local variable for each of the matrix uniforms
-    modelViewMatrixLoc = gl.getUniformLocation (program, "modelViewMatrix");
+    modelMatrixLoc = gl.getUniformLocation (program, "modelMatrix");
     projectionMatrixLoc = gl.getUniformLocation (program, "projectionMatrix");
     normalMatrixLoc = gl.getUniformLocation (program, "normalMatrix");
     cameraMatrixLoc = gl.getUniformLocation (program, "cameraMatrix");
     lightMatrixLoc = gl.getUniformLocation (program, "lightMatrix");
     lightProjectionMatrixLoc = gl.getUniformLocation (program, "lightProjectionMatrix");
 
+    SGraph = new sceneGraph ();
+    //CollisionManager = new sceneCollisionManager ();
     lightsManager = new lightHandler ();
     animationsManager = new animationHandler ();
     clickManager = new triggerHandler ();
 
-    lightsManager.addSource (new light (new transform (vec3.fromValues (-40.0, 0.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
-                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
-                              vec4.fromValues (1.0, 0.1, 0.1, 1.0),
+    lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 50.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec4.fromValues (0.4, 0.4, 0.4, 1.0),
+                              vec4.fromValues (0.8, 0.8, 0.8, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
 
     lightsManager.lightSources[0].tag = "red";
-
+/*
     lightsManager.addSource (new light (new transform (vec3.fromValues (10.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (0.1, 0.1, 1.0, 1.0),
@@ -265,7 +267,7 @@ window.onload = function init () {
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
 
     lightsManager.lightSources[2].tag = "green";
-
+*/
     // generate each of the spheres and create a geometry instance to define it
     generateSphere (5);
     geometries.push (new geometry (pointsArray, normalsArray));
@@ -280,7 +282,6 @@ window.onload = function init () {
     geometries.push (new geometry (pointsArray, normalsArray));
     textures.push (new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
 
-
     // create the materials for each of the 6 bodies (sun, planet1, planet2, planet3, planet4, moon)
     materials =         [   new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                             new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
@@ -289,8 +290,8 @@ window.onload = function init () {
                         ]; 
 
     // create the transforms for each of the 6 bodies.
-    transforms =        [   new transform (vec3.fromValues (-4.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
-                            new transform (vec3.fromValues (4.0,  0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    transforms =        [   new transform (vec3.fromValues (-4.0, 1.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                            new transform (vec3.fromValues (4.0,  5.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                             new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
                             new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ())
                         ];
@@ -327,31 +328,42 @@ window.onload = function init () {
 
     cubes[1].addOnMouseExitTrigger (function (object) {
         console.log ("Exit");
-    }); */
-
+    });  
+ */
     cubes[0] = new object ();
     cubes[0].loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
     cubes[0].transform = transforms[0];
-    cubes[0].collider = colliders[0];
 
     cubes[0].addOnMouseClickTrigger (function (object) {
         animationsManager.animations.push (new animationHold (object));
     }); 
+
+    cubes[1].addOnMouseClickTrigger (function (object) {
+        animationsManager.animations.push (new animationHold (object));
+    }); 
+
 
     animationsManager.animations.push (new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (1.0, 1.0, 0.0)));
     animationsManager.animations.push (new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0)));
     animationsManager.animations.push (new animationRotation (cubes[2], 0.0, 120.0, vec3.fromValues (0.0, 0.0, 1.0)));
     animationsManager.animations.push (new animationRotation (cubes[3], 0.0, 360.0, vec3.fromValues (0.0, 0.0, 1.0)));
 
-    generatePlane ();
-    cubes.push (new object (new transform (vec3.fromValues (0.0, -3.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    //generatePlane ();
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
+
+    cubes.push (new object (new transform (vec3.fromValues (0.0, -3.0, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
                             new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                             new geometry (pointsArray, normalsArray),
                             new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]))
                 );
 
-    cubes[4].collider = new boxCollider (planeVertices);
+    //cubes[4].collider = new polygonCollider (planeVertices); 
 
+    cubes.push (new object ());
+    cubes[5].loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
+    cubes[5].transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     buildSceneGraph ();
 
     animationsManager.deactivateAll ();
@@ -359,6 +371,9 @@ window.onload = function init () {
     for (var i = 0; i < cubes.length; i++) {
         cubes[i].tag = i;
     }
+
+    cubes[5].tag = "world";
+    cubes[4].tag = "world";
 
     window.requestAnimFrame (render);
 }
@@ -372,9 +387,6 @@ function render (current) {
     current *= 0.001;
     var deltaTime = current - prev;
     prev = current;
-
-
-    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // animate all of the objects
     animationsManager.animateAll (deltaTime);
@@ -639,33 +651,6 @@ function flattenArray (array) {
 }
 
 function initShadowFramebuffer () {
-    /*var texture, depthBuffer;
-    var framebuffer = gl.createFramebuffer();
-
-    texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); 
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-
-    gl.bindFramebuffer (gl.FRAMEBUFFER, framebuffer);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, texture, 0);
-
-    depthBuffer = gl.createRenderbuffer();
-    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
-
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer); 
-
-    framebuffer.texture = texture;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-
-    return framebuffer; */
-
     // Query the extension
     var depthTextureExt = gl.getExtension("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
     if(!depthTextureExt) { doSomeFallbackInstead(); return; }
@@ -681,19 +666,19 @@ function initShadowFramebuffer () {
 
     // Create the depth texture
     var depthTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, depthTexture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
+    gl.bindTexture (gl.TEXTURE_2D, depthTexture);
+    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D (gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
 
     var framebuffer = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture, 0);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
+    gl.bindFramebuffer (gl.FRAMEBUFFER, framebuffer);
+    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture, 0);
+    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
 
-    framebuffer.texture = colorTexture;
+    framebuffer.texture = depthTexture;
 
     return framebuffer;
 }

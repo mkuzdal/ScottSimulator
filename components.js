@@ -84,15 +84,26 @@ class triggerHandler {
     }
 }
 
-class boxCollider {
+class nullCollider {
+    constructor () {
+        this.type = "null";
+
+        this.matrix = mat4.create ();
+    }
+}
+
+
+class polygonCollider {
     constructor (_vertices) {
         this.vertices = _vertices;
-        this.type = "box"
+        this.type = "polygon"
+
+        this.matrix = mat4.create ();
     }
 
-    inFustrum (PC, M) {
+    inFustrum (PC) {
         var PCM = mat4.create ();
-        mat4.mul (PCM, PC, M);
+        mat4.mul (PCM, PC, this.matrix);
 
         var p_prime = [];
         for (var i = 0; i < this.vertices.length; i++) {
@@ -175,46 +186,114 @@ class boxCollider {
 
         return true;
     }
+}
 
-    intersectingBox (PC, other, M1, M2) {
-        var PCM1 = mat4.create ();
-        mat4.mul (PCM, PC, M1);
+class boxCollider {
+    constructor (_min, _max) {
+        this.min = _min;
+        this.max = _max;
+        this.type = "box";
 
-        var PCM2 = mat4.create ();
-        mat4.mul (PCM, PC, M2);
+        this.min = vec4.fromValues (this.min[0], this.min[1], this.min[2], 1.0);
+        this.max = vec4.fromValues (this.max[0], this.max[1], this.max[2], 1.0);
 
-        var p1_prime = [];
+        this.vertices = [];
+        this.vertices.push (vec4.fromValues (this.min[0], this.min[1], this.min[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.min[0], this.min[1], this.max[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.min[0], this.max[1], this.min[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.min[0], this.max[1], this.max[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.max[0], this.min[1], this.min[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.max[0], this.min[1], this.max[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.max[0], this.max[1], this.min[2], 1.0));
+        this.vertices.push (vec4.fromValues (this.max[0], this.max[1], this.max[2], 1.0));
+
+        this.matrix = mat4.create ();
+    }
+
+    inFustrum (PC) {
+        var PCM = mat4.create ();
+        mat4.mul (PCM, PC, this.matrix);
+
+        var p_prime = [];
         for (var i = 0; i < this.vertices.length; i++) {
             var storage = vec4.create ();
-            p1_prime.push (vec4.transformMat4 (storage, this.vertices[i], PCM1));
+            p_prime.push (vec4.transformMat4 (storage, this.vertices[i], PCM));
         }
 
-        var other_maxX = 0;
-        var other_minX = 10000;
-        var other_maxY = 0;
-        var other_minY = 10000;
-        var other_maxZ = 0;
-        var other_minZ = 10000;
+        var toDraw = false;
 
-        for (var i = 0; i < other.vertices.length; i++) {
-            var p2_prime = vec4.create ();
-            vec4.transformMat4 (p2_prime, other.vertices[i], PCM2);
-            other_maxX = Math.max (other_maxX, p2_prime[0]);
-            other_minX = Math.min (other_minX, p2_prime[0]);
-            other_maxY = Math.max (other_maxY, p2_prime[1]);
-            other_minY = Math.min (other_minY, p2_prime[1]);
-            other_maxZ = Math.max (other_maxZ, p2_prime[2]);
-            other_minZ = Math.min (other_minZ, p2_prime[2]);
+        // check right plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][0] < p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
+        }
+        toDraw = false;
+
+        // check left plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][0] > -p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
+        }
+        toDraw = false;
+
+        // check top plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][1] < p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
+        }
+        toDraw = false;
+
+        // check bottom plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][1] > -p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
+        }
+        toDraw = false;
+
+        // check far plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][2] < p_prime[i][3]) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
+        }
+        toDraw = false;
+
+        // check near plane:
+        for (var i = 0; i < p_prime.length; i++) {
+            if (p_prime[i][2] > 0) {
+                toDraw = true;
+                break;
+            }
+        }
+        if (!toDraw) {
+            return false;
         }
 
-        for (var i = 0; i < p1_prime.length; i++) {
-            if ((p1_prime[i][0] >= other_minX && p1_prime[i][0] <= other_maxX) &&
-                (p1_prime[i][1] >= other_minY && p1_prime[i][1] <= other_maxY) &&
-                (p1_prime[i][2] >= other_minZ && p1_prime[i][2] <= other_maxZ))
-                return true;
-        }
-
-        return false;
+        return true;
     }
 }
 
@@ -223,9 +302,16 @@ class sphereCollider {
         this.center = _center;
         this.radius = _radius;
         this.type = "sphere"
+
+        this.matrix = mat4.create ();
+        this.scaling = 1.0;
     }
 
-    inFustrum (PC, c, r) {
+    inFustrum (PC) {
+        var c = vec3.create ();
+        vec3.transformMat4 (c, this.center, this.matrix);
+        var r = this.radius * this.scaling;
+
         var d, A, B, C, D;
 
         // check right plane:
@@ -332,23 +418,6 @@ class sphereCollider {
 
         return true;
     }
-
-    intersectingSphere (PC, other, T1, T2) {
-        var c1 = vec3.create ();
-        vec3.transformMat4 (c, this.center, T1);
-
-        var c2 = vec3.create ();
-        vec3.transformMat4 (c, this.center, T2);
-
-        var d2 = vec3.squaredDistance (c2, c1);
-        var r2 = (this.radius + other.radius) * (this.radius + other.radius);
-
-        if (r2 > d2)
-            return true;
-
-        else return false;
-    }
-
 } 
 
 /** geometry: an abstraction for a geometry object. Geometries manage and maintain
@@ -433,8 +502,6 @@ class texture {
         gl.texImage2D (gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.image);
         gl.generateMipmap (gl.TEXTURE_2D);
 
-        gl.uniform1i (gl.getUniformLocation (program, "texture"), 0);
-
         this.tBuffer = gl.createBuffer ();
         gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
         gl.bufferData (gl.ARRAY_BUFFER, flattenArray (_texCoords), gl.STATIC_DRAW);
@@ -442,7 +509,10 @@ class texture {
 
     setup () {
         // bind textures
+        gl.uniform1i (gl.getUniformLocation (program, "texture"), 0);
+        gl.activeTexture (gl.TEXTURE0);
         gl.bindTexture (gl.TEXTURE_2D, this.texture);
+
         gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
 
         for (var i = 0; i < this.options.length; i++) {
@@ -475,22 +545,22 @@ class transform {
         this.scale = _scale         || vec3.fromValues (1.0, 1.0, 1.0);
         this.rotation = _rotation   || quat.create ();
 
-        this.MVmatrix = mat4.create ();
+        this.matrix = mat4.create ();
 
-        this.setModelView ();
+        this.setMatrix();
     }
 
     /** update: event loop function. Currently just sets the matrices for the object.
      *  @param { float } dTime: the time since the last framce callback (in seconds).
      */
     update (dTime) {
-        this.setModelView ();
+        this.setMatrix ();
     }
  
     /** setMatrices: sets the model and normal matrices for an object.
      */
-    setModelView () {
-        mat4.fromRotationTranslationScale (this.MVmatrix, this.rotation, this.position, this.scale);
+    setMatrix () {
+        mat4.fromRotationTranslationScale (this.matrix, this.rotation, this.position, this.scale);
     }
 }
 
