@@ -14,8 +14,12 @@ class StateManager {
 	}
 
 	apply(event) {
-		event.run();
-		this.currentState = this.currentState[event.name];
+		if(this.currentState.getChild(event.name)) {
+			event.run();
+			this.currentState = this.currentState.getChild(event.name);
+		} else {
+			console.log('This event is not a branch of the current state', event);
+		}
 	}
 }
 
@@ -46,24 +50,35 @@ class Event {
 }
 
 class Activity {
-	constructor(_audio, _function, _event) {
+	constructor(_audio, _initfunc, _endfunc) {
 		this.audio = _audio;
-		this.func = _function;
-		if(this.audio) this.audio.addEventListener("ended", this.func);
+		this.initfunc = _initfunc;
+		this.endfunc = _endfunc;
+		if(this.audio) this.audio.addEventListener("ended", this.endfunc);
 	}
 
 	run() {
+		this.audio.currentTime = 0;
+		this.initfunc();
 		if(this.audio) this.audio.play();
-		else this.func;
+		else this.endfunc();
 	}
 }
 
+function xxx(text) {
+	console.log(text);
+}
 
 var SM = new StateManager(new State("root"));
-SM.addState(new State("second"));
+SM.addState("second");
 SM.getState("root").addChild("test", SM.getState("second"));
+SM.getState("second").addChild("test2", SM.getState("root"));
 
-var event1 = new Event("test", new Activity(document.getElementById('AUDIOWOOHOO'), function(){console.log('testing activity');}));
-var event2 = new Event("test2", new Activity(document.getElementById('AUDIORICH'), function(){console.log('testing null audio activity');}))
+var event1 = new Event("test", new Activity(document.getElementById('AUDIOWOOHOO'), function(){xxx('init activity')}, function(){xxx('testing activity1')}));
+var event2 = new Event("test2", new Activity(document.getElementById('AUDIORICH'), function(){xxx('init null audio activity')}, function(){xxx('testing activity2')}));
 
 SM.apply(event1);
+SM.apply(event2);
+
+
+//// IMPORTANT NOTE: Make sure the init function disables all buttons or we could have two events running that conflict with each other == bad race condition stuff.
