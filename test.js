@@ -46,7 +46,7 @@ var prev = 0;
 // global index for generating sphere vertices
 var index = 0;
 
-// component containers for each of the planets
+// component containers for each of the objects
 var cubes = [];
 var materials = [];
 var geometries = [];
@@ -64,8 +64,6 @@ var movingright = false;
 var movingup = false;
 var movingdown = false;
 
-// some objects
-var color = new Uint8Array (4);
 
 var cubeVertices = [
     vec4.fromValues ( -0.5, -0.5,  0.5, 1.0 ),
@@ -203,6 +201,7 @@ window.onload = function init () {
                 break;
         }
     }); 
+
     window.addEventListener ("keyup", function (e) {
         switch (event.keyCode) {
             case 32: // space
@@ -246,6 +245,7 @@ window.onload = function init () {
     lightsManager = new lightHandler ();
     animationsManager = new animationHandler ();
     clickManager = new triggerHandler ();
+    audioManager = new audioHandler ();
 
     lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 50.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.4, 0.4, 0.4, 1.0),
@@ -353,7 +353,7 @@ window.onload = function init () {
     generateCubeVertices (cubeVertices);
     generateCubeTexCoords (texCoords);
 
-    cubes.push (new object (new transform (vec3.fromValues (0.0, -3.0, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
+    cubes.push (new object (new transform (vec3.fromValues (0.0, -4.0, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
                             new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                             new geometry (pointsArray, normalsArray),
                             new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]))
@@ -366,7 +366,7 @@ window.onload = function init () {
     cubes[5].transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     buildSceneGraph ();
 
-    animationsManager.deactivateAll ();
+    //animationsManager.deactivateAll ();
 
     for (var i = 0; i < cubes.length; i++) {
         cubes[i].tag = i;
@@ -378,11 +378,16 @@ window.onload = function init () {
     window.requestAnimFrame (render);
 }
 
+var maxFrame = 2;
+var currFrame = 0;
 /** render: renders the current callback frame.
  *  @param: { float } current: the current frame time.
  */
 function render (current) {
-    
+    currFrame++;
+    if (currFrame > maxFrame)
+    //    return;
+
     // update the current and change in time
     current *= 0.001;
     var deltaTime = current - prev;
@@ -394,7 +399,6 @@ function render (current) {
 
     // animate the camera rotation
     cam.updateRotation (deltaTime);
-    gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.matrix);
     gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), cam.position);
 
     if (movingforward) cam.camMoveForward(deltaTime * 4);
@@ -652,7 +656,7 @@ function flattenArray (array) {
 
 function initShadowFramebuffer () {
     // Query the extension
-    var depthTextureExt = gl.getExtension("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
+    var depthTextureExt = gl.getExtension ("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
     if(!depthTextureExt) { doSomeFallbackInstead(); return; }
 
     // Create a color texture
