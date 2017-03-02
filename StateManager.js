@@ -1,26 +1,54 @@
-class StateManager {
-	constructor(_state) {
-		this.currentState = _state;
-		this.states = {};
-		this.states[_state.name] = _state;
+var StateManager = function() {
+	if(StateManager._instance) {
+		return StateManager._instance;
 	}
+	this.currentState = new State("root");
+	this.states = {};
+	this.states["root"] = this.currentState;
+	this.eventQueue = [];
+	this.currentEvent = null;
 
-	addState(stateName) {
-		this.states[stateName] = new State(stateName);
-	}
+	StateManager._instance = this;
+	return StateManager._instance;
+};
 
-	getState(stateName) {
-		return this.states[stateName];
-	}
+StateManager.getInstance = function() {
+	return StateManager()._instance || new StateManager();
+}
 
-	apply(event) {
-		if(this.currentState.getChild(event.name)) {
+StateManager.addState = function(stateName) {
+	states[stateName] = new State(stateName);
+}
+
+StateManager.getState = function(stateName) {
+	return states[stateName];
+}
+
+StateManager.apply = function(event) {
+	if(!currentEvent) {
+		if(currentState.getChild(event.name)) {
+			currentEvent = event;
 			event.run();
-			this.currentState = this.currentState.getChild(event.name);
+			currentState = currentState.getChild(event.name);
 		} else {
-			console.log('This event is not a branch of the current state', event);
+			console.log('This event is not a branch of the current state');
+			console.log(currentState);
+			console.log(event);
+			StateManager.finishedEvent();
 		}
+	} else {
+		eventQueue.push(event);
 	}
+}
+
+StateManager.stop = function() {
+	currentEvent.stop();
+	currentEvent = null;
+}
+
+StateManager.finishedEvent = function() {
+	currentEvent = null;
+	if(eventQueue.length > 0) StateManager.apply(eventQueue.shift());
 }
 
 class State {
@@ -47,13 +75,20 @@ class Event {
 	run() {
 		this.activity.run();
 	}
+
+	stop() {
+		this.activity.stop();
+	}
 }
 
 class Activity {
 	constructor(_audio, _initfunc, _endfunc) {
 		this.audio = _audio;
 		this.initfunc = _initfunc;
-		this.endfunc = _endfunc;
+		this.endfunc = function() {
+				_endfunc();
+				StateManager.finishedEvent();
+			}
 		if(this.audio) this.audio.addEventListener("ended", this.endfunc);
 	}
 
@@ -63,22 +98,28 @@ class Activity {
 		if(this.audio) this.audio.play();
 		else this.endfunc();
 	}
+
+	stop() {
+		this.audio.pause();
+		this.endfunc();
+	}
 }
 
 function xxx(text) {
 	console.log(text);
 }
 
-var SM = new StateManager(new State("root"));
-SM.addState("second");
-SM.getState("root").addChild("test", SM.getState("second"));
-SM.getState("second").addChild("test2", SM.getState("root"));
+StateManager.getInstance();
+StateManager.addState("second");
+StateManager.getState("root").addChild("test", StateManager.getState("second"));
+StateManager.getState("second").addChild("test2", StateManager.getState("root"));
 
 var event1 = new Event("test", new Activity(document.getElementById('AUDIOWOOHOO'), function(){xxx('init activity')}, function(){xxx('testing activity1')}));
 var event2 = new Event("test2", new Activity(document.getElementById('AUDIORICH'), function(){xxx('init null audio activity')}, function(){xxx('testing activity2')}));
 
-SM.apply(event1);
-SM.apply(event2);
+StateManager.apply(event1);
+StateManager.apply(event2);
+setTimeout(function(){StateManager.stop();}, 200);
 
 
 //// IMPORTANT NOTE: Make sure the init function disables all buttons or we could have two events running that conflict with each other == bad race condition stuff.
