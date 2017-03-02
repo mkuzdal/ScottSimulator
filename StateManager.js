@@ -28,17 +28,32 @@ class State {
 }
 
 class Event {
-	constructor(_name, _activity) {
+	constructor(_name) {
 		this.name = _name;
-		this.activity = _activity;
+		this.activityQueue = [];
 	}
 
-	activate() {
-		this.activity();
+	addActivity(activity) {
+		this.activityQueue.push(activity);
+	}
+
+	run() {
+		for(var i=0; i<this.activityQueue.length; i++) this.activityQueue[i].run();
 	}
 }
 
-var event = new Event("test", function() {
-	console.log("testing event activity");
-});
-event.activate();
+class Activity {
+	constructor(_audio, _function) {
+		this.audio = _audio;
+		this.func = _function;
+		this.audio.addEventListener("ended", this.func);
+	}
+
+	run() {
+		this.audio.play();
+	}
+}
+
+var event = new Event("test");
+event.addActivity(new Activity(document.getElementById('AUDIOWOOHOO'), function(){console.log('testing activity')}));
+event.run();
