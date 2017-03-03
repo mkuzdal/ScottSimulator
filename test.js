@@ -380,7 +380,7 @@ var currentFrame = 0;
 function render (current) {
     currentFrame++;
     console.log (currentFrame);
-    if (currentFrame == 10) {
+    if (currentFrame == 500) {
         var objs = SGraph.getObjects ();
         for (var i = 0; i < objs.length; i++) {
             if (objs[i].tag != "world")
