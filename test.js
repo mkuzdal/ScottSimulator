@@ -372,21 +372,10 @@ window.onload = function init () {
     window.requestAnimFrame (render);
 }
 
-var currentFrame = 0;
-
 /** render: renders the current callback frame.
  *  @param: { float } current: the current frame time.
  */
 function render (current) {
-    currentFrame++;
-    console.log (currentFrame);
-    if (currentFrame == 10) {
-        var objs = SGraph.getObjects ();
-        for (var i = 0; i < objs.length; i++) {
-            if (objs[i].tag != "world")
-                objs[i].active = false;
-        }
-    }
 
     // update the current and change in time
     current = performance.now();
