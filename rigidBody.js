@@ -15,8 +15,8 @@ class rigidBody {
 
 	update (dTime) {
 		var dt = dTime
-		vec3.scaleAndAdd (this.velocity, this.velocity, this.force, dt / this.mass);
 		vec3.scaleAndAdd (this.object.transform.position, this.object.transform.position, this.velocity, dt);
+		vec3.scaleAndAdd (this.velocity, this.velocity, this.force, dt / this.mass);
 		// f dt = m (vf - v0)
 		// vf = f * dt / m + v0
 		// xf - x0 = v dt
@@ -37,7 +37,7 @@ class angularRigidBody {
 	}
 }
 
-function resolveCollision (object1, object2) {
+function resolveCollision (object1, object2, manifold) {
 	if (object1.rigidBody == null || object2.rigidBody == null)
 		return
 	if (object1.rigidBody.type == "static" && object2.rigidBody.type == "static")
@@ -50,12 +50,10 @@ function resolveCollision (object1, object2) {
 			object1 = temp;
 		}
 
-		//object1.rigidBody.addForce (vec3.fromValues (0.0, -object1.rigidBody.force[1], 0.0));
-		//object1.rigidBody.velocity = vec3.create ();
-		//console.log (object1.rigidBody.force);
+		vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, manifold.penetrationDistance);
 		vec3.scale (object1.rigidBody.velocity, object1.rigidBody.velocity, -object1.rigidBody.restitution);
 		return;
-	} else if (object1.rigidBody.type == "dynamic" && object2.rigidBody.type == "static") {
+	} else if (object1.rigidBody.type == "dynamic" && object2.rigidBody.type == "dynamic") {
 
 	} 
 }

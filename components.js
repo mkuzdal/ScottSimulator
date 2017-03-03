@@ -87,7 +87,7 @@ class nullCollider {
     }
 }
 
-
+/*
 class polygonCollider {
     constructor (_vertices) {
         this.vertices = _vertices;
@@ -185,7 +185,7 @@ class polygonCollider {
 
         return true;
     }
-}
+} */
 
 class boxCollider {
     constructor (_min, _max) {

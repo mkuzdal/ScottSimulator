@@ -23,6 +23,8 @@ class object {
         this.rigidBody = _rigidBody;
         if (this.rigidBody)
             this.rigidBody.object = this;
+        if (this.collider)
+            this.collider.object = this;
 
         this.mouseTriggers = [];
         this.worldView = mat4.create ();
@@ -155,7 +157,8 @@ class object {
         collider.push (vec4.fromValues (max_X, max_Y, min_Z, 1.0));
         collider.push (vec4.fromValues (max_X, max_Y, max_Z, 1.0));
         this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z));
-
+        this.collider.object = this;
+        
         for (var i = 0; i < points_Array.length; i++) {
             normals_Array[i] = vec3.fromValues (normals_Array[i][0], normals_Array[i][1], normals_Array[i][2]);
         }
@@ -222,11 +225,6 @@ class object {
 
         var newCollider;
         switch (this.collider.type) {
-            case "polygon":
-            {
-                newCollider = new polygonCollider (this.collider.vertices);
-                break;
-            }
             case "box":
             {
                 newCollider = new boxCollider (this.collider.min, this.collider.max);
