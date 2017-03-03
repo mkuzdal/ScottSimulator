@@ -303,8 +303,8 @@ window.onload = function init () {
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5))
                         ];
 
-    rigidBodies =       [   new rigidBody (5.0, 0.4, "dynamic"),
-                            new rigidBody (5.0, 0.4, "dynamic"),
+    rigidBodies =       [   new rigidBody (5.0, 0.2, "dynamic"),
+                            new rigidBody (5.0, 0.2, "dynamic"),
                             new rigidBody (5.0, 1.1, "dynamic"),
                             new rigidBody (5.0, 1.1, "dynamic"),
                         ]; 
@@ -372,21 +372,10 @@ window.onload = function init () {
     window.requestAnimFrame (render);
 }
 
-var currentFrame = 0;
-
 /** render: renders the current callback frame.
  *  @param: { float } current: the current frame time.
  */
 function render (current) {
-    currentFrame++;
-    console.log (currentFrame);
-    if (currentFrame == 10) {
-        var objs = SGraph.getObjects ();
-        for (var i = 0; i < objs.length; i++) {
-            if (objs[i].tag != "world")
-                objs[i].active = false;
-        }
-    }
 
     // update the current and change in time
     current = performance.now();
