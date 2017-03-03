@@ -1,5 +1,5 @@
-/*
-var CollisionManager;
+
+var collisionManager;
 
 class sceneCollisionManager {
 	constructor () {
@@ -8,20 +8,24 @@ class sceneCollisionManager {
 
 	detectCollision (collider1, collider2) {
 		if (collider1.type == "box" && collider2.type == "box") {
-			var max1 = vec3.create ();
-			var max2 = vec3.create ();
-			var min1 = vec3.create ();
-			var min2 = vec3.create ();
-			var max1 = vec3.transformMat4 (max1, collider1.max, collider1.matrix);
-			var min1 = vec3.transformMat4 (min1, collider1.min, collider1.matrix);
+			var axis1 = vec3.create ();
+			vec3.sub (axis1, collider2.currentVertices[7], collider1.currentVertices[3]);
+			var axis2 = vec3.create ();
+			vec3.sub (axis2, collider2.currentVertices[7], collider1.currentVertices[5]);
+			var axis3 = vec3.create ();
+			vec3.sub (axis3, collider2.currentVertices[7], collider1.currentVertices[6]);
+			var axis4 = vec3.create ();
+			vec3.sub (axis4, collider2.currentVertices[7], collider2.currentVertices[3]);
+			var axis5 = vec3.create ();
+			vec3.sub (axis5, collider2.currentVertices[7], collider2.currentVertices[5]);
+			var axis6 = vec3.create ();
+			vec3.sub (axis6, collider2.currentVertices[7], collider2.currentVertices[6]);
 
-			var max2 = vec3.transformMat4 (max2, collider2.max, collider2.matrix);
-			var min2 = vec3.transformMat4 (min2, collider2.min, collider2.matrix);
-			var t1 = (min1[0] <= max2[0] && max1[0] >= min2[0]) &&
-         			 (min1[1] <= max2[1] && max1[1] >= min2[1]) &&
-         			 (min1[2] <= max2[2] && max1[2] >= min2[2]);
-
-			return  t1;
+			// axis 1
+			projection_points = [];
+			for (var i = 0; i < collider1.currentVertices.length; i++) {
+				projection_points.push ()
+			}
 
 		} else if (collider1.type == "sphere" && collider2.type == "sphere") {
 			var c1 = vec3.create ();
@@ -38,6 +42,7 @@ class sceneCollisionManager {
         	else return false;
 
 		} else if (collider1.type == "polygon" && collider2.type == "polygon") {
+
 
 		} else if (collider1.type == "sphere" && collider2.type == "box" ||
 				   collider2.type == "sphere" && collider1.type == "box") {
@@ -99,12 +104,13 @@ class sceneCollisionManager {
 		}
 	}
 
-	detectAllColisions () {
+	detectAllCollisions () {
 		for (var i = 0; i < this.objects.length; i++) {
 			for (var j = i + 1; j < this.objects.length; j++) {
+				if (this.objects[i].collider.tag != "null")
 				if (this.detectCollision (this.objects[i].collider, this.objects[j].collider))
 					console.log (this.objects[i].collider.type, this.objects[j].collider.type);
 			}
 		}
 	}
-} */
+} 

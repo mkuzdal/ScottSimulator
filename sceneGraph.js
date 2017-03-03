@@ -14,13 +14,15 @@ class object {
      *  @param { material } material: the material that defines an object.
      *  @param { geometry } geometry: the object's geometry to define it.
      */
-    constructor (_transform, _material, _geometry, _texture, _collider) {
+    constructor (_transform, _material, _geometry, _texture, _collider, _rigidBody) {
         this.transform = _transform || new transform ();
         this.material = _material;
         this.geometry = _geometry;
         this.texture = _texture;
         this.collider = _collider || new nullCollider ();
+        this.rigidBody = _rigidBody;
         this.mouseTriggers = [];
+        this.worldView = mat4.create ();
 
         this.drawType = gl.TRIANGLES;
         this.active = true;
@@ -32,7 +34,11 @@ class object {
      *  @param { float } dTime: the time since the last framce callback (in seconds).
      */
     update (dTime) {
-        this.transform.update (dTime);
+        this.collider.setup ();
+        if (this.rigidBody) {
+            this.rigidBody.update (dTime);
+        }
+        this.transform.update ();
     }
 
     setup (CTM) {
@@ -42,7 +48,7 @@ class object {
             this.geometry.setup ();
         } if (this.texture) {
             this.texture.setup (); 
-        }
+        } 
 
         if (this.mouseTriggers.length) {
             this.mouseTriggers[0].setup ();
@@ -146,7 +152,7 @@ class object {
         collider.push (vec4.fromValues (max_X, min_Y, max_Z, 1.0));
         collider.push (vec4.fromValues (max_X, max_Y, min_Z, 1.0));
         collider.push (vec4.fromValues (max_X, max_Y, max_Z, 1.0));
-        this.collider = new polygonCollider (collider);
+        this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z));
 
         for (var i = 0; i < points_Array.length; i++) {
             normals_Array[i] = vec3.fromValues (normals_Array[i][0], normals_Array[i][1], normals_Array[i][2]);
@@ -212,9 +218,27 @@ class object {
                                         vec4.clone (this.material.specular),
                                         this.material.shininess);
 
+        var newCollider;
+        switch (this.collider.type) {
+            case "polygon":
+            {
+                newCollider = new polygonCollider (this.collider.vertices);
+                break;
+            }
+            case "box":
+            {
+                newCollider = new boxCollider (this.collider.min, this.collider.max);
+                break;
+            }
+            case "sphere":
+            {
+                newCollider = new sphereCollider (this.collider.center, this.collider.radius);
+                break;
+            }
+        }
+
         var newGeometry = this.geometry;
         var newTexture = this.texture;
-        var newCollider = this.collider;
         var newObject = new object (newTransform, newMaterial, newGeometry, newTexture, newCollider);
         newObject.drawType = this.drawType;
         newObject.tag = this.tag;
@@ -358,7 +382,11 @@ class sceneGraph {
         mat4.mul (CTM_prime, CTM, root.transform.matrix);
         var scaling_prime = scaling * root.transform.scale[0];
         root.collider.matrix = mat4.clone (CTM_prime);
+        if (root.collider.type == "sphere") {
+            root.collider.scaling = scaling_prime;
+        }
             
+        collisionManager.objects.push (root);
         for (var i = 0; i < root.children.length; i++) {
             this.__updateAndSet_AUX (dTime, root.children[i], CTM_prime, scaling_prime);
         }
@@ -372,18 +400,22 @@ function buildSceneGraph () {
     SGraph.root.children.push (cubes[4]);
     //SGraph.root.children.push (cubes[5]);
 
+    for (var i = 6; i < cubes.length; i++) {
+        SGraph.root.children.push (cubes[i]);
+    }
+
 	SGraph.root.children[1].children.push (cubes[2]);
     SGraph.root.children[1].children[0].children.push (cubes[3]);
 }
 
 function drawSceneGraph (dTime) {
-
-    //CollisionManager.detectAllColisions ();
     SGraph.updateAndSet (dTime);
     lightsManager.setupAll ();
-    //CollisionManager.objects = [];
+    collisionManager.detectAllCollisions ();
+    collisionManager.objects = [];
 
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.colorMask (false, false, false, false);
 
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
@@ -397,7 +429,8 @@ function drawSceneGraph (dTime) {
     SGraph.drawTree (DRAW_TYPE_SHADOW);
 
     gl.disable (gl.CULL_FACE);
-    gl.clear (gl.DEPTH_BUFFER_BIT);
+    gl.clear (gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+    gl.colorMask (true, true, true, true);
     gl.bindFramebuffer (gl.FRAMEBUFFER, null);
 
     gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_COLOR); 
@@ -416,11 +449,12 @@ function drawSceneGraph (dTime) {
     gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_DEFAULT); 
     gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_DEFAULT); 
 
-    gl.activeTexture (gl.TEXTURE1);
-    gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 1);
+    gl.activeTexture (gl.TEXTURE0);
     gl.bindTexture (gl.TEXTURE_2D, frameBufferObject.texture);
+    gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 0);
 
     SGraph.drawTree (DRAW_TYPE_DEFAULT);
+
 }
 
 
