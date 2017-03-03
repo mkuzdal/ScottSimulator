@@ -292,7 +292,7 @@ window.onload = function init () {
 
     // create the transforms for each of the 6 bodies.
     transforms =        [   new transform (vec3.fromValues (-4.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
-                            new transform (vec3.fromValues (4.0,  10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                            new transform (vec3.fromValues (-4.0, 20.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                             new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
                             new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ())
                         ];
@@ -372,10 +372,21 @@ window.onload = function init () {
     window.requestAnimFrame (render);
 }
 
+var currentFrame = 0;
+
 /** render: renders the current callback frame.
  *  @param: { float } current: the current frame time.
  */
 function render (current) {
+    currentFrame++;
+    console.log (currentFrame);
+    if (currentFrame == 10) {
+        var objs = SGraph.getObjects ();
+        for (var i = 0; i < objs.length; i++) {
+            if (objs[i].tag != "world")
+                objs[i].active = false;
+        }
+    }
 
     // update the current and change in time
     current = performance.now();

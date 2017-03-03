@@ -49,11 +49,39 @@ function resolveCollision (object1, object2, manifold) {
 			object2 = object1;
 			object1 = temp;
 		}
-
 		vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, manifold.penetrationDistance);
+		//object1.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
 		vec3.scale (object1.rigidBody.velocity, object1.rigidBody.velocity, -object1.rigidBody.restitution);
 		return;
 	} else if (object1.rigidBody.type == "dynamic" && object2.rigidBody.type == "dynamic") {
+		vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, manifold.penetrationDistance);
 
+		// Calculate relative velocity
+  		var rv = vec3.create ();
+  		vec3.sub (rv, object2.rigidBody.velocity, object1.rigidBody.velocity);
+ 
+  		// Calculate relative velocity in terms of the normal direction
+  		var velAlongNormal = vec3.dot (rv, manifold.normal);
+ 
+ 		// Do not resolve if velocities are separating
+  		if (velAlongNormal > 0)
+    		return;
+ 
+		// Calculate restitution
+		var e = Math.min (object1.rigidBody.restitution, object2.rigidBody.restitution);
+		 
+		// Calculate impulse scalar
+		var j = -(1 + e) * velAlongNormal;
+		var impulse = vec3.create ();
+		vec3.scale (impulse, manifold.normal, j);
+
+		// Apply impulse
+		var mass_sum = object1.rigidBody.mass + object2.rigidBody.mass;
+
+		var ratio = object1.rigidBody.mass / mass_sum;
+		vec3.scaleAndAdd (object1.rigidBody.velocity, object1.rigidBody.velocity, impulse, -ratio);
+
+		ratio = object2.rigidBody.mass / mass_sum;
+		vec3.scaleAndAdd (object2.rigidBody.velocity, object2.rigidBody.velocity, impulse, ratio);
 	} 
 }

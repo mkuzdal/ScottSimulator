@@ -158,7 +158,7 @@ class object {
         collider.push (vec4.fromValues (max_X, max_Y, max_Z, 1.0));
         this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z));
         this.collider.object = this;
-        
+
         for (var i = 0; i < points_Array.length; i++) {
             normals_Array[i] = vec3.fromValues (normals_Array[i][0], normals_Array[i][1], normals_Array[i][2]);
         }
@@ -313,6 +313,23 @@ class sceneGraph {
         obj.setup ();
         obj.draw ();
 	}
+
+    getObjects () {
+        var objects = [];
+        for (var i = 0; i < this.root.children.length; i++) {
+            this.__getObjects_AUX (this.root.children[i], objects);
+        }
+
+        return objects;
+    }
+
+    __getObjects_AUX (root, objects) {
+        objects.push (root);
+
+        for (var i = 0; i < root.children.length; i++) {
+            this.__getObjects_AUX (root.children[i], objects);
+        }
+    }
 
     getObjectsByTag (tag) {
         var objects = [];
