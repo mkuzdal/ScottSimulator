@@ -303,8 +303,8 @@ window.onload = function init () {
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5))
                         ];
 
-    rigidBodies =       [   new rigidBody (5.0, 0.4, "dynamic"),
-                            new rigidBody (5.0, 0.4, "dynamic"),
+    rigidBodies =       [   new rigidBody (5.0, 0.2, "dynamic"),
+                            new rigidBody (5.0, 0.2, "dynamic"),
                             new rigidBody (5.0, 1.1, "dynamic"),
                             new rigidBody (5.0, 1.1, "dynamic"),
                         ]; 

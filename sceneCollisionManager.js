@@ -414,9 +414,9 @@ class sceneCollisionManager {
 			var max = vec4.transformMat4 (storage, collider2.max, collider2.matrix);
 			var min = vec4.transformMat4 (storage, collider2.min, collider2.matrix);
 
-			var x = Math.max(min[0], Math.min(c[0], max[0]));
-  			var y = Math.max(min[1], Math.min(c[1], max[1]));
-  			var z = Math.max(min[2], Math.min(c[2], max[2]));
+			var x = Math.max (min[0], Math.min (c[0], max[0]));
+  			var y = Math.max (min[1], Math.min (c[1], max[1]));
+  			var z = Math.max (min[2], Math.min (c[2], max[2]));
   			var d2 = (x - c[0]) * (x - c[0]) +
   					 (y - c[1]) * (y - c[1]) +
                      (z - c[2]) * (z - c[2]);
