@@ -303,8 +303,8 @@ window.onload = function init () {
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5))
                         ];
 
-    rigidBodies =       [   new rigidBody (5.0, 0.4, "dynamic"),
-                            new rigidBody (5.0, 0.4, "dynamic"),
+    rigidBodies =       [   new rigidBody (5.0, 0.2, "dynamic"),
+                            new rigidBody (5.0, 0.2, "dynamic"),
                             new rigidBody (5.0, 1.1, "dynamic"),
                             new rigidBody (5.0, 1.1, "dynamic"),
                         ]; 
@@ -369,10 +369,8 @@ window.onload = function init () {
     prev = performance.now();
     prev *= 0.001;
 
-    window.requestAnimFrame (render);
+    window.requestAnimationFrame (render);
 }
-
-var currentFrame = 0;
 
 /** render: renders the current callback frame.
  *  @param: { float } current: the current frame time.
@@ -413,7 +411,7 @@ function render (current) {
     drawSceneGraph (deltaTime);
 
     // callback
-    window.requestAnimFrame (render);
+    window.requestAnimationFrame (render);
 }
 
 function generatePlane () {
@@ -658,7 +656,7 @@ function flattenArray (array) {
 function initShadowFramebuffer () {
     // Query the extension
     var depthTextureExt = gl.getExtension ("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
-    if(!depthTextureExt) { doSomeFallbackInstead(); return; }
+    if(!depthTexture) { console.log("Depth Texture isn't working"); }
 
     // Create a color texture
     var colorTexture = gl.createTexture();
