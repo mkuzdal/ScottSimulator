@@ -8,25 +8,205 @@ class sceneCollisionManager {
 
 	detectCollision (collider1, collider2) {
 		if (collider1.type == "box" && collider2.type == "box") {
-			var axis1 = vec3.create ();
-			vec3.sub (axis1, collider2.currentVertices[7], collider1.currentVertices[3]);
-			var axis2 = vec3.create ();
-			vec3.sub (axis2, collider2.currentVertices[7], collider1.currentVertices[5]);
-			var axis3 = vec3.create ();
-			vec3.sub (axis3, collider2.currentVertices[7], collider1.currentVertices[6]);
-			var axis4 = vec3.create ();
-			vec3.sub (axis4, collider2.currentVertices[7], collider2.currentVertices[3]);
-			var axis5 = vec3.create ();
-			vec3.sub (axis5, collider2.currentVertices[7], collider2.currentVertices[5]);
-			var axis6 = vec3.create ();
-			vec3.sub (axis6, collider2.currentVertices[7], collider2.currentVertices[6]);
-
 			// axis 1
-			projection_points = [];
+			var axis = vec3.create ();
+			var projection_points1 = [];
+			var projection_points2 = [];
+
+			vec3.sub (axis, collider1.currentVertices[7], collider1.currentVertices[3]);
+
+			projection_points1 = [];
 			for (var i = 0; i < collider1.currentVertices.length; i++) {
-				projection_points.push ()
+				projection_points1.push (project (collider1.currentVertices[i], axis)[0]);
+			}
+			projection_points2 = [];
+			for (var i = 0; i < collider2.currentVertices.length; i++) {
+				projection_points2.push (project (collider2.currentVertices[i], axis)[0]);
 			}
 
+			var min1 = 1000000.0;
+			var min2 = 1000000.0;
+			var max1 = -1000000.0;
+			var max2 = -1000000.0;
+
+			for (var i = 0; i < projection_points1.length; i++) {
+				min1 = Math.min (min1, projection_points1[i]);
+				max1 = Math.max (max1, projection_points1[i]);
+			}
+			for (var i = 0; i < projection_points2.length; i++) {
+				min2 = Math.min (min2, projection_points2[i]);
+				max2 = Math.max (max2, projection_points2[i]);
+			}
+
+			if (min2 > max1 || max2 < min1)
+				return false;
+
+			// axis 2
+			axis = vec3.create ();
+			projection_points1 = [];
+			projection_points2 = [];
+
+			vec3.sub (axis, collider1.currentVertices[7], collider1.currentVertices[5]);
+
+			projection_points1 = [];
+			for (var i = 0; i < collider1.currentVertices.length; i++) {
+				projection_points1.push (project (collider1.currentVertices[i], axis)[1]);
+			}
+			projection_points2 = [];
+			for (var i = 0; i < collider2.currentVertices.length; i++) {
+				projection_points2.push (project (collider2.currentVertices[i], axis)[1]);
+			}
+
+			var min1 = 1000000.0;
+			var min2 = 1000000.0;
+			var max1 = -1000000.0;
+			var max2 = -1000000.0;
+
+			for (var i = 0; i < projection_points1.length; i++) {
+				min1 = Math.min (min1, projection_points1[i]);
+				max1 = Math.max (max1, projection_points1[i]);
+			}
+			for (var i = 0; i < projection_points2.length; i++) {
+				min2 = Math.min (min2, projection_points2[i]);
+				max2 = Math.max (max2, projection_points2[i]);
+			}
+
+			if (min2 > max1 || max2 < min1)
+				return false;
+
+			// axis 3
+			axis = vec3.create ();
+			projection_points1 = [];
+			projection_points2 = [];
+
+			vec3.sub (axis, collider1.currentVertices[7], collider1.currentVertices[6]);
+
+			projection_points1 = [];
+			for (var i = 0; i < collider1.currentVertices.length; i++) {
+				projection_points1.push (project (collider1.currentVertices[i], axis)[2]);
+			}
+			projection_points2 = [];
+			for (var i = 0; i < collider2.currentVertices.length; i++) {
+				projection_points2.push (project (collider2.currentVertices[i], axis)[2]);
+			}
+
+			var min1 = 1000000.0;
+			var min2 = 1000000.0;
+			var max1 = -1000000.0;
+			var max2 = -1000000.0;
+
+			for (var i = 0; i < projection_points1.length; i++) {
+				min1 = Math.min (min1, projection_points1[i]);
+				max1 = Math.max (max1, projection_points1[i]);
+			}
+			for (var i = 0; i < projection_points2.length; i++) {
+				min2 = Math.min (min2, projection_points2[i]);
+				max2 = Math.max (max2, projection_points2[i]);
+			}
+
+			if (min2 > max1 || max2 < min1)
+				return false;
+
+			// axis 4
+			axis = vec3.create ();
+			projection_points1 = [];
+			projection_points2 = [];
+
+			vec3.sub (axis, collider2.currentVertices[7], collider2.currentVertices[3]);
+
+			projection_points1 = [];
+			for (var i = 0; i < collider1.currentVertices.length; i++) {
+				projection_points1.push (project (collider1.currentVertices[i], axis)[0]);
+			}
+			projection_points2 = [];
+			for (var i = 0; i < collider2.currentVertices.length; i++) {
+				projection_points2.push (project (collider2.currentVertices[i], axis)[0]);
+			}
+
+			var min1 = 1000000.0;
+			var min2 = 1000000.0;
+			var max1 = -1000000.0;
+			var max2 = -1000000.0;
+
+			for (var i = 0; i < projection_points1.length; i++) {
+				min1 = Math.min (min1, projection_points1[i]);
+				max1 = Math.max (max1, projection_points1[i]);
+			}
+			for (var i = 0; i < projection_points2.length; i++) {
+				min2 = Math.min (min2, projection_points2[i]);
+				max2 = Math.max (max2, projection_points2[i]);
+			}
+
+			if (min2 > max1 || max2 < min1)
+				return false;
+
+			// axis 5
+			axis = vec3.create ();
+			projection_points1 = [];
+			projection_points2 = [];
+
+			vec3.sub (axis, collider2.currentVertices[7], collider2.currentVertices[5]);
+
+			projection_points1 = [];
+			for (var i = 0; i < collider1.currentVertices.length; i++) {
+				projection_points1.push (project (collider1.currentVertices[i], axis)[1]);
+			}
+			projection_points2 = [];
+			for (var i = 0; i < collider2.currentVertices.length; i++) {
+				projection_points2.push (project (collider2.currentVertices[i], axis)[1]);
+			}
+
+			var min1 = 1000000.0;
+			var min2 = 1000000.0;
+			var max1 = -1000000.0;
+			var max2 = -1000000.0;
+
+			for (var i = 0; i < projection_points1.length; i++) {
+				min1 = Math.min (min1, projection_points1[i]);
+				max1 = Math.max (max1, projection_points1[i]);
+			}
+			for (var i = 0; i < projection_points2.length; i++) {
+				min2 = Math.min (min2, projection_points2[i]);
+				max2 = Math.max (max2, projection_points2[i]);
+			}
+
+			if (min2 > max1 || max2 < min1)
+				return false;
+
+			// axis 6
+			axis = vec3.create ();
+			projection_points1 = [];
+			projection_points2 = [];
+
+			vec3.sub (axis, collider2.currentVertices[7], collider2.currentVertices[6]);
+
+			projection_points1 = [];
+			for (var i = 0; i < collider1.currentVertices.length; i++) {
+				projection_points1.push (project (collider1.currentVertices[i], axis)[2]);
+			}
+			projection_points2 = [];
+			for (var i = 0; i < collider2.currentVertices.length; i++) {
+				projection_points2.push (project (collider2.currentVertices[i], axis)[2]);
+			}
+
+			var min1 = 1000000.0;
+			var min2 = 1000000.0;
+			var max1 = -1000000.0;
+			var max2 = -1000000.0;
+
+			for (var i = 0; i < projection_points1.length; i++) {
+				min1 = Math.min (min1, projection_points1[i]);
+				max1 = Math.max (max1, projection_points1[i]);
+			}
+			for (var i = 0; i < projection_points2.length; i++) {
+				min2 = Math.min (min2, projection_points2[i]);
+				max2 = Math.max (max2, projection_points2[i]);
+			}
+
+			if (min2 > max1 || max2 < min1)
+				return false;
+
+			return true;
 		} else if (collider1.type == "sphere" && collider2.type == "sphere") {
 			var c1 = vec3.create ();
         	vec3.transformMat4 (c1, collider1.center, collider1.matrix);
@@ -107,10 +287,24 @@ class sceneCollisionManager {
 	detectAllCollisions () {
 		for (var i = 0; i < this.objects.length; i++) {
 			for (var j = i + 1; j < this.objects.length; j++) {
-				if (this.objects[i].collider.tag != "null")
-				if (this.detectCollision (this.objects[i].collider, this.objects[j].collider))
-					console.log (this.objects[i].collider.type, this.objects[j].collider.type);
+				if (this.objects[i].collider.tag != "null" && this.objects[j].collider.tag != "null") {
+					if (this.detectCollision (this.objects[i].collider, this.objects[j].collider)) {
+						resolveCollision (this.objects[i], this.objects[j]);
+					}
+				}
 			}
 		}
+		this.objects = [];
 	}
 } 
+
+
+function project (point, axis) {
+	var mag = (point[0] * axis[0] + point[1] * axis[1] + point[2] * axis[2]) / (axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+	var projection = vec3.create ();
+	vec3.scale (projection, axis, mag);
+
+	return projection;
+
+
+}

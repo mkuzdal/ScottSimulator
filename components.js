@@ -207,7 +207,6 @@ class boxCollider {
         this.vertices.push (vec4.fromValues (this.max[0], this.max[1], this.max[2], 1.0));
 
         this.matrix = mat4.create ();
-        this.currentVertices = [];
     }
 
     setup () {

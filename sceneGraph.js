@@ -21,6 +21,9 @@ class object {
         this.texture = _texture;
         this.collider = _collider || new nullCollider ();
         this.rigidBody = _rigidBody;
+        if (this.rigidBody)
+            this.rigidBody.object = this;
+
         this.mouseTriggers = [];
         this.worldView = mat4.create ();
 
@@ -34,7 +37,6 @@ class object {
      *  @param { float } dTime: the time since the last framce callback (in seconds).
      */
     update (dTime) {
-        this.collider.setup ();
         if (this.rigidBody) {
             this.rigidBody.update (dTime);
         }
@@ -298,24 +300,10 @@ class sceneGraph {
         if (type != DRAW_TYPE_COLOR || root.tag != "world") {
     		if (root.collider.type == "null") {
                 this.drawNode (root);
-            } else if (root.collider.type == "box") {
-                if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
-                    this.drawNode (root);
-                } else {
-                    //console.log ("HERE");
-                }
-            } else if (root.collider.type == "sphere") {
-                if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
-                    this.drawNode (root);
-                } else {
-                    //console.log ("HERE");
-                }
-            } else if (root.collider.type == "polygon") {
-                if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
-                    this.drawNode (root);
-                } else {
-                    //console.log ("HERE");
-                }
+            } else if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
+                this.drawNode (root);
+            } else {
+                //console.log ("HERE");
             }
         }
         for (var i = 0; i < root.children.length; i++) {
@@ -363,21 +351,15 @@ class sceneGraph {
         }
     }
 
-    updateAndSet (dTime) {
-
+    set () {
         var CTM = mat4.create ();
 
         for (var i = 0; i < this.root.children.length; i++) {
-            this.__updateAndSet_AUX (dTime, this.root.children[i], CTM, 1.0);
+            this.__set_AUX (this.root.children[i], CTM, 1.0);
         }
     }
 
-    __updateAndSet_AUX (dTime, root, CTM, scaling) {
-        if (!root.active)
-            return;
-
-        root.update (dTime);
-
+    __set_AUX (root, CTM, scaling) {
         var CTM_prime = mat4.create ();
         mat4.mul (CTM_prime, CTM, root.transform.matrix);
         var scaling_prime = scaling * root.transform.scale[0];
@@ -385,10 +367,28 @@ class sceneGraph {
         if (root.collider.type == "sphere") {
             root.collider.scaling = scaling_prime;
         }
-            
+
+        root.collider.setup ();
         collisionManager.objects.push (root);
         for (var i = 0; i < root.children.length; i++) {
-            this.__updateAndSet_AUX (dTime, root.children[i], CTM_prime, scaling_prime);
+            this.__set_AUX (root.children[i], CTM_prime, scaling_prime);
+        }
+    }
+
+    update (dTime) {
+        for (var i = 0; i < this.root.children.length; i++) {
+            this.__update_AUX (dTime, this.root.children[i]);
+        }
+    }
+
+    __update_AUX (dTime, root) {
+        if (!root.active)
+            return;
+
+        root.update (dTime);
+            
+        for (var i = 0; i < root.children.length; i++) {
+            this.__update_AUX (dTime, root.children[i]);
         }
     }
 }
@@ -409,10 +409,9 @@ function buildSceneGraph () {
 }
 
 function drawSceneGraph (dTime) {
-    SGraph.updateAndSet (dTime);
+    SGraph.set ();
     lightsManager.setupAll ();
     collisionManager.detectAllCollisions ();
-    collisionManager.objects = [];
 
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.colorMask (false, false, false, false);
@@ -455,6 +454,7 @@ function drawSceneGraph (dTime) {
 
     SGraph.drawTree (DRAW_TYPE_DEFAULT);
 
+    SGraph.update (dTime);
 }
 
 
