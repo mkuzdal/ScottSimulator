@@ -42,15 +42,15 @@ StateManager.apply = function(event) {
 }
 
 StateManager.stop = function() {
-	currentEvent.stop();
+	if(currentEvent) currentEvent.stop();
 	currentEvent = null;
 }
 
 StateManager.pause = function() {
-	currentEvent.pause();
+	if(currentEvent) currentEvent.pause();
 }
 StateManager.play = function() {
-	currentEvent.play();
+	if(currentEvent) currentEvent.play();
 }
 
 StateManager.finishedEvent = function() {
@@ -113,14 +113,14 @@ class Activity {
 	}
 
 	stop() {
-		this.audio.pause();
+		if(this.audio) this.audio.pause();
 		this.endfunc();
 	}
 	pause() {
-		this.audio.pause();
+		if(this.audio) this.audio.pause();
 	}
 	play() {
-		this.audio.play();
+		if(this.audio) this.audio.play();
 	}
 }
 
@@ -138,9 +138,9 @@ var event2 = new Event("test2", new Activity(document.getElementById('AUDIORICH'
 
 StateManager.apply(event1);
 StateManager.apply(event2);
-setTimeout(function(){StateManager.pause();}, 300);
-setTimeout(function(){StateManager.play();}, 600);
-setTimeout(function(){StateManager.stop();}, 700);
+setTimeout(function(){StateManager.pause();}, 600);
+setTimeout(function(){StateManager.play();}, 800);
+setTimeout(function(){StateManager.stop();}, 900);
 
 
 //// IMPORTANT NOTE: Make sure the init function disables all buttons or we could have two events running that conflict with each other == bad race condition stuff.
