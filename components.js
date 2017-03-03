@@ -21,7 +21,7 @@ class triggerHandler {
         this.pixel = new Uint8Array (4);
         this.triggers = [];
         this.hover = [];
-        this.currentID = vec4.fromValues (16.0, 0.0, 0.0, 255.0);
+        this.currentID = 1;
     }
 
     addTrigger (trigger) {
@@ -32,22 +32,13 @@ class triggerHandler {
                 return;
             }
         }
+        trigger.ID = vec4.fromValues (this.currentID % 256 , Math.floor(this.currentID/256) % 256, Math.floor(this.currentID/65536) % 256, 1.0)
 
-        trigger.ID = vec4.clone (this.currentID);
-
-        for (var i = 0; i < 3; i++) {
-            if (this.currentID[i] == 255.0)
-                continue;
-            else {
-                this.currentID[i] += 16;
-                break;
-            }
-        }
+        this.currentID++;
         this.triggers.push (trigger);
     }
 
-    handleMouseEvents () {
-        
+    handleMouseEvents () {        
         for (var i = 0; i < this.triggers.length; i++) {
             if (vec4.equals(this.pixel, this.triggers[i].ID)) { 
                 if (this.triggers[i].type == "click" && this.clicked == true) {
@@ -90,6 +81,10 @@ class nullCollider {
 
         this.matrix = mat4.create ();
     }
+
+    setup () {
+
+    }
 }
 
 
@@ -99,6 +94,10 @@ class polygonCollider {
         this.type = "polygon"
 
         this.matrix = mat4.create ();
+    }
+
+    setup () {
+
     }
 
     inFustrum (PC) {
@@ -210,6 +209,14 @@ class boxCollider {
         this.matrix = mat4.create ();
     }
 
+    setup () {
+        this.currentVertices = [];
+        for (var i = 0; i < this.vertices.length; i++) {
+            var storage = vec4.create ();
+            this.currentVertices.push (vec4.transformMat4 (storage, this.vertices[i], this.matrix));
+        }
+    }
+
     inFustrum (PC) {
         var PCM = mat4.create ();
         mat4.mul (PCM, PC, this.matrix);
@@ -217,7 +224,7 @@ class boxCollider {
         var p_prime = [];
         for (var i = 0; i < this.vertices.length; i++) {
             var storage = vec4.create ();
-            p_prime.push (vec4.transformMat4 (storage, this.vertices[i], PCM));
+            p_prime.push (vec4.transformMat4 (storage, this.vertices[i], PC));
         }
 
         var toDraw = false;
@@ -305,12 +312,21 @@ class sphereCollider {
 
         this.matrix = mat4.create ();
         this.scaling = 1.0;
+
+        this.currentCenter = vec3.clone (this.center);
+        this.currentRadius = this.radius;
+    }
+
+    setup () {
+        vec3.transformMat4 (this.currentCenter, this.center, this.matrix);
+        this.currentRadius = this.radius * this.scaling;
     }
 
     inFustrum (PC) {
-        var c = vec3.create ();
-        vec3.transformMat4 (c, this.center, this.matrix);
-        var r = this.radius * this.scaling;
+        //var c = vec3.create ();
+        //vec3.transformMat4 (c, this.center, this.matrix);
+        var c = this.currentCenter;
+        var r = this.currentRadius;
 
         var d, A, B, C, D;
 
@@ -509,9 +525,9 @@ class texture {
 
     setup () {
         // bind textures
-        gl.uniform1i (gl.getUniformLocation (program, "texture"), 0);
-        gl.activeTexture (gl.TEXTURE0);
+        gl.activeTexture (gl.TEXTURE1);
         gl.bindTexture (gl.TEXTURE_2D, this.texture);
+        gl.uniform1i (gl.getUniformLocation( program, "texture"), 1);
 
         gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
 
@@ -553,7 +569,7 @@ class transform {
     /** update: event loop function. Currently just sets the matrices for the object.
      *  @param { float } dTime: the time since the last framce callback (in seconds).
      */
-    update (dTime) {
+    update () {
         this.setMatrix ();
     }
  

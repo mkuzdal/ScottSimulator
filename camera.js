@@ -29,7 +29,7 @@ class camera {
         this.rotation = quat.create();
         this.desRotation = quat.create();
 
-        this.matrix = mat4.create ();
+        this.view = mat4.create ();
         this.perspectiveProjectionMatrix = mat4.create ();
         this.orthoProjectionMatrix = mat4.create ();
 
@@ -67,8 +67,8 @@ class camera {
     /** updateCameraMatrix: sets the camera view matrix.
      */
     updateCameraMatrix () {
-        mat4.fromRotationTranslation (this.matrix, this.rotation, this.position);
-        mat4.invert (this.matrix, this.matrix);
+        mat4.fromRotationTranslation (this.view, this.rotation, this.position);
+        mat4.invert (this.view, this.view);
     }
 
     /** camMoveForward: moves the camera in the forwards direction by 'speed' many units.
