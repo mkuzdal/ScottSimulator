@@ -38,8 +38,6 @@ var lightsManager;
 var animationsManager;
 var clickManager;
 
-var clicked = false;
-
 // previous frame time
 var prev = 0;
 
@@ -291,8 +289,8 @@ window.onload = function init () {
                         ]; 
 
     // create the transforms for each of the 6 bodies.
-    transforms =        [   new transform (vec3.fromValues (-4.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
-                            new transform (vec3.fromValues (-4.0, 20.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    transforms =        [   new transform (vec3.fromValues (0.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                            new transform (vec3.fromValues (-1.0, 20.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                             new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
                             new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ())
                         ];
@@ -303,7 +301,7 @@ window.onload = function init () {
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5))
                         ];
 
-    rigidBodies =       [   new rigidBody (5.0, "dynamic"),
+    rigidBodies =       [   new rigidBody (50.0, "dynamic"),
                             new rigidBody (5.0, "dynamic"),
                             new rigidBody (5.0, "dynamic"),
                             new rigidBody (5.0, "dynamic"),
@@ -341,7 +339,7 @@ window.onload = function init () {
                             new geometry (pointsArray, normalsArray),
                             new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
-                            new rigidBody (5.0, "static"))
+                            new rigidBody (100.0, "static"))
                 );
 
     cubes.push (new object ());
@@ -350,19 +348,20 @@ window.onload = function init () {
 
     animationsManager.deactivateAll ();
 
-    for (var i = 0; i < 10; i++) {
-        var c = cubes[0].clone ();
-        var angle = (360 / 10) * i;
-        //c.transform.position = vec3.fromValues (40 * Math.cos (Math.PI * angle / 180), c.transform.position[1], 10 * Math.sin (Math.PI * angle / 180));
-        cubes.push (c);
-    } 
-
     for (var i = 0; i < cubes.length; i++) {
         cubes[i].tag = i;
     }
 
+    //cubes[1].active = false;
     cubes[5].tag = "world";
     cubes[4].tag = "world";
+
+    for (var i = 0; i < 0; i++) {
+        var c = cubes[0].clone ();
+        var angle = (360 / 10) * i;
+        c.transform.position = vec3.fromValues (40 * Math.cos (Math.PI * angle / 180), c.transform.position[1], 10 * Math.sin (Math.PI * angle / 180));
+        cubes.push (c);
+    } 
 
     buildSceneGraph ();
 
@@ -376,15 +375,6 @@ window.onload = function init () {
  *  @param: { float } current: the current frame time.
  */
 function render (current) {
-    currentFrame++;
-    console.log (currentFrame);
-    if (currentFrame == 500) {
-        var objs = SGraph.getObjects ();
-        for (var i = 0; i < objs.length; i++) {
-            if (objs[i].tag != "world")
-                objs[i].active = false;
-        }
-    }
 
     // update the current and change in time
     current = performance.now();

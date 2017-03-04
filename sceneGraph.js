@@ -238,7 +238,11 @@ class object {
             }
         }
 
-        var newRigidBody = new rigidBody (this.rigidBody.mass, this.rigidBody.type);
+        var newRigidBody = null;
+        if (this.rigidBody) {
+            newRigidBody = new rigidBody (this.rigidBody.mass, this.rigidBody.type);
+        }
+
         var newGeometry = this.geometry;
         var newTexture = this.texture;
         var newObject = new object (newTransform, newMaterial, newGeometry, newTexture, newCollider, newRigidBody);
@@ -418,12 +422,13 @@ function buildSceneGraph () {
     SGraph.root.children.push (cubes[4]);
     //SGraph.root.children.push (cubes[5]);
 
+	SGraph.root.children[1].children.push (cubes[2]);
+    SGraph.root.children[1].children[0].children.push (cubes[3]);
+
     for (var i = 6; i < cubes.length; i++) {
         SGraph.root.children.push (cubes[i]);
     }
 
-	SGraph.root.children[1].children.push (cubes[2]);
-    SGraph.root.children[1].children[0].children.push (cubes[3]);
 }
 
 function drawSceneGraph (dTime) {
@@ -458,12 +463,14 @@ function drawSceneGraph (dTime) {
     gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_COLOR); 
     gl.viewport (0, 0, canvas.width, canvas.height);
     gl.bindFramebuffer (gl.FRAMEBUFFER, colorFramebuffer);
+    gl.disable (gl.DEPTH_TEST);
 
     SGraph.drawTree (DRAW_TYPE_COLOR);
 
     gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, clickManager.pixel);
     clickManager.handleMouseEvents ();
 
+    gl.enable (gl.DEPTH_TEST);
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.bindFramebuffer (gl.FRAMEBUFFER, null);
 
