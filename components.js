@@ -191,6 +191,7 @@ class boxCollider {
     constructor (_min, _max) {
         this.min = _min;
         this.max = _max;
+        this.center = vec3.fromValues ((_min[0] + _max[0])/2, (_min[1] + _max[1])/2, (_min[2] + _max[2])/2);
         this.type = "box";
 
         this.min = vec4.fromValues (this.min[0], this.min[1], this.min[2], 1.0);
@@ -207,10 +208,12 @@ class boxCollider {
         this.vertices.push (vec4.fromValues (this.max[0], this.max[1], this.max[2], 1.0));
 
         this.matrix = mat4.create ();
+        this.currentCenter = vec3.create ();
     }
 
     setup () {
         this.currentVertices = [];
+        vec3.transformMat4 (this.currentCenter, this.center, this.matrix);
         for (var i = 0; i < this.vertices.length; i++) {
             var storage = vec4.create ();
             this.currentVertices.push (vec4.transformMat4 (storage, this.vertices[i], this.matrix));
@@ -323,8 +326,6 @@ class sphereCollider {
     }
 
     inFustrum (PC) {
-        //var c = vec3.create ();
-        //vec3.transformMat4 (c, this.center, this.matrix);
         var c = this.currentCenter;
         var r = this.currentRadius;
 

@@ -60,7 +60,27 @@ uniform vec4 fLightPosition[5];
 uniform vec4 fAmbientLight[5], fDiffuseLight[5], fSpecularLight[5];
 uniform vec3 fCameraPosition;
 
+vec4 pack (const float depth) {
+  const vec4 bitShift = vec4(255.0 * 255.0 * 255.0, 255.0 * 255.0, 255.0, 1.0);
+  const vec4 bitMask = vec4(0.0, 1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0);
+
+  vec4 res = fract(depth * bitShift);
+  res -= res.xxyz * bitMask;
+
+  return res;
+}
+
+float unpack (vec4 color) {
+   const vec4 bitShift = vec4 (1.0 / (255.0 * 255.0 * 255.0), 1.0 / (255.0 * 255.0), 1.0 / 255.0, 1.0);
+   return dot (color, bitShift);
+}
+
 float ShadowCalculation (vec4 fPositionFromLight) {
+   /* vec3 shadowCoord = (fPositionFromLight.xyz/fPositionFromLight.w)/2.0 + 0.5;
+    vec4 rgbaDepth = texture2D(shadowMap, shadowCoord.xy);
+    float depth = unpack(rgbaDepth);
+    float visibility = (shadowCoord.z > depth + 0.0015) ? 0.7 : 1.0;
+    return visibility; */
     /*
     vec3 projCoords = fPositionFromLight.xyz / fPositionFromLight.w;
     projCoords = projCoords * 0.5 + 0.5;
@@ -94,23 +114,8 @@ float ShadowCalculation (vec4 fPositionFromLight) {
     if(projCoords.z > 1.0)
         visibility = 0.0;
 
-    return visibility; 
+    return visibility;  
 } 
-
-vec4 pack (const float depth) {
-  const vec4 bitShift = vec4(255.0 * 255.0 * 255.0, 255.0 * 255.0, 255.0, 1.0);
-  const vec4 bitMask = vec4(0.0, 1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0);
-
-  vec4 res = fract(depth * bitShift);
-  res -= res.xxyz * bitMask;
-
-  return res;
-}
-
-float unpack (vec4 color) {
-   const vec4 bitShift = vec4 (1.0 / (255.0 * 255.0 * 255.0), 1.0 / (255.0 * 255.0), 1.0 / 255.0, 1.0);
-   return dot (color, bitShift);
-}
 
 float omnidirectionalShadow (vec3 lightPosition, float bias, float darkness, sampler2D sampler) {
     vec3 direction = fPos - lightPosition;
@@ -122,7 +127,7 @@ float omnidirectionalShadow (vec3 lightPosition, float bias, float darkness, sam
 
 void main () { 
     if (fDrawType == 0) {
-        //gl_FragColor = pack (gl_FragCoord.z);
+        gl_FragColor = pack (gl_FragCoord.z);
         return;
 
     } else if (fDrawType == 1) {
