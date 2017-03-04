@@ -375,7 +375,6 @@ window.onload = function init () {
  *  @param: { float } current: the current frame time.
  */
 function render (current) {
-
     // update the current and change in time
     current = performance.now();
     current *= 0.001;
