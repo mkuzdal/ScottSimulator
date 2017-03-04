@@ -376,16 +376,6 @@ window.onload = function init () {
  *  @param: { float } current: the current frame time.
  */
 function render (current) {
-    currentFrame++;
-    console.log (currentFrame);
-    if (currentFrame == 500) {
-        var objs = SGraph.getObjects ();
-        for (var i = 0; i < objs.length; i++) {
-            if (objs[i].tag != "world")
-                objs[i].active = false;
-        }
-    }
-
     // update the current and change in time
     current = performance.now();
     current *= 0.001;
