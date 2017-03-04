@@ -98,7 +98,7 @@ class object {
             return -1;
         }
 
-        var lines = ObjEle.text.split ("\n");
+        var lines = ObjEle.split ("\n");
         var indexes = [];
         var vertices = [];
         var normals = [];
@@ -169,7 +169,7 @@ class object {
         }
 
 
-        lines = MatEle.text.split ("\n");
+        lines = MatEle.split ("\n");
 
         var shininess;
         var ambient;
