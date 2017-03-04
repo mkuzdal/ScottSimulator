@@ -283,6 +283,20 @@ window.onload = function init () {
     room.children.push (desk);
 
 
+    StateManager.addState("second");
+
+    var event1 = new Event("clickedButton", new Activity(document.getElementById('AUDIOWOOHOO'), function(){console.log('init activity')}, function(){console.log('testing activity1')}));
+    var event2 = new Event("clickedButton", new Activity(document.getElementById('AUDIORICH'), function(){console.log('init null audio activity')}, function(){console.log('testing activity2')}));
+
+    StateManager.getState("root").addChild(event1, StateManager.getState("second"));
+    StateManager.getState("second").addChild(event2, StateManager.getState("root"));
+
+    button.addOnMouseClickTrigger(function(object) {
+        StateManager.apply("clickedButton");
+    });
+
+
+
     prev = performance.now();
     prev *= 0.001;
 
@@ -297,6 +311,8 @@ function render (current) {
     current = performance.now();
     current *= 0.001;
     var deltaTime = current - prev;
+    //cap the maximum delta time so that if you switch away from the tab and switch back everything won't go haywire
+    if(deltaTime > 0.1) deltaTime=0.1;    
     prev = current;
 
     // animate all of the objects
