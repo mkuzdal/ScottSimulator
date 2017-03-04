@@ -570,7 +570,7 @@ function flattenArray (array) {
 function initShadowFramebuffer () {
     // Query the extension
     var depthTextureExt = gl.getExtension ("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
-    if(!depthTexture) { console.log("Depth Texture isn't working"); }
+    if(!depthTextureExt) { console.log("Depth Texture isn't working"); }
 
     // Create a color texture
     var colorTexture = gl.createTexture();
