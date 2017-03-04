@@ -21,6 +21,7 @@ class rigidBody {
 
 		this.I = this.mass;
 		this.inv_I = 1 / this.I;
+		this.collisionPoint = null;
 	}
 
 	update (dTime) {
@@ -28,6 +29,17 @@ class rigidBody {
 			var dt = dTime
 			vec3.scaleAndAdd (this.velocity, this.velocity, this.force, dt * this.inv_mass);
 			vec3.scaleAndAdd (this.object.transform.position, this.object.transform.position, this.velocity, dt);
+
+			if (this.collisionPoint) {
+				console.log (this.collisionPoint);
+				/*var r = vec3.create ();
+				vec3.sub (r, this.collisionPoint, this.object.collider.currentCenter);
+
+				var T = vec3.create ();
+				vec3.cross (T, r, this.force);
+
+				vec3.scaleAndAdd (this.omega, this.omega, T, dt * this.inv_I); */
+			}
 
 			vec3.scaleAndAdd (this.omega, this.omega, this.torque, dt * this.inv_I);
 			var rotation = quat.create ();
@@ -40,6 +52,8 @@ class rigidBody {
 
 			quat.setAxisAngle (rotation, axisOfRot, angularVel * dt);
 			quat.mul (this.object.transform.rotation, this.object.transform.rotation, rotation);
+
+			this.collisionPoint = null;
 		}
 	}
 
@@ -72,13 +86,16 @@ function resolveCollision (object1, object2, manifold) {
 			var temp = object2;
 			object2 = object1;
 			object1 = temp;
-			vec3.negate (manifold.normal, manifold.normal)
+			vec3.negate (manifold.normal, manifold.normal);
 		}
+
 		var percent = 1.1;
   		vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, percent * manifold.penetrationDistance);
 
 		var dv = project (object1.rigidBody.velocity, manifold.normal);
 		vec3.scaleAndAdd (object1.rigidBody.velocity, object1.rigidBody.velocity, dv, -2 * object1.rigidBody.restitution);
+
+		object1.rigidBody.collisionPoint = manifold.collisionPoint;
 
 		var rv = vec3.create ();
   		vec3.sub (rv, object2.rigidBody.velocity, object1.rigidBody.velocity);
