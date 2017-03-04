@@ -255,7 +255,7 @@ window.onload = function init () {
 
     lightsManager.lightSources[0].tag = "red";
 
-    cam = new camera ();
+    cam = new camera ([0,0,-12], glMatrix.toRadian(180), 0);
 
     var room = new object ();
     room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
@@ -302,6 +302,8 @@ function render (current) {
     current = performance.now();
     current *= 0.001;
     var deltaTime = current - prev;
+    //cap the maximum delta time so that if you switch away from the tab and switch back everything won't go haywire
+    if(deltaTime > 0.1) deltaTime=0.1;    
     prev = current;
 
     // animate all of the objects
