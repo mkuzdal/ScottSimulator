@@ -268,106 +268,102 @@ window.onload = function init () {
     lightsManager.lightSources[2].tag = "green";
 */
     // generate each of the spheres and create a geometry instance to define it
-    // generateSphere (5);
-    // geometries.push (new geometry (pointsArray, normalsArray));
-    // textures.push (new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
+    generateSphere (5);
+    geometries.push (new geometry (pointsArray, normalsArray));
+    textures.push (new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
 
-    // generateCubeNormals (cubeVertices);
-    // generateCubeVertices (cubeVertices);
-    // generateCubeTexCoords (texCoords);
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
 
     cam = new camera ();
 
-    // geometries.push (new geometry (pointsArray, normalsArray));
-    // textures.push (new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
+    geometries.push (new geometry (pointsArray, normalsArray));
+    textures.push (new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
 
-    // // create the materials for each of the 6 bodies (sun, planet1, planet2, planet3, planet4, moon)
-    // materials =         [   new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
-    //                         new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
-    //                         new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
-    //                         new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0)
-    //                     ]; 
+    // create the materials for each of the 6 bodies (sun, planet1, planet2, planet3, planet4, moon)
+    materials =         [   new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0)
+                        ]; 
 
-    // // create the transforms for each of the 6 bodies.
-    // transforms =        [   new transform (vec3.fromValues (0.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
-    //                         new transform (vec3.fromValues (-1.0, 20.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
-    //                         new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
-    //                         new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ())
-    //                     ];
+    // create the transforms for each of the 6 bodies.
+    transforms =        [   new transform (vec3.fromValues (0.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                            new transform (vec3.fromValues (-1.0, 20.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                            new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
+                            new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ())
+                        ];
 
-    // colliders =         [   new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0),
-    //                         new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)), //new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 0.5),
-    //                         new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0),
-    //                         new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5))
-    //                     ];
+    colliders =         [   new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0),
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)), //new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 0.5),
+                            new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0),
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5))
+                        ];
 
-    // rigidBodies =       [   new rigidBody (50.0, "dynamic"),
-    //                         new rigidBody (5.0, "dynamic"),
-    //                         new rigidBody (5.0, "dynamic"),
-    //                         new rigidBody (5.0, "dynamic"),
-    //                     ]; 
+    rigidBodies =       [   new rigidBody (50.0, "dynamic"),
+                            new rigidBody (5.0, "dynamic"),
+                            new rigidBody (5.0, "dynamic"),
+                            new rigidBody (5.0, "dynamic"),
+                        ]; 
 
-    // // create the object for each of the 6 bodies.
-    // cubes  =            [   new object (transforms[0], materials[0], geometries[0], textures[0], colliders[0], rigidBodies[0]),
-    //                         new object (transforms[1], materials[1], geometries[1], textures[1], colliders[1], rigidBodies[1]),
-    //                         new object (transforms[2], materials[2], geometries[0], textures[0], colliders[2]),
-    //                         new object (transforms[3], materials[3], geometries[1], textures[1], colliders[3])
-    //                     ];
+    // create the object for each of the 6 bodies.
+    cubes  =            [   new object (transforms[0], materials[0], geometries[0], textures[0], colliders[0], rigidBodies[0]),
+                            new object (transforms[1], materials[1], geometries[1], textures[1], colliders[1], rigidBodies[1]),
+                            new object (transforms[2], materials[2], geometries[0], textures[0], colliders[2]),
+                            new object (transforms[3], materials[3], geometries[1], textures[1], colliders[3])
+                        ];
 
-    // cubes[0] = new object ();
-    // cubes[0].loadFromObj ("stoolOBJ", "stoolMAT", "stoolTEX");
-    // cubes[0].transform = transforms[0];
-    // cubes[0].rigidBody = rigidBodies[0];
+    cubes[0] = new object ();
+    cubes[0].loadFromObj ("stoolOBJ", "stoolMAT", "stoolTEX");
+    cubes[0].transform = transforms[0];
+    cubes[0].rigidBody = rigidBodies[0];
 
-    // cubes[0].addOnMouseClickTrigger (function (object) {
-    //     animationsManager.animations.push (new animationHold (object));
-    // }); 
+    cubes[0].addOnMouseClickTrigger (function (object) {
+        animationsManager.animations.push (new animationHold (object));
+    }); 
 
 
-    // animationsManager.animations.push (new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (1.0, 1.0, 0.0)));
-    // animationsManager.animations.push (new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0)));
-    // animationsManager.animations.push (new animationRotation (cubes[2], 0.0, 120.0, vec3.fromValues (0.0, 0.0, 1.0)));
-    // animationsManager.animations.push (new animationRotation (cubes[3], 0.0, 360.0, vec3.fromValues (0.0, 0.0, 1.0)));
+    animationsManager.animations.push (new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (1.0, 1.0, 0.0)));
+    animationsManager.animations.push (new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0)));
+    animationsManager.animations.push (new animationRotation (cubes[2], 0.0, 120.0, vec3.fromValues (0.0, 0.0, 1.0)));
+    animationsManager.animations.push (new animationRotation (cubes[3], 0.0, 360.0, vec3.fromValues (0.0, 0.0, 1.0)));
 
-    // //generatePlane ();
-    // generateCubeNormals (cubeVertices);
-    // generateCubeVertices (cubeVertices);
-    // generateCubeTexCoords (texCoords);
+    //generatePlane ();
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
 
-    // cubes.push (new object (new transform (vec3.fromValues (0.0, -4.0, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
-    //                         new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
-    //                         new geometry (pointsArray, normalsArray),
-    //                         new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
-    //                         new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
-    //                         new rigidBody (100.0, "static"))
-    //             );
+    cubes.push (new object (new transform (vec3.fromValues (0.0, -4.0, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray),
+                            new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
+                            new rigidBody (100.0, "static"))
+                );
 
-    // cubes.push (new object ());
-    // cubes[5].loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
-    // cubes[5].transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    cubes.push (new object ());
+    cubes[5].loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
+    cubes[5].transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
 
-    // animationsManager.deactivateAll ();
+    animationsManager.deactivateAll ();
 
-    // for (var i = 0; i < cubes.length; i++) {
-    //     cubes[i].tag = i;
-    // }
+    for (var i = 0; i < cubes.length; i++) {
+        cubes[i].tag = i;
+    }
 
-    // //cubes[1].active = false;
-    // cubes[5].tag = "world";
-    // cubes[4].tag = "world";
+    //cubes[1].active = false;
+    cubes[5].tag = "world";
+    cubes[4].tag = "world";
 
-    // for (var i = 0; i < 0; i++) {
-    //     var c = cubes[0].clone ();
-    //     var angle = (360 / 10) * i;
-    //     c.transform.position = vec3.fromValues (40 * Math.cos (Math.PI * angle / 180), c.transform.position[1], 10 * Math.sin (Math.PI * angle / 180));
-    //     cubes.push (c);
-    // } 
+    for (var i = 0; i < 0; i++) {
+        var c = cubes[0].clone ();
+        var angle = (360 / 10) * i;
+        c.transform.position = vec3.fromValues (40 * Math.cos (Math.PI * angle / 180), c.transform.position[1], 10 * Math.sin (Math.PI * angle / 180));
+        cubes.push (c);
+    } 
 
-    var room = new object();
-    room.loadFromObj("roomOBJ", "roomMAT", "roomTEX");
-    console.log(SGraph);
-    SGraph.root.children.push(room);
-    //buildSceneGraph ();
+    buildSceneGraph ();
 
     prev = performance.now();
     prev *= 0.001;
@@ -383,8 +379,6 @@ function render (current) {
     current = performance.now();
     current *= 0.001;
     var deltaTime = current - prev;
-    //cap the maximum delta time so that if you switch away from the tab and switch back everything won't go haywire
-    if(deltaTime > 0.1) deltaTime=0.1;    
     prev = current;
 
     // animate all of the objects
@@ -407,23 +401,6 @@ function render (current) {
 
     // callback
     window.requestAnimationFrame (render);
-}
-
-
-
-function buildSceneGraph () {
-    SGraph.root.children.push (cubes[0]);
-    SGraph.root.children.push (cubes[1]);
-    SGraph.root.children.push (cubes[4]);
-    //SGraph.root.children.push (cubes[5]);
-
-    SGraph.root.children[1].children.push (cubes[2]);
-    SGraph.root.children[1].children[0].children.push (cubes[3]);
-
-    for (var i = 6; i < cubes.length; i++) {
-        SGraph.root.children.push (cubes[i]);
-    }
-
 }
 
 function generatePlane () {

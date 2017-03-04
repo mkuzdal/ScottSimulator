@@ -415,7 +415,6 @@ class sceneGraph {
     }
 }
 
-
 function drawSceneGraph (dTime) {
     SGraph.set ();
     lightsManager.setupAll ();
