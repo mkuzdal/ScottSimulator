@@ -2,9 +2,10 @@
 var collisionManager;
 
 class collisionManifold {
-	constructor (_contact, _normal, _penetrationDistance) {
+	constructor (_contact, _normal, _penetrationDistance, _center, _collisionPoint) {
 		this.normal = _normal;
 		this.penetrationDistance = _penetrationDistance;
+		this.collisionPoint = _collisionPoint;
 	}
 }
 

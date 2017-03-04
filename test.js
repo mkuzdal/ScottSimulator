@@ -303,10 +303,10 @@ window.onload = function init () {
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5))
                         ];
 
-    rigidBodies =       [   new rigidBody (5.0, 0.2, "dynamic"),
-                            new rigidBody (5.0, 0.2, "dynamic"),
-                            new rigidBody (5.0, 1.1, "dynamic"),
-                            new rigidBody (5.0, 1.1, "dynamic"),
+    rigidBodies =       [   new rigidBody (5.0, "dynamic"),
+                            new rigidBody (5.0, "dynamic"),
+                            new rigidBody (5.0, "dynamic"),
+                            new rigidBody (5.0, "dynamic"),
                         ]; 
 
     // create the object for each of the 6 bodies.
@@ -341,7 +341,7 @@ window.onload = function init () {
                             new geometry (pointsArray, normalsArray),
                             new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
-                            new rigidBody (5.0, 1.0, "static"))
+                            new rigidBody (5.0, "static"))
                 );
 
     cubes.push (new object ());
@@ -349,13 +349,13 @@ window.onload = function init () {
     cubes[5].transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
 
     animationsManager.deactivateAll ();
-/*
+
     for (var i = 0; i < 10; i++) {
         var c = cubes[0].clone ();
         var angle = (360 / 10) * i;
-        c.transform.position = new vec3.fromValues (10 * Math.cos (Math.PI * angle / 180), c.transform.position[1], 10 * Math.sin (Math.PI * angle / 180));
+        //c.transform.position = vec3.fromValues (40 * Math.cos (Math.PI * angle / 180), c.transform.position[1], 10 * Math.sin (Math.PI * angle / 180));
         cubes.push (c);
-    } */
+    } 
 
     for (var i = 0; i < cubes.length; i++) {
         cubes[i].tag = i;
@@ -376,6 +376,15 @@ window.onload = function init () {
  *  @param: { float } current: the current frame time.
  */
 function render (current) {
+    currentFrame++;
+    console.log (currentFrame);
+    if (currentFrame == 500) {
+        var objs = SGraph.getObjects ();
+        for (var i = 0; i < objs.length; i++) {
+            if (objs[i].tag != "world")
+                objs[i].active = false;
+        }
+    }
 
     // update the current and change in time
     current = performance.now();
@@ -657,6 +666,8 @@ function initShadowFramebuffer () {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.generateMipmap (gl.TEXTURE_2D);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
     // Create the depth texture
     var depthTexture = gl.createTexture();
@@ -673,7 +684,7 @@ function initShadowFramebuffer () {
     gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
 
     framebuffer.texture = depthTexture;
-
+    
     return framebuffer;
 }
 
