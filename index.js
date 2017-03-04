@@ -288,6 +288,8 @@ function render (current) {
     current = performance.now();
     current *= 0.001;
     var deltaTime = current - prev;
+    //cap the maximum delta time so that if you switch away from the tab and switch back everything won't go haywire
+    if(deltaTime > 0.1) deltaTime=0.1;    
     prev = current;
 
     // animate all of the objects
