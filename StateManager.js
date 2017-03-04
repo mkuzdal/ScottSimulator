@@ -38,7 +38,7 @@ StateManager.apply = function(eventName) {
 			StateManager.finishedEvent();
 		}
 	} else {
-		eventQueue.push(event);
+		eventQueue.push(eventName);
 	}
 }
 
