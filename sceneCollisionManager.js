@@ -101,6 +101,8 @@ class sceneCollisionManager {
 				}
 			}	
 
+			console.log (collisionPoint);
+
 			// axis 2
 			axis = vec3.create ();
 			projection_points1 = [];
