@@ -33,6 +33,14 @@ class camera {
         this.perspectiveProjectionMatrix = mat4.create ();
         this.orthoProjectionMatrix = mat4.create ();
 
+        var yawQuat = quat.create();
+        var pitchQuat = quat.create();
+        quat.setAxisAngle(yawQuat, this.up, this.yaw);
+        quat.setAxisAngle(pitchQuat, [1,0,0], this.pitch);
+        quat.mul(this.desRotation, yawQuat, pitchQuat);
+        quat.normalize(this.desRotation, this.desRotation);
+        this.rotation = quat.clone(this.desRotation);
+
         this.updatePerspective ();
         this.updateOrthographic ();
         this.updateCameraMatrix ();
