@@ -369,13 +369,22 @@ window.onload = function init () {
     prev = performance.now();
     prev *= 0.001;
 
-    window.requestAnimFrame (render);
+    window.requestAnimationFrame (render);
 }
 
 /** render: renders the current callback frame.
  *  @param: { float } current: the current frame time.
  */
 function render (current) {
+    currentFrame++;
+    console.log (currentFrame);
+    if (currentFrame == 500) {
+        var objs = SGraph.getObjects ();
+        for (var i = 0; i < objs.length; i++) {
+            if (objs[i].tag != "world")
+                objs[i].active = false;
+        }
+    }
 
     // update the current and change in time
     current = performance.now();
@@ -402,7 +411,7 @@ function render (current) {
     drawSceneGraph (deltaTime);
 
     // callback
-    window.requestAnimFrame (render);
+    window.requestAnimationFrame (render);
 }
 
 function generatePlane () {
@@ -647,7 +656,7 @@ function flattenArray (array) {
 function initShadowFramebuffer () {
     // Query the extension
     var depthTextureExt = gl.getExtension ("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
-    if(!depthTextureExt) { doSomeFallbackInstead(); return; }
+    if(!depthTexture) { console.log("Depth Texture isn't working"); }
 
     // Create a color texture
     var colorTexture = gl.createTexture();
