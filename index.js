@@ -257,21 +257,30 @@ window.onload = function init () {
 
     cam = new camera ([0,0,-12], glMatrix.toRadian(180), 0);
 
+    // room
     var room = new object ();
     room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
     room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     room.tag = "world";
+    SGraph.root.children.push (room);
 
-    var button = new object ();
-    button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
-    button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    // first buttonMount, room.child[0]
     var buttonMount = new object ();
     buttonMount.loadFromObj ("buttonMountOBJ", "buttonMountMAT", "buttonMountTEX");
     buttonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
-    
-    buttonMount.children.push (button);
     room.children.push (buttonMount);
-    SGraph.root.children.push (room);
+
+    // first button, buttonMount.child[0]
+    var button = new object ();
+    button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
+    button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    buttonMount.children.push (button);
+
+    // desk, room.child[1]
+    var desk = new object ();
+    desk.loadFromObj ("deskOBJ", "deskMAT", "deskTEX");
+    desk.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    room.children.push (desk);
 
 
     prev = performance.now();
@@ -607,6 +616,24 @@ function initColorFramebuffer () {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     return framebuffer;
+}
+
+function readTextFile(file)
+{
+    var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function ()
+    {
+        if(rawFile.readyState === 4)
+        {
+            if(rawFile.status === 200 || rawFile.status == 0)
+            {
+                var allText = rawFile.responseText;
+                alert(allText);
+            }
+        }
+    }
+    rawFile.send(null);
 }
 
 /** @endfile: test.js */
