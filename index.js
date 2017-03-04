@@ -254,7 +254,7 @@ window.onload = function init () {
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
 
     lightsManager.lightSources[0].tag = "red";
-    
+
     cam = new camera ();
 
     var room = new object ();
@@ -262,6 +262,15 @@ window.onload = function init () {
     room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     room.tag = "world";
 
+    var button = new object ();
+    button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
+    button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    var buttonMount = new object ();
+    buttonMount.loadFromObj ("buttonMountOBJ", "buttonMountMAT", "buttonMountTEX");
+    buttonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    
+    buttonMount.children.push (button);
+    room.children.push (buttonMount);
     SGraph.root.children.push (room);
 
 
