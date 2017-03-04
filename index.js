@@ -274,6 +274,20 @@ window.onload = function init () {
     SGraph.root.children.push (room);
 
 
+    StateManager.addState("second");
+
+    var event1 = new Event("clickedButton", new Activity(document.getElementById('AUDIOWOOHOO'), function(){console.log('init activity')}, function(){console.log('testing activity1')}));
+    var event2 = new Event("clickedButton", new Activity(document.getElementById('AUDIORICH'), function(){console.log('init null audio activity')}, function(){console.log('testing activity2')}));
+
+    StateManager.getState("root").addChild(event1, StateManager.getState("second"));
+    StateManager.getState("second").addChild(event2, StateManager.getState("root"));
+
+    button.addOnMouseClickTrigger(function(object) {
+        StateManager.apply("clickedButton");
+    });
+
+
+
     prev = performance.now();
     prev *= 0.001;
 
