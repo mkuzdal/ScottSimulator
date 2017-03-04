@@ -21,6 +21,7 @@ class object {
         this.texture = _texture;
         this.collider = _collider || new nullCollider ();
         this.rigidBody = _rigidBody;
+
         if (this.rigidBody)
             this.rigidBody.object = this;
         if (this.collider)
@@ -237,9 +238,11 @@ class object {
             }
         }
 
+        var newRigidBody = new rigidBody (this.rigidBody.mass, this.rigidBody.type);
         var newGeometry = this.geometry;
         var newTexture = this.texture;
-        var newObject = new object (newTransform, newMaterial, newGeometry, newTexture, newCollider);
+        var newObject = new object (newTransform, newMaterial, newGeometry, newTexture, newCollider, newRigidBody);
+
         newObject.drawType = this.drawType;
         newObject.tag = this.tag;
         newObject.active = this.active;
@@ -429,6 +432,9 @@ function drawSceneGraph (dTime) {
     collisionManager.detectAllCollisions ();
 
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+
     gl.colorMask (false, false, false, false);
 
     gl.enable(gl.DEPTH_TEST);
@@ -436,6 +442,7 @@ function drawSceneGraph (dTime) {
     gl.cullFace (gl.FRONT);
 
     gl.bindFramebuffer (gl.FRAMEBUFFER, frameBufferObject);
+    
     gl.viewport (0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
     gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_SHADOW); 
     gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_SHADOW); 
@@ -470,6 +477,8 @@ function drawSceneGraph (dTime) {
     SGraph.drawTree (DRAW_TYPE_DEFAULT);
 
     SGraph.update (dTime);
+
+    gl.flush ();
 }
 
 
