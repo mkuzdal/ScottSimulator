@@ -255,7 +255,7 @@ window.onload = function init () {
 
     lightsManager.lightSources[0].tag = "red";
 
-    cam = new camera ();
+    cam = new camera ([0,0,-12], glMatrix.toRadian(180), 0);
 
     var room = new object ();
     room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
