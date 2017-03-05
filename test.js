@@ -53,6 +53,7 @@ var transforms = [];
 var colliders = [];
 var rigidBodies = [];
 var clickEvents = [];
+var crosshair;
 
 // player variables; consider abstracting into a player class
 var cam;
@@ -252,6 +253,13 @@ window.onload = function init () {
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
 
     lightsManager.lightSources[0].tag = "red";
+
+    crosshair = new Crosshair ([
+            vec4.fromValues (0.0, 0.05, 0.5, 1.0),
+            vec4.fromValues (0.0, -0.05, 0.5, 1.0),
+            vec4.fromValues (0.05, 0.0, 0.5, 1.0),
+            vec4.fromValues (-0.05, 0.0, 0.5, 1.0)
+        ]);
 /*
     lightsManager.addSource (new light (new transform (vec3.fromValues (10.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
