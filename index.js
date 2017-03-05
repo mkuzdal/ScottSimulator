@@ -272,19 +272,49 @@ window.onload = function init () {
 	desk.transform = new transform (vec3.fromValues (0.0, -6, -9), vec3.fromValues (1.4, 1.4, 1.4), quat.clone(rotation));
 	room.children.push (desk);
 
-	var chair = new object ();
-	chair.loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
+	
 	var rotation = quat.create();
-	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
-	chair.transform = new transform (vec3.fromValues (0.0, -3.8, -1.3), vec3.fromValues (1.2, 1.2, 1.2), quat.clone(rotation));
-	room.children.push (chair);
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90));
 
-	var seat = new object ();
+	//make all the chairs!
+    var chair = new object ();
+    chair.loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
+    chair.transform = new transform (vec3.fromValues (0, -3.8, -1.3), vec3.fromValues (1.2, 1.2, 1.2), quat.clone(rotation));
+    var seat = new object ();
 	seat.loadFromObj ("seatOBJ", "seatMAT", "seatTEX");
 	var rotation = quat.create();
 	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
 	seat.transform = new transform (vec3.fromValues (0.0, 0, 0.22), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
 	chair.children.push (seat);
+
+	var rows_of_chairs=4; 
+    var chairs_per_row=8;
+    for(var i=0; i<rows_of_chairs; i++){
+    	//create each large row of chairs
+    	for(var j=0; j< chairs_per_row; j++){
+    		var tempChair = chair.clone();
+    		tempChair.transform.position = vec3.fromValues (2.61*j-9.2, -3.8+2.8*i, -1.8+4*i);
+    		room.children.push (tempChair);
+    	}
+    	//also create the chairs on the edges of the room, on the outside of the aisles
+    	var rightChair = chair.clone();
+    	var rightChairRotate = quat.create();
+		quat.setAxisAngle(rightChairRotate, [0,1,0], glMatrix.toRadian(-105));
+    	rightChair.transform.rotation = quat.clone(rightChairRotate);
+    	rightChair.transform.position = vec3.fromValues(-15.5, -3.8+2.8*i, -1.8+4*i-1.2);
+    	room.children.push(rightChair);
+
+    	var leftChair = chair.clone();
+    	var leftChairRotate = quat.create();
+    	quat.setAxisAngle(leftChairRotate, [0,1,0], glMatrix.toRadian(-75));
+    	leftChair.transform.rotation = quat.clone(leftChairRotate);
+    	leftChair.transform.position = vec3.fromValues(15.5, -3.8+2.8*i, -1.8+4*i-1.2);
+    	room.children.push(leftChair); 
+
+    }
+
+
+	
 
 	var button = new object ();
     button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
