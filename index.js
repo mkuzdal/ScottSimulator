@@ -275,17 +275,25 @@ window.onload = function init () {
 	var chair = new object ();
 	chair.loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
 	var rotation = quat.create();
+	var position = vec3.fromValues (0.0, -3.8, -1.3);
 	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
-	chair.transform = new transform (vec3.fromValues (0.0, -3.8, -1.3), vec3.fromValues (1.2, 1.2, 1.2), quat.clone(rotation));
+	chair.transform = new transform (vec3.clone(position), vec3.fromValues (1.2, 1.2, 1.2), quat.clone(rotation));
 	room.children.push (chair);
 
 	var seat = new object ();
 	seat.loadFromObj ("seatOBJ", "seatMAT", "seatTEX");
 	var rotation = quat.create();
 	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
-	seat.transform = new transform (vec3.fromValues (0.0, 0, 0.22), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
+	seat.transform = new transform (vec3.fromValues(0.0,0.3,0.22), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
 	chair.children.push (seat);
 
+	for (var i = 0; i < 3; i++) {
+		var nextChair = chair.clone();
+		position[0] += 3.0;
+		nextChair.transform.position = vec3.clone(position);
+		SGraph.root.children.push(nextChair);
+	}
+ 
 	var button = new object ();
     button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
     button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
