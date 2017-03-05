@@ -27,7 +27,7 @@ StateManager.getState = function(stateName) {
 StateManager.apply = function(eventName) {
 	var event = currentState.getEvent(eventName);
 	if(!currentEvent) {
-		if(currentState.getChild(event.name)) {
+		if(event && currentState.getChild(event.name)) {
 			currentEvent = event;
 			event.run();
 			currentState = currentState.getChild(event.name);
@@ -112,7 +112,7 @@ class Activity {
 	}
 
 	run() {
-		this.audio.currentTime = 0;
+		if(this.audio) this.audio.currentTime = 0;
 		this.initfunc();
 		if(this.audio) this.audio.play();
 		else this.endfunc();
@@ -133,3 +133,4 @@ class Activity {
 StateManager.getInstance();
 
 //// IMPORTANT NOTE: Make sure the init function disables all buttons or we could have two events running that conflict with each other == bad race condition stuff.
+//// IMPORTANT NOTE 2: Each event must have an independent audio element or else we execute all the endfuncs that are attached to that audio.
