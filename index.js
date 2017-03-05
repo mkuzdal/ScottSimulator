@@ -264,19 +264,7 @@ window.onload = function init () {
 	room.tag = "world";
 	SGraph.root.children.push (room);
 
-	// first buttonMount, room.child[0];
-	var buttonMount = new object ();
-	buttonMount.loadFromObj ("buttonMountOBJ", "buttonMountMAT", "buttonMountTEX");
-	buttonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
-	room.children.push (buttonMount);
-
-	// first button, buttonMount.child[0]
-	var button = new object ();
-	button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
-	button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
-	buttonMount.children.push (button);
-
-	// desk, room.child[1]
+	// desk
 	var desk = new object ();
 	desk.loadFromObj ("deskOBJ", "deskMAT", "deskTEX");
 	var rotation = quat.create();
@@ -298,13 +286,50 @@ window.onload = function init () {
 	seat.transform = new transform (vec3.fromValues (0.0, 0, 0.22), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
 	chair.children.push (seat);
 
-	StateManager.addState("second");
+	var button = new object ();
+    button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
+    button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    var buttonMount = new object ();
+    buttonMount.loadFromObj ("buttonMountOBJ", "buttonMountMAT", "buttonMountTEX");
+    buttonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    buttonMount.children.push (button);
+    
+    var rightButtonMount = buttonMount.clone(); rightButtonMount.transform.position = vec3.fromValues (-5,0,0);
+    var leftButtonMount = buttonMount.clone(); leftButtonMount.transform.position = vec3.fromValues (5,0,0);
 
-	var event1 = new Event("clickedButton", new Activity(document.getElementById('AUDIOWOOHOO'), function(){console.log('init activity')}, function(){console.log('testing activity1')}));
-	var event2 = new Event("clickedButton", new Activity(document.getElementById('AUDIORICH'), function(){console.log('init null audio activity')}, function(){console.log('testing activity2')}));
+    room.children.push (rightButtonMount);
+    room.children.push (leftButtonMount);
+    SGraph.root.children.push (room);
 
-	StateManager.getState("root").addChild(event1, StateManager.getState("second"));
-	StateManager.getState("second").addChild(event2, StateManager.getState("root"));
+
+    StateManager.addState("twobuttons");
+    StateManager.addState("clickedRight1");
+    StateManager.addState("clickedRight2");
+    StateManager.addState("clickedRight3");
+    StateManager.addState("clickedLeft");
+
+    var lookedDown = new Event("lookDown", new Activity(document.getElementById('AUDIOWOOHOO'), function(){}, function(){console.log('Scott clicks the left button.')}));
+    var clickedRight1 = new Event("clickedRight", new Activity(document.getElementById('AUDIOBRIBED'), function(){}, function(){console.log('You did not hear me. I said the left button')}));
+    var clickedRight2 = new Event("clickedRight", new Activity(document.getElementById('AUDIOFOUNDOIL'), function(){}, function(){console.log('LEFT. As in your left')}));
+    var clickedRight3 = new Event("clickedRight", new Activity(document.getElementById('AUDIODIE'), function(){}, function(){console.log('You have done it now Scott...')}));
+    var clickedRight4 = new Event("clickedRight", new Activity(document.getElementById('AUDIOGIVEUP'), function(){}, function(){console.log('Alright, that is it. Game over...')}));
+    var clickedLeft = new Event("clickedLeft", new Activity(document.getElementById('AUDIOSONAR'), function(){}, function(){console.log('Good job')}));
+
+    StateManager.getState("root").addChild(lookedDown, StateManager.getState("twobuttons"));
+    StateManager.getState("twobuttons").addChild(clickedRight1, StateManager.getState("clickedRight1"));
+    StateManager.getState("clickedRight1").addChild(clickedRight2, StateManager.getState("clickedRight2"));
+    StateManager.getState("clickedRight2").addChild(clickedRight3, StateManager.getState("clickedRight3"));
+    StateManager.getState("clickedRight3").addChild(clickedRight4, StateManager.getState("root"));
+    StateManager.getState("twobuttons").addChild(clickedLeft, StateManager.getState("root"));
+
+    rightButtonMount.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("clickedRight");
+    });
+    leftButtonMount.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("clickedLeft");
+    }); 
+
+    StateManager.apply("lookDown");
 
 	// button.addOnMouseClickTrigger(function(object) {
 	//     StateManager.apply("clickedButton");
