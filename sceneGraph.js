@@ -3,6 +3,7 @@ var SGraph;
 var DRAW_TYPE_SHADOW = 0;
 var DRAW_TYPE_COLOR = 1;
 var DRAW_TYPE_DEFAULT = 2;
+var DRAW_TYPE_ORTHO = 3;
 
 /** object: an abstraction for a object. Objects contain a material, geometry,
  *  and transform object to define it. Objects can also be deactivated, causing
@@ -482,6 +483,9 @@ function drawSceneGraph (dTime) {
     gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 0);
 
     SGraph.drawTree (DRAW_TYPE_DEFAULT);
+
+    crosshair.setup ();
+    crosshair.draw ();
 
     SGraph.update (dTime);
 }

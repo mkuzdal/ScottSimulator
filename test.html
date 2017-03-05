@@ -27,6 +27,9 @@ void main ()
         fPositionFromLight = lightProjectionMatrix * lightMatrix * modelMatrix * vPosition;
         gl_Position = fPositionFromLight;
         return;
+    } else if (vDrawType == 3) {
+        gl_Position = projectionMatrix * vPosition;
+        return;
     }
 
     fPos = (modelMatrix * vPosition).xyz;
@@ -172,6 +175,9 @@ void main () {
         }
 
         gl_FragColor = fColor * texture2D (texture, fTexCoord);
+    } else if (fDrawType == 3) {
+        vec4 fColor = vec4 (1.0, 1.0, 1.0, 1.0);
+        gl_FragColor = fColor;
     }
 }
 </script>

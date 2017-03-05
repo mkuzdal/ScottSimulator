@@ -484,3 +484,40 @@ class transform {
     }
 }
 
+/** Crosshair: an abstraction for a Crosshair object. Crosshairs represent the orthographic
+ * crosshair that shows up in the middle of the screen. It is defined by vertices and 
+ * handles the setup and drawing of the geometry.
+ */
+class Crosshair {
+    /** constructor: builds an instance of a crosshair object with given attributes.
+     *  @param { vec3 [] } vertices: the array of vertices to represent the crosshair.
+     */
+    constructor (_vertices) {
+        this.Nvertices = _vertices.length;
+
+        this.vBuffer = gl.createBuffer ();
+        gl.bindBuffer (gl.ARRAY_BUFFER, this.vBuffer);
+        gl.bufferData (gl.ARRAY_BUFFER, flattenArray (_vertices), gl.STATIC_DRAW);
+    }
+
+    /** setup: enables all buffers and sets the vertex attributes.
+     */
+    setup () {
+        gl.bindBuffer (gl.ARRAY_BUFFER, this.vBuffer);
+        var vPosition = gl.getAttribLocation (program, "vPosition");
+        gl.vertexAttribPointer (vPosition, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray (vPosition);
+    }
+
+    /** draw: draw the crosshair object with orthographic projection.
+     * the crosshair is drawn with lines, connecting 2 vertices at a time
+     */
+    draw () {
+        gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.orthoProjectionMatrix);
+        gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_ORTHO); 
+        gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_ORTHO); 
+        for (var i=0; i < this.Nvertices; i+=2) {
+            gl.drawArrays (gl.LINES, i, 2);
+        }
+    }
+}

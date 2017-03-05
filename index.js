@@ -55,6 +55,7 @@ var transforms = [];
 var colliders = [];
 var rigidBodies = [];
 var clickEvents = [];
+var crosshair;
 
 // player variables; consider abstracting into a player class
 var cam;
@@ -256,6 +257,13 @@ window.onload = function init () {
 	lightsManager.lightSources[0].tag = "red";
 
 	cam = new camera ([0,-1.85,-15.8], glMatrix.toRadian(180), glMatrix.toRadian(5));
+
+    crosshair = new Crosshair ([
+            vec4.fromValues (0.0, 0.05, 0.5, 1.0),
+            vec4.fromValues (0.0, -0.05, 0.5, 1.0),
+            vec4.fromValues (0.05, 0.0, 0.5, 1.0),
+            vec4.fromValues (-0.05, 0.0, 0.5, 1.0)
+        ]);
 
 	// room
 	var room = new object ();
