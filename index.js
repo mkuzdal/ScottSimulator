@@ -313,8 +313,11 @@ window.onload = function init () {
 
     }
 
-
-	
+    //add a stool in the corner 
+    var stool = new object();
+    stool.loadFromObj("stoolOBJ", "stoolMAT", "stoolTEX");
+	stool.transform = new transform (vec3.fromValues(-16, -7.48, -8.5), vec3.fromValues(0.4, 0.4, 0.4), quat.clone(rotation)); 
+	room.children.push(stool); 
 
 	var button = new object ();
     button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
