@@ -95,174 +95,198 @@ var planeVertices = [
  */
 window.onload = function init () {
 
-    // Get the canvas variable and set it up
-    canvas = document.getElementById ("gl-canvas");
-    gl = WebGLUtils.setupWebGL (canvas, {antialias: true});
-    if (!gl) { alert ("WebGL isn't available"); }
+	// Get the canvas variable and set it up
+	canvas = document.getElementById ("gl-canvas");
+	gl = WebGLUtils.setupWebGL (canvas, {antialias: true});
+	if (!gl) { alert ("WebGL isn't available"); }
 
-    // GL setup for viewport and background color
-    gl.viewport (0, 0, canvas.width, canvas.height);
-    gl.clearColor (0.0, 0.0, 0.0, 1.0);
-    
-    //gl.enable (gl.BLEND);
-    //gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	// GL setup for viewport and background color
+	gl.viewport (0, 0, canvas.width, canvas.height);
+	gl.clearColor (0.0, 0.0, 0.0, 1.0);
+	
+	//gl.enable (gl.BLEND);
+	//gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    gl.enable (gl.DEPTH_TEST);
+	gl.enable (gl.DEPTH_TEST);
 
-    // Setting up pointerlock
-    canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
-    document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
+	// Setting up pointerlock
+	canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
+	document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
 
-    canvas.onclick = function() {
-        canvas.requestPointerLock();
-    };
+	canvas.onclick = function() {
+		canvas.requestPointerLock();
+	};
 
-    document.addEventListener('pointerlockchange', lockChange, false);
-    document.addEventListener('mozpointerlockchange', lockChange, false);
+	document.addEventListener('pointerlockchange', lockChange, false);
+	document.addEventListener('mozpointerlockchange', lockChange, false);
 
-    function lockChange() {
-        if (document.pointerLockElement === canvas || document.mozPointerLockElement === canvas) {
-            console.log('The pointer lock status is now locked');
-            document.addEventListener("mousemove", updateCamera, false);
-        } else {
-            console.log('The pointer lock status is now unlocked');  
-            document.removeEventListener("mousemove", updateCamera, false);
-        }
-    }
+	function lockChange() {
+		if (document.pointerLockElement === canvas || document.mozPointerLockElement === canvas) {
+			// console.log('The pointer lock status is now locked');
+			document.addEventListener("mousemove", updateCamera, false);
+		} else {
+			// console.log('The pointer lock status is now unlocked');  
+			document.removeEventListener("mousemove", updateCamera, false);
+		}
+	}
 
-    function updateCamera(e) {
-        cam.mouseLook (e.movementX, e.movementY);
-    }
+	function updateCamera(e) {
+		cam.mouseLook (e.movementX, e.movementY);
+	}
 
-    canvas.addEventListener ("mousedown", function (e) {
-        clickManager.clicked = true;
-    });
+	canvas.addEventListener ("mousedown", function (e) {
+		clickManager.clicked = true;
+	});
 
-    // Assigning keys
-    window.addEventListener ("keydown", function (e) {
-        switch (event.keyCode) {
-            case 187: // =
-            {
-                ch.active = !ch.active;
-                break;
-            }
-            case 73: // i
-            case 79: // o
-            case 49: // 1
-            case 50: // 2
-            case 51: // 3
-            case 52: // 4
-            case 53: // 5
-            case 54: // 6
-            case 55: // 7
-            case 56: // 8
-            case 57: // 9
-            {
-                break;
-            }
-            case 82: // r
-            {
-                animationsManager.toggleByAnimationTag ("rotate");
-                break;
-            }
-            case 81: // q
-            break;
-            case 69: // e
-            case 84: // t
-            case 89: // y
-            case 38: // up
-            case 40: // down 
-            case 37: // left
-            case 39: // right
-            default:
-                break;
-        }
-    }); 
+	// Assigning keys
+	window.addEventListener ("keydown", function (e) {
+		switch (event.keyCode) {
+			case 187: // =
+			{
+				ch.active = !ch.active;
+				break;
+			}
+			case 73: // i
+			case 79: // o
+			case 49: // 1
+			case 50: // 2
+			case 51: // 3
+			case 52: // 4
+			case 53: // 5
+			case 54: // 6
+			case 55: // 7
+			case 56: // 8
+			case 57: // 9
+			{
+				break;
+			}
+			case 82: // r
+			{
+				animationsManager.toggleByAnimationTag ("rotate");
+				break;
+			}
+			case 81: // q
+			break;
+			case 69: // e
+			case 84: // t
+			case 89: // y
+			case 38: // up
+			case 40: // down 
+			case 37: // left
+			case 39: // right
+			default:
+				break;
+		}
+	}); 
 
-    // Camera movement - consider abstracting into a player class
-    window.addEventListener ("keydown", function (e) {
-        switch (event.keyCode) {
-            case 32: // space
-            		movingup = true;
-                break;
-            case 16: // shift
-            		movingdown = true;
-                break;
-            case 87: // w
-            		movingforward = true;
-                break;
-            case 65: // a
-            		movingleft = true;
-                break;
-            case 83: // s
-            		movingbackward = true;
-                break;
-            case 68: // d
-            		movingright = true;
-                break;
-        }
-    }); 
+	// Camera movement - consider abstracting into a player class
+	window.addEventListener ("keydown", function (e) {
+		switch (event.keyCode) {
+			case 32: // space
+					movingup = true;
+				break;
+			case 16: // shift
+					movingdown = true;
+				break;
+			case 87: // w
+					movingforward = true;
+				break;
+			case 65: // a
+					movingleft = true;
+				break;
+			case 83: // s
+					movingbackward = true;
+				break;
+			case 68: // d
+					movingright = true;
+				break;
+		}
+	}); 
 
-    window.addEventListener ("keyup", function (e) {
-        switch (event.keyCode) {
-            case 32: // space
-            		movingup = false;
-                break;
-            case 16: // shift
-            		movingdown = false;
-                break;
-            case 87: // w
-            		movingforward = false;
-                break;
-            case 65: // a
-            		movingleft = false;
-                break;
-            case 83: // s
-            		movingbackward = false;
-                break;
-            case 68: // d
-            		movingright = false;
-                break;
-        }
-    }); 
+	window.addEventListener ("keyup", function (e) {
+		switch (event.keyCode) {
+			case 32: // space
+					movingup = false;
+				break;
+			case 16: // shift
+					movingdown = false;
+				break;
+			case 87: // w
+					movingforward = false;
+				break;
+			case 65: // a
+					movingleft = false;
+				break;
+			case 83: // s
+					movingbackward = false;
+				break;
+			case 68: // d
+					movingright = false;
+				break;
+		}
+	}); 
 
-    // Create the shader and vertex program
-    program = initShaders (gl, "vertex-shader", "fragment-shader");
-    gl.useProgram (program);
+	// Create the shader and vertex program
+	program = initShaders (gl, "vertex-shader", "fragment-shader");
+	gl.useProgram (program);
 
-    colorFramebuffer = initColorFramebuffer ();
-    frameBufferObject = initShadowFramebuffer ();
+	colorFramebuffer = initColorFramebuffer ();
+	frameBufferObject = initShadowFramebuffer ();
 
-    // Get the local variable for each of the matrix uniforms
-    modelMatrixLoc = gl.getUniformLocation (program, "modelMatrix");
-    projectionMatrixLoc = gl.getUniformLocation (program, "projectionMatrix");
-    normalMatrixLoc = gl.getUniformLocation (program, "normalMatrix");
-    cameraMatrixLoc = gl.getUniformLocation (program, "cameraMatrix");
-    lightMatrixLoc = gl.getUniformLocation (program, "lightMatrix");
-    lightProjectionMatrixLoc = gl.getUniformLocation (program, "lightProjectionMatrix");
+	// Get the local variable for each of the matrix uniforms
+	modelMatrixLoc = gl.getUniformLocation (program, "modelMatrix");
+	projectionMatrixLoc = gl.getUniformLocation (program, "projectionMatrix");
+	normalMatrixLoc = gl.getUniformLocation (program, "normalMatrix");
+	cameraMatrixLoc = gl.getUniformLocation (program, "cameraMatrix");
+	lightMatrixLoc = gl.getUniformLocation (program, "lightMatrix");
+	lightProjectionMatrixLoc = gl.getUniformLocation (program, "lightProjectionMatrix");
 
-    SGraph = new sceneGraph ();
-    collisionManager = new sceneCollisionManager ();
-    lightsManager = new lightHandler ();
-    animationsManager = new animationHandler ();
-    clickManager = new triggerHandler ();
-    audioManager = new audioHandler ();
+	SGraph = new sceneGraph ();
+	collisionManager = new sceneCollisionManager ();
+	lightsManager = new lightHandler ();
+	animationsManager = new animationHandler ();
+	clickManager = new triggerHandler ();
+	audioManager = new audioHandler ();
 
-    lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
-                              vec4.fromValues (0.4, 0.4, 0.4, 1.0),
-                              vec4.fromValues (0.8, 0.8, 0.8, 1.0),
-                              vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
+	lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+							  vec4.fromValues (0.4, 0.4, 0.4, 1.0),
+							  vec4.fromValues (0.8, 0.8, 0.8, 1.0),
+							  vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
 
-    lightsManager.lightSources[0].tag = "red";
+	lightsManager.lightSources[0].tag = "red";
 
-    cam = new camera ([0,0,-12], glMatrix.toRadian(180), 0);
+	cam = new camera ([0,-1.85,-15.8], glMatrix.toRadian(180), glMatrix.toRadian(5));
 
-    var room = new object ();
-    room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
-    room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
-    room.tag = "world";
+	// room
+	var room = new object ();
+	room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
+	room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+	room.tag = "world";
+	SGraph.root.children.push (room);
 
-    var button = new object ();
+	// desk
+	var desk = new object ();
+	desk.loadFromObj ("deskOBJ", "deskMAT", "deskTEX");
+	var rotation = quat.create();
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
+	desk.transform = new transform (vec3.fromValues (0.0, -6, -9), vec3.fromValues (1.4, 1.4, 1.4), quat.clone(rotation));
+	room.children.push (desk);
+
+	var chair = new object ();
+	chair.loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
+	var rotation = quat.create();
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
+	chair.transform = new transform (vec3.fromValues (0.0, -3.8, -1.3), vec3.fromValues (1.2, 1.2, 1.2), quat.clone(rotation));
+	room.children.push (chair);
+
+	var seat = new object ();
+	seat.loadFromObj ("seatOBJ", "seatMAT", "seatTEX");
+	var rotation = quat.create();
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
+	seat.transform = new transform (vec3.fromValues (0.0, 0, 0.22), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
+	chair.children.push (seat);
+
+	var button = new object ();
     button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
     button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     var buttonMount = new object ();
@@ -310,12 +334,16 @@ window.onload = function init () {
 
     StateManager.apply("lookDown");
 
+	// button.addOnMouseClickTrigger(function(object) {
+	//     StateManager.apply("clickedButton");
+	// });
 
 
-    prev = performance.now();
-    prev *= 0.001;
 
-    window.requestAnimationFrame (render);
+	prev = performance.now();
+	prev *= 0.001;
+
+	window.requestAnimationFrame (render);
 }
 
 /** render: renders the current callback frame.
