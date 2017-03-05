@@ -301,8 +301,8 @@ window.onload = function init () {
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5))
                         ];
 
-    rigidBodies =       [   new rigidBody (50.0, "dynamic"),
-                            new rigidBody (5.0, "dynamic"),
+    rigidBodies =       [   new rigidBody (50.0, 4.0, "dynamic"),
+                            new rigidBody (5.0, 1.0, "dynamic"),
                             new rigidBody (5.0, "dynamic"),
                             new rigidBody (5.0, "dynamic"),
                         ]; 
@@ -352,7 +352,7 @@ window.onload = function init () {
         cubes[i].tag = i;
     }
 
-    //cubes[1].active = false;
+    cubes[1].active = false;
     cubes[5].tag = "world";
     cubes[4].tag = "world";
 
