@@ -269,6 +269,19 @@ window.onload = function init () {
 	roof.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
 	room.children.push(roof);
 
+	var speaker = new object ();
+	var rotation = quat.create();
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(75));
+	speaker.loadFromObj ("speakerOBJ", "speakerMAT", "speakerTEX");
+	speaker.transform = new transform (vec3.fromValues (15, 11.3, -3), vec3.fromValues (2.0, 2.0, 2.0), quat.clone (rotation));
+	room.children.push(speaker);
+
+	var speaker2 = speaker.clone();
+	speaker2.transform.position = vec3.fromValues (-15, 11.3, -3);
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-75));
+	speaker2.transform.rotation = quat.clone (rotation);
+	room.children.push(speaker2);
+
 	// desk
 	var desk = new object ();
 	desk.loadFromObj ("deskOBJ", "deskMAT", "deskTEX");
