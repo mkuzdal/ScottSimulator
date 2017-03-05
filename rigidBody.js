@@ -6,8 +6,8 @@ class rigidBody {
 		this.inv_mass = 1 / this.mass;
 		this.restitution = 0.7;
 		this.type = _type || "static";
-		this.frictionStatic = 0.4;
-		this.frictionDynamic = 0.4;
+		this.frictionStatic = 10.0;
+		this.frictionDynamic = 10.0;
 
 		this.velocity = vec3.fromValues (0.0, 0.0, 0.0);
 		if (this.type == "dynamic") {
@@ -15,6 +15,8 @@ class rigidBody {
 		} else {
 			this.force = vec3.create ();
 		}
+
+		this.force = vec3.create ();
 
 		this.omega = vec3.fromValues (0.0, 0.0, 0.0);
 		this.torque = vec3.fromValues (0.0, 0.0, 0.0);
@@ -31,12 +33,11 @@ class rigidBody {
 			vec3.scaleAndAdd (this.object.transform.position, this.object.transform.position, this.velocity, dt);
 
 			if (this.collisionPoint) {
-				var r = vec3.create ();
-				vec3.sub (r, this.collisionPoint, this.object.collider.currentCenter);
-
-				var T = vec3.create ();
-				vec3.cross (T, r, vec3.fromValues (0.0, gravity * this.mass, 0.0));
-				vec3.scaleAndAdd (this.omega, this.omega, T, dt * this.inv_I);
+				//var r = vec3.create ();
+				//vec3.sub (r, this.collisionPoint, this.object.collider.currentCenter);
+				//var T = vec3.create ();
+				//vec3.cross (T, r, vec3.fromValues (0.0, gravity * this.mass, 0.0));
+				//vec3.scaleAndAdd (this.omega, this.omega, T, dt * this.inv_I);
 			} 
 
 			vec3.scaleAndAdd (this.omega, this.omega, this.torque, dt * this.inv_I);
@@ -47,6 +48,8 @@ class rigidBody {
 				vec3.scale (axisOfRot, this.omega, 1 / angularVel);
 			else 
 				axisOfRot = vec3.clone (this.omega);
+
+			console.log (axisOfRot);
 
 			quat.setAxisAngle (rotation, axisOfRot, angularVel * dt);
 			quat.mul (this.object.transform.rotation, this.object.transform.rotation, rotation);
@@ -87,7 +90,7 @@ function resolveCollision (object1, object2, manifold) {
 			vec3.negate (manifold.normal, manifold.normal);
 		}
 
-		var percent = 2.0;
+		var percent = 1.0;
   		vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, percent * manifold.penetrationDistance);
 
 		var dv = project (object1.rigidBody.velocity, manifold.normal);
@@ -123,12 +126,11 @@ function resolveCollision (object1, object2, manifold) {
 			vec3.scale (frictionImpulse, tangentVelocity, -j * dynamicFriction);
 		}
 
-		var contactVector = vec3.create ();
-		vec3.cross (contactVector, manifold.normal, frictionImpulse);
+		//var contactVector = vec3.create ();
+		//vec3.cross (contactVector, manifold.normal, frictionImpulse);
 
-		console.log (contactVector);
 		vec3.scaleAndAdd (object1.rigidBody.velocity, object1.rigidBody.velocity, frictionImpulse, -object1.rigidBody.inv_mass);
-		vec3.scaleAndAdd (object1.rigidBody.omega, object1.rigidBody.omega, contactVector, object1.rigidBody.inv_I);
+		//vec3.scaleAndAdd (object1.rigidBody.omega, object1.rigidBody.omega, contactVector, object1.rigidBody.inv_I);
 
 	} else if (object1.rigidBody.type == "dynamic" && object2.rigidBody.type == "dynamic") {
 		var percent = 1.0 
@@ -140,6 +142,7 @@ function resolveCollision (object1, object2, manifold) {
 		// Calculate relative velocity
   		var rv = vec3.create ();
   		vec3.sub (rv, object2.rigidBody.velocity, object1.rigidBody.velocity);
+
  
   		// Calculate relative velocity in terms of the normal direction
   		var velAlongNormal = vec3.dot (rv, manifold.normal);
@@ -178,8 +181,8 @@ function resolveCollision (object1, object2, manifold) {
 		// Apply impulse
 		vec3.scaleAndAdd (object1.rigidBody.velocity, object1.rigidBody.velocity, impulse, -object1.rigidBody.inv_mass);
 		vec3.scaleAndAdd (object2.rigidBody.velocity, object2.rigidBody.velocity, impulse, object2.rigidBody.inv_mass);
-		vec3.scaleAndAdd (object1.rigidBody.omega, object1.rigidBody.omega, contactVector, -object1.rigidBody.inv_I);
-		vec3.scaleAndAdd (object2.rigidBody.omega, object2.rigidBody.omega, contactVector, object2.rigidBody.inv_I);
+		//vec3.scaleAndAdd (object1.rigidBody.omega, object1.rigidBody.omega, contactVector, -object1.rigidBody.inv_I);
+		//vec3.scaleAndAdd (object2.rigidBody.omega, object2.rigidBody.omega, contactVector, object2.rigidBody.inv_I);
 
 		// Friction
 		var storage = vec3.create ();
@@ -199,12 +202,12 @@ function resolveCollision (object1, object2, manifold) {
 			vec3.scale (frictionImpulse, tangentVelocity, -j * dynamicFriction);
 		}
 
-		vec3.cross (contactVector, manifold.normal, frictionImpulse);
+		//vec3.cross (contactVector, manifold.normal, frictionImpulse);
 
 		vec3.scaleAndAdd (object1.rigidBody.velocity, object1.rigidBody.velocity, frictionImpulse, -object1.rigidBody.inv_mass);
 		vec3.scaleAndAdd (object2.rigidBody.velocity, object2.rigidBody.velocity, frictionImpulse, object2.rigidBody.inv_mass);
-		vec3.scaleAndAdd (object1.rigidBody.omega, object1.rigidBody.omega, contactVector, -object1.rigidBody.inv_I);
-		vec3.scaleAndAdd (object2.rigidBody.omega, object2.rigidBody.omega, contactVector, object2.rigidBody.inv_I);
+		//vec3.scaleAndAdd (object1.rigidBody.omega, object1.rigidBody.omega, contactVector, -object1.rigidBody.inv_I);
+		//vec3.scaleAndAdd (object2.rigidBody.omega, object2.rigidBody.omega, contactVector, object2.rigidBody.inv_I);
 
 	} 
 }
