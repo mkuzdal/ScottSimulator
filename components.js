@@ -32,7 +32,7 @@ class triggerHandler {
                 return;
             }
         }
-        trigger.ID = vec4.fromValues (this.currentID % 256 , Math.floor(this.currentID/256) % 256, Math.floor(this.currentID/65536) % 256, 1.0)
+        trigger.ID = vec4.fromValues (this.currentID % 256 , Math.floor (this.currentID/256) % 256, Math.floor(this.currentID/65536) % 256, 1.0)
 
         this.currentID++;
         this.triggers.push (trigger);

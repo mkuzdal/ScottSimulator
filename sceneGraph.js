@@ -20,13 +20,14 @@ class object {
         this.geometry = _geometry;
         this.texture = _texture;
         this.collider = _collider || new nullCollider ();
-        this.rigidBody = _rigidBody;
 
-        if (this.collider)
+        if (this.collider) {
             this.collider.object = this;
+        }
 
-        if (this.rigidBody)
-            this.rigidBody.object = this;
+        if (_rigidBody) {
+            this.addRigidBody (_rigidBody);
+        }
 
         this.mouseTriggers = [];
         this.worldView = mat4.create ();
@@ -150,15 +151,7 @@ class object {
         }
 
         var collider = [];
-        collider.push (vec4.fromValues (min_X, min_Y, min_Z, 1.0));
-        collider.push (vec4.fromValues (min_X, min_Y, max_Z, 1.0));
-        collider.push (vec4.fromValues (min_X, max_Y, min_Z, 1.0));
-        collider.push (vec4.fromValues (min_X, max_Y, max_Z, 1.0));
-        collider.push (vec4.fromValues (max_X, min_Y, min_Z, 1.0));
-        collider.push (vec4.fromValues (max_X, min_Y, max_Z, 1.0));
-        collider.push (vec4.fromValues (max_X, max_Y, min_Z, 1.0));
-        collider.push (vec4.fromValues (max_X, max_Y, max_Z, 1.0));
-        this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z), "static");
+        this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z), "dynamic");
         this.collider.object = this;
 
         for (var i = 0; i < points_Array.length; i++) {
@@ -168,7 +161,6 @@ class object {
         for (var i = 0; i < points_Array.length; i++) {
             texture_Array[i] = vec2.fromValues (texture_Array[i][0], texture_Array[i][1]);
         }
-
 
         lines = MatEle.split ("\n");
 
@@ -269,6 +261,34 @@ class object {
         }
 
         return newObject;
+    }
+
+    addRigidBody (_rigidBody) {
+        this.rigidBody = _rigidBody;
+        if (this.rigidBody) {
+            this.rigidBody.object = this;
+            if (this.collider) {
+                if (this.collider.type == "box") {
+                    var x = this.collider.max[1] * this.collider.max[1] + this.collider.max[2] * this.collider.max[2];
+                    var y = this.collider.max[0] * this.collider.max[0] + this.collider.max[2] * this.collider.max[2];
+                    var z = this.collider.max[0] * this.collider.max[0] + this.collider.max[1] * this.collider.max[1];
+
+                    var M = this.rigidBody.mass / 3;
+                    var I_body = mat3.fromValues (x * M, 0.0,   0.0, 
+                                                  0.0,   y * M, 0.0,   
+                                                  0.0,   0.0,   z * M);
+
+                    this.rigidBody.Ibody = I_body;
+                    this.rigidBody.CoM = this.collider.center;
+
+                    var inv_I_body = mat3.create ();
+                    mat3.invert (inv_I_body, I_body);
+                    this.rigidBody.inv_Ibody = inv_I_body;
+                } else if (this.collider.type == "sphere") {
+
+                }
+            }
+        }
     }
 }
 

@@ -2,10 +2,15 @@
 var collisionManager;
 
 class collisionManifold {
-	constructor (_contact, _normal, _penetrationDistance, _center, _collisionPoint) {
-		this.normal = _normal;
-		this.penetrationDistance = _penetrationDistance;
+	constructor (_vertexBody, _faceBody, _collisionPoint, _normal, _edgeA, _edgeB, _vf, _penetrationDistance) {
+		this.vertexBody = _vertexBody;
+		this.faceBody = _faceBody;
 		this.collisionPoint = _collisionPoint;
+		this.normal = _normal;
+		this.edgeA = _edgeA;
+		this.edgeB = _edgeB;
+		this.vf = _vf;
+		this.penetrationDistance = _penetrationDistance;
 	}
 }
 
@@ -16,9 +21,73 @@ class sceneCollisionManager {
 
 	detectCollision (collider1, collider2) {
 		if (collider1.type == "box" && collider2.type == "box") {
+	/*		var axis = vec3.create ();
+			vec3.sub (axis, collider1.currentVertices[7], collider1.currentVertices[3]);
+
+			var man = [];
+			man.push (checkAxis (axis, collider1, collider2));
+			if (!man[0])
+				return false;
+
+			axis = vec3.create ();
+			vec3.sub (axis, collider1.currentVertices[7], collider1.currentVertices[5]);
+
+			man.push (checkAxis (axis, collider1, collider2));
+			if (!man[1])
+				return false;
+
+			axis = vec3.create ();
+			vec3.sub (axis, collider1.currentVertices[7], collider1.currentVertices[6]);
+
+			man.push (checkAxis (axis, collider1, collider2));
+			if (!man[2])
+				return false;
+
+			axis = vec3.create ();
+			vec3.sub (axis, collider2.currentVertices[7], collider2.currentVertices[3]);
+
+			man.push (checkAxis (axis, collider1, collider2));
+			if (!man[3])
+				return false;
+
+			axis = vec3.create ();
+			vec3.sub (axis, collider2.currentVertices[7], collider2.currentVertices[5]);
+
+			man.push (checkAxis (axis, collider1, collider2));
+			if (!man[4])
+				return false;
+
+			axis = vec3.create ();
+			vec3.sub (axis, collider2.currentVertices[7], collider2.currentVertices[6]);
+			
+			man.push (checkAxis (axis, collider1, collider2));
+			if (!man[5])
+				return false;
+			
+			var manifold = new collisionManifold ();
+			manifold.penetrationDistance = 10000;
+			manifold.normal = vec3.create ();
+			manifold.collisionPoint = vec3.create ();
+			for (var i = 0; i < 6; i++) {
+				if (man[i].penetrationDistance < manifold.penetrationDistance) {
+					manifold = man[i];
+					if (0 < i < 3) {
+						manifold.vertexBody = collider1.object;
+						manifold.faceBody = collider2.object;
+					} else {
+						manifold.vertexBody = collider2.object;
+						manifold.faceBody = collider1.object;
+					}
+				}
+			}
+
+			return manifold;
+		*/
 			var penetrationNormal = vec3.create ();
 			var penetrationDistance = 10000;
 			var collisionPoint = vec3.fromValues (0.0, 0.0, 0.0);
+			var vertexBody = null;
+			var faceBody = null;
 
 			// axis 1
 			var axis = vec3.create ();
@@ -26,11 +95,11 @@ class sceneCollisionManager {
 
 			var projection_points1 = [];
 			for (var i = 0; i < collider1.currentVertices.length; i++) {
-				projection_points1.push (project (collider1.currentVertices[i], axis)[0]);
+				projection_points1.push (project (collider1.currentVertices[i], axis));
 			}
 			var projection_points2 = [];
 			for (var i = 0; i < collider2.currentVertices.length; i++) {
-				projection_points2.push (project (collider2.currentVertices[i], axis)[0]);
+				projection_points2.push (project (collider2.currentVertices[i], axis));
 			}
 
 			var min1 = 1000000.0;
@@ -97,6 +166,8 @@ class sceneCollisionManager {
 						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (maxPoint1);
 					}
+					vertexBody = collider1.object;
+					faceBody = collider2.object;
 				}
 			} else {
 				if (penetrationDistance > d2) {
@@ -109,6 +180,8 @@ class sceneCollisionManager {
 						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (minPoint1);
 					}
+					vertexBody = collider1.object;
+					faceBody = collider2.object;
 				}
 			}	
 
@@ -118,11 +191,11 @@ class sceneCollisionManager {
 
 			projection_points1 = [];
 			for (var i = 0; i < collider1.currentVertices.length; i++) {
-				projection_points1.push (project (collider1.currentVertices[i], axis)[1]);
+				projection_points1.push (project (collider1.currentVertices[i], axis));
 			}
 			projection_points2 = [];
 			for (var i = 0; i < collider2.currentVertices.length; i++) {
-				projection_points2.push (project (collider2.currentVertices[i], axis)[1]);
+				projection_points2.push (project (collider2.currentVertices[i], axis));
 			}
 
 			min1 = 1000000.0;
@@ -142,7 +215,6 @@ class sceneCollisionManager {
 						minPoint1 = [ collider1.currentVertices[i] ];
 					}
 					min1 = projection_points1[i];
-
 				}
 				if (projection_points1[i] >= max1) {
 					if (projection_points1[i] == max1) {
@@ -190,6 +262,8 @@ class sceneCollisionManager {
 						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (maxPoint1);
 					}
+					vertexBody = collider1.object;
+					faceBody = collider2.object;
 				}
 			} else {
 				if (penetrationDistance > d2) {
@@ -202,6 +276,8 @@ class sceneCollisionManager {
 						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (minPoint1);
 					}
+					vertexBody = collider1.object;
+					faceBody = collider2.object;					
 				}
 			}	
 
@@ -211,11 +287,11 @@ class sceneCollisionManager {
 
 			projection_points1 = [];
 			for (var i = 0; i < collider1.currentVertices.length; i++) {
-				projection_points1.push (project (collider1.currentVertices[i], axis)[2]);
+				projection_points1.push (project (collider1.currentVertices[i], axis));
 			}
 			projection_points2 = [];
 			for (var i = 0; i < collider2.currentVertices.length; i++) {
-				projection_points2.push (project (collider2.currentVertices[i], axis)[2]);
+				projection_points2.push (project (collider2.currentVertices[i], axis));
 			}
 
 			min1 = 1000000.0;
@@ -283,6 +359,8 @@ class sceneCollisionManager {
 						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (maxPoint1);
 					}
+					vertexBody = collider1.object;
+					faceBody = collider2.object;					
 				}
 			} else {
 				if (penetrationDistance > d2) {
@@ -295,6 +373,8 @@ class sceneCollisionManager {
 						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (minPoint1);
 					}
+					vertexBody = collider1.object;
+					faceBody = collider2.object;					
 				}
 			}
 
@@ -304,11 +384,11 @@ class sceneCollisionManager {
 
 			projection_points1 = [];
 			for (var i = 0; i < collider1.currentVertices.length; i++) {
-				projection_points1.push (project (collider1.currentVertices[i], axis)[0]);
+				projection_points1.push (project (collider1.currentVertices[i], axis));
 			}
 			projection_points2 = [];
 			for (var i = 0; i < collider2.currentVertices.length; i++) {
-				projection_points2.push (project (collider2.currentVertices[i], axis)[0]);
+				projection_points2.push (project (collider2.currentVertices[i], axis));
 			}
 
 			min1 = 1000000.0;
@@ -376,6 +456,8 @@ class sceneCollisionManager {
 						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (maxPoint1);
 					}
+					vertexBody = collider2.object;
+					faceBody = collider1.object;					
 				}
 			} else {
 				if (penetrationDistance > d2) {
@@ -388,6 +470,8 @@ class sceneCollisionManager {
 						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (minPoint1);
 					}
+					vertexBody = collider2.object;
+					faceBody = collider1.object;
 				}
 			}
 
@@ -397,11 +481,11 @@ class sceneCollisionManager {
 
 			projection_points1 = [];
 			for (var i = 0; i < collider1.currentVertices.length; i++) {
-				projection_points1.push (project (collider1.currentVertices[i], axis)[1]);
+				projection_points1.push (project (collider1.currentVertices[i], axis));
 			}
 			projection_points2 = [];
 			for (var i = 0; i < collider2.currentVertices.length; i++) {
-				projection_points2.push (project (collider2.currentVertices[i], axis)[1]);
+				projection_points2.push (project (collider2.currentVertices[i], axis));
 			}
 
 			min1 = 1000000.0;
@@ -469,6 +553,8 @@ class sceneCollisionManager {
 						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (maxPoint1);
 					}
+					vertexBody = collider2.object;
+					faceBody = collider1.object;
 				}
 			} else {
 				if (penetrationDistance > d2) {
@@ -481,6 +567,8 @@ class sceneCollisionManager {
 						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (minPoint1);
 					}
+					vertexBody = collider2.object;
+					faceBody = collider1.object;
 				}
 			}
 
@@ -490,11 +578,11 @@ class sceneCollisionManager {
 
 			projection_points1 = [];
 			for (var i = 0; i < collider1.currentVertices.length; i++) {
-				projection_points1.push (project (collider1.currentVertices[i], axis)[2]);
+				projection_points1.push (project (collider1.currentVertices[i], axis));
 			}
 			projection_points2 = [];
 			for (var i = 0; i < collider2.currentVertices.length; i++) {
-				projection_points2.push (project (collider2.currentVertices[i], axis)[2]);
+				projection_points2.push (project (collider2.currentVertices[i], axis));
 			}
 
 			min1 = 1000000.0;
@@ -562,6 +650,8 @@ class sceneCollisionManager {
 						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (maxPoint1);
 					}
+					vertexBody = collider2.object;
+					faceBody = collider1.object;
 				}
 			} else {
 				if (penetrationDistance > d2) {
@@ -574,6 +664,8 @@ class sceneCollisionManager {
 						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (minPoint1);
 					}
+					vertexBody = collider2.object;
+					faceBody = collider1.object;
 				}
 			}
 		
@@ -582,10 +674,14 @@ class sceneCollisionManager {
         		manifold.penetrationDistance = penetrationDistance;
         		manifold.normal = penetrationNormal;
         		manifold.collisionPoint = vec3.clone (collisionPoint);
+        		manifold.vertexBody = vertexBody;
+        		manifold.faceBody = faceBody;
         	} else {
         		manifold.penetrationDistance = 0.0;
         		manifold.normal = vec3.fromValues (0.0, 1.0, 0.0);
         		manifold.collisionPoint = vec3.clone (collisionPoint);
+        		manifold.vertexBody = vertexBody;
+        		manifold.faceBody = faceBody;
         	}
 
 			return manifold; 
@@ -668,13 +764,21 @@ class sceneCollisionManager {
 
 
 function project (point, axis) {
+	var axis_prime = vec3.create ();
+	vec3.normalize (axis_prime, axis);
+	return vec3.dot (point, axis_prime);
+
+}
+
+function project2 (point, axis) {
 	var mag = (point[0] * axis[0] + point[1] * axis[1] + point[2] * axis[2]) / (axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
 	var projection = vec3.create ();
 	vec3.scale (projection, axis, mag);
 
 	return projection;
-
 }
+
+
 
 function average (points) {
 	var x = 0;
@@ -689,14 +793,14 @@ function average (points) {
 	return vec3.fromValues (x / points.length, y / points.length, z / points.length);
 }
 
-function checkAxis (axis, collider1, collider2, collisionPoint, penetrationDistance, penetrationNormal) {
+function checkAxis (axis, collider1, collider2) {
 	var projection_points1 = [];
 	for (var i = 0; i < collider1.currentVertices.length; i++) {
-		projection_points1.push (project (collider1.currentVertices[i], axis)[1]);
+		projection_points1.push (project (collider1.currentVertices[i], axis));
 	}
 	var projection_points2 = [];
 	for (var i = 0; i < collider2.currentVertices.length; i++) {
-		projection_points2.push (project (collider2.currentVertices[i], axis)[1]);
+		projection_points2.push (project (collider2.currentVertices[i], axis));
 	}
 
 	var min1 = 1000000.0;
@@ -716,7 +820,6 @@ function checkAxis (axis, collider1, collider2, collisionPoint, penetrationDista
 				minPoint1 = [ collider1.currentVertices[i] ];
 			}
 			min1 = projection_points1[i];
-
 		}
 		if (projection_points1[i] >= max1) {
 			if (projection_points1[i] == max1) {
@@ -749,37 +852,35 @@ function checkAxis (axis, collider1, collider2, collisionPoint, penetrationDista
 	if (min2 > max1 || max2 < min1) 
 		return false;
 
+	var manifold = new collisionManifold ();
+	manifold.normal = vec3.create ();
+	manifold.collisionPoint = vec3.create ();
+
 	var v1 = max1 - min2;
 	var v2 = max2 - min1;
 	var d1 = Math.abs (v1);
 	var d2 = Math.abs (v2);
-
 	if (d1 < d2) {
-		if (penetrationDistance > d1) {
-			// d1 is the new penetration distance
-			penetrationDistance = d1;
-			if (v1 > 0) {
-				vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
-				collisionPoint = average (minPoint2);
-			} else { 
-				vec3.normalize (penetrationNormal, vec3.clone (axis));
-				collisionPoint = average (maxPoint1);
-			}
+		manifold.penetrationDistance = d1;
+		if (v1 > 0) {
+			vec3.normalize (manifold.normal, vec3.clone (vec3.negate (axis, axis)));
+			manifold.collisionPoint = average (minPoint2);
+		} else { 
+			vec3.normalize (manifold.normal, vec3.clone (axis));
+			manifold.collisionPoint = average (maxPoint1);
 		}
 	} else {
-		if (penetrationDistance > d2) {
-			// d2 is the new penetration distance
-			penetrationDistance = d2;
-			if (v2 < 0) {
-				vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
-				collisionPoint = average (maxPoint2);
-			} else {
-				vec3.normalize (penetrationNormal, vec3.clone (axis));
-				collisionPoint = average (minPoint1);
-			}
+		manifold.penetrationDistance = d2;
+		if (v2 > 0) {
+			vec3.normalize (manifold.normal, vec3.clone (axis));
+			manifold.collisionPoint = average (maxPoint2);
+		} else {
+			vec3.normalize (manifold.normal, vec3.clone (vec3.negate (axis, axis)));
+			manifold.collisionPoint = average (minPoint1);
 		}
-	}
-	return;	
+	}	
+
+	return manifold;
 }
 
 

@@ -289,8 +289,8 @@ window.onload = function init () {
                         ]; 
 
     // create the transforms for each of the 6 bodies.
-    transforms =        [   new transform (vec3.fromValues (0.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
-                            new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    transforms =        [   new transform (vec3.fromValues (-1.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                            new transform (vec3.fromValues (0.0, 20.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                             new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
                             new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ())
                         ];
@@ -301,23 +301,24 @@ window.onload = function init () {
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "dynamic")
                         ];
 
-    rigidBodies =       [   new rigidBody (50.0, 4.0, "dynamic"),
-                            new rigidBody (5.0, 1.0, "dynamic"),
-                            new rigidBody (5.0, 2.0, "dynamic"),
-                            new rigidBody (5.0, 1.0, "dynamic"),
+    rigidBodies =       [   new rigidBody (50.0, "dynamic"),
+                            new rigidBody (5.0, "dynamic"),
+                            new rigidBody (5.0, "dynamic"),
+                            new rigidBody (5.0, "dynamic"),
                         ]; 
 
     // create the object for each of the 6 bodies.
-    cubes  =            [   new object (transforms[0], materials[0], geometries[0], textures[0], colliders[0], rigidBodies[0]),
+    cubes  =            [   new object (transforms[0], materials[0], geometries[0], textures[0], colliders[0]),
                             new object (transforms[1], materials[1], geometries[1], textures[1], colliders[1], rigidBodies[1]),
                             new object (transforms[2], materials[2], geometries[0], textures[0], colliders[2]),
                             new object (transforms[3], materials[3], geometries[1], textures[1], colliders[3])
                         ];
 
+    cubes[0] = null;
     cubes[0] = new object ();
     cubes[0].loadFromObj ("stoolOBJ", "stoolMAT", "stoolTEX");
     cubes[0].transform = transforms[0];
-    cubes[0].rigidBody = rigidBodies[0];
+    cubes[0].addRigidBody (new rigidBody (10.0, "dynamic"));
 
     cubes[0].addOnMouseClickTrigger (function (object) {
         animationsManager.animations.push (new animationHold (object));
@@ -339,7 +340,7 @@ window.onload = function init () {
                             new geometry (pointsArray, normalsArray),
                             new texture (document.getElementById ("TEXfrance"), textureArray, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
-                            new rigidBody (100.0, "static"))
+                            new rigidBody (50.0, "static"))
                 );
 
     cubes.push (new object ());
