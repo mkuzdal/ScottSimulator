@@ -348,9 +348,10 @@ class geometry {
      *  @param { vec3 [] } vertices: the array of vertices to represent the geometry.
      *  @param { vec4 [] } normals: the array of normals to represent the geometry.
      */
-    constructor (_vertices, _normals) {
+    constructor (_vertices, _normals, _texCoords) {
         this.Nvertices = _vertices.length;
         this.Nnormals = _normals.length;
+        this.NtexCoords = _texCoords.length;
 
         this.nBuffer = gl.createBuffer();
         gl.bindBuffer (gl.ARRAY_BUFFER, this.nBuffer);
@@ -359,6 +360,10 @@ class geometry {
         this.vBuffer = gl.createBuffer ();
         gl.bindBuffer (gl.ARRAY_BUFFER, this.vBuffer);
         gl.bufferData (gl.ARRAY_BUFFER, flattenArray (_vertices), gl.STATIC_DRAW);
+
+        this.tBuffer = gl.createBuffer ();
+        gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
+        gl.bufferData (gl.ARRAY_BUFFER, flattenArray (_texCoords), gl.STATIC_DRAW);
     }
 
     /** setup: enables all buffers and sets the vertex and normal attributes.
@@ -373,6 +378,11 @@ class geometry {
         var vNormal = gl.getAttribLocation (program, "vNormal");
         gl.vertexAttribPointer (vNormal, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray (vNormal); 
+
+        gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
+        var vTexCoord = gl.getAttribLocation (program, "vTexCoord");
+        gl.vertexAttribPointer (vTexCoord, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray (vTexCoord);
     }
 }
 
@@ -409,9 +419,8 @@ class material {
  *  creates and loads buffers.
  */
 class texture {
-    constructor (_image, _texCoords, _options) {
+    constructor (_image, _options) {
         this.image = _image;
-        this.nCoords = _texCoords.length;
         this.options = _options || [[gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]];
 
         this.texture = gl.createTexture();
@@ -421,10 +430,6 @@ class texture {
 
         gl.texImage2D (gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.image);
         gl.generateMipmap (gl.TEXTURE_2D);
-
-        this.tBuffer = gl.createBuffer ();
-        gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
-        gl.bufferData (gl.ARRAY_BUFFER, flattenArray (_texCoords), gl.STATIC_DRAW);
     }
 
     setup () {
@@ -433,20 +438,9 @@ class texture {
         gl.bindTexture (gl.TEXTURE_2D, this.texture);
         gl.uniform1i (gl.getUniformLocation( program, "texture"), 1);
 
-        gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
-
         for (var i = 0; i < this.options.length; i++) {
             gl.texParameteri (gl.TEXTURE_2D, this.options[i][0], this.options[i][1]);
         }
-
-        var vTexCoord = gl.getAttribLocation (program, "vTexCoord");
-        gl.vertexAttribPointer (vTexCoord, 2, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray (vTexCoord);
-    }
-
-    bindCoordinates (texCoords) {
-        gl.bindBuffer (gl.ARRAY_BUFFER, this.tBuffer);
-        gl.bufferData (gl.ARRAY_BUFFER, flattenArray (texCoords), gl.STATIC_DRAW);
     }
 }
 

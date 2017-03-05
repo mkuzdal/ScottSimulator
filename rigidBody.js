@@ -54,13 +54,6 @@ class rigidBody {
 			vec3.scaleAndAdd (this.L, this.L, this.torque, dt);
 			vec3.transformMat3 (this.omega, this.L, this.inv_I);
 
-/*
-			var q_w = quat.fromValues (this.omega[0], this.omega[1], this.omega[2], 0.0);
-			var q_dot = quat.create ();
-			quat.mul (this.object.transform.rotation, this.object.transform.rotation, q_w);
-			quat.scale (this.object.transform.rotation, q_dot, 0.5);
-			quat.normalize (this.object.transform.rotation, this.object.transform.rotation);
-*/
 			var rotation = quat.create ();
 			var angularVel = Math.sqrt (this.omega[0] * this.omega[0] + this.omega[1] * this.omega[1] + this.omega[2] * this.omega[2]);
 			var axisOfRot = vec3.create ();
@@ -136,11 +129,9 @@ function resolveCollision (object1, object2, manifold) {
   		var vrelNormal = vec3.dot (n, vrel);
 
   		if (vrelNormal > THRESHHOLD) {
-  			console.log ("HERE");
   			return;
   		}
   		if (vrelNormal > -THRESHHOLD) {
-  			console.log ("HERE");
   			return;
   		}  
 

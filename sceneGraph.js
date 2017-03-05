@@ -187,9 +187,9 @@ class object {
         specular = vec4.fromValues (specular[0], specular[1], specular[2], 1.0);
         shininess = shininess[0];
 
-        this.geometry = new geometry (points_Array, normals_Array);
+        this.geometry = new geometry (points_Array, normals_Array, texture_Array);
         this.material = new material (ambient, diffuse, specular, shininess);
-        this.texture = new texture (TexEle, texture_Array);
+        this.texture = new texture (TexEle);
     }
 
     addOnMouseClickTrigger (_function) {
@@ -448,8 +448,8 @@ function buildSceneGraph () {
         SGraph.root.children.push (cubes[i]);
     }
 
-    SGraph.root.children[1].children.push (cubes[2]);
-    SGraph.root.children[1].children[0].children.push (cubes[3]);
+    //SGraph.root.children[1].children.push (cubes[2]);
+    //SGraph.root.children[1].children[0].children.push (cubes[3]);
 }
 
 function drawSceneGraph (dTime) {
