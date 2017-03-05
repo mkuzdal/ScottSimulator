@@ -264,6 +264,11 @@ window.onload = function init () {
 	room.tag = "world";
 	SGraph.root.children.push (room);
 
+	var roof = new object ();
+	roof.loadFromObj ("roofOBJ", "roofMAT", "roofTEX");
+	roof.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+	room.children.push(roof);
+
 	// desk
 	var desk = new object ();
 	desk.loadFromObj ("deskOBJ", "deskMAT", "deskTEX");
@@ -272,28 +277,53 @@ window.onload = function init () {
 	desk.transform = new transform (vec3.fromValues (0.0, -6, -9), vec3.fromValues (1.4, 1.4, 1.4), quat.clone(rotation));
 	room.children.push (desk);
 
-	var chair = new object ();
-	chair.loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
+	
 	var rotation = quat.create();
-	var position = vec3.fromValues (0.0, -3.8, -1.3);
-	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
-	chair.transform = new transform (vec3.clone(position), vec3.fromValues (1.2, 1.2, 1.2), quat.clone(rotation));
-	room.children.push (chair);
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90));
 
-	var seat = new object ();
+	//make all the chairs!
+    var chair = new object ();
+    chair.loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
+    chair.transform = new transform (vec3.fromValues (0, -3.8, -1.3), vec3.fromValues (1.2, 1.2, 1.2), quat.clone(rotation));
+    var seat = new object ();
 	seat.loadFromObj ("seatOBJ", "seatMAT", "seatTEX");
 	var rotation = quat.create();
 	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
 	seat.transform = new transform (vec3.fromValues(0.0,0.3,0.22), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
 	chair.children.push (seat);
 
-	for (var i = 0; i < 3; i++) {
-		var nextChair = chair.clone();
-		position[0] += 3.0;
-		nextChair.transform.position = vec3.clone(position);
-		SGraph.root.children.push(nextChair);
-	}
- 
+	var rows_of_chairs=4;
+    var chairs_per_row=8;
+    for(var i=0; i<rows_of_chairs; i++){
+    	//create each large row of chairs
+    	for(var j=0; j< chairs_per_row; j++){
+    		var tempChair = chair.clone();
+    		tempChair.transform.position = vec3.fromValues (2.61*j-9.2, -3.8+2.8*i, -1.8+4*i);
+    		room.children.push (tempChair);
+    	}
+    	//also create the chairs on the edges of the room, on the outside of the aisles
+    	var rightChair = chair.clone();
+    	var rightChairRotate = quat.create();
+		quat.setAxisAngle(rightChairRotate, [0,1,0], glMatrix.toRadian(-105));
+    	rightChair.transform.rotation = quat.clone(rightChairRotate);
+    	rightChair.transform.position = vec3.fromValues(-15.5, -3.8+2.8*i, -1.8+4*i-1.2);
+    	room.children.push(rightChair);
+
+    	var leftChair = chair.clone();
+    	var leftChairRotate = quat.create();
+    	quat.setAxisAngle(leftChairRotate, [0,1,0], glMatrix.toRadian(-75));
+    	leftChair.transform.rotation = quat.clone(leftChairRotate);
+    	leftChair.transform.position = vec3.fromValues(15.5, -3.8+2.8*i, -1.8+4*i-1.2);
+    	room.children.push(leftChair); 
+
+    }
+
+    //add a stool in the corner 
+    var stool = new object();
+    stool.loadFromObj("stoolOBJ", "stoolMAT", "stoolTEX");
+	stool.transform = new transform (vec3.fromValues(-16, -7.48, -8.5), vec3.fromValues(0.4, 0.4, 0.4), quat.clone(rotation)); 
+	room.children.push(stool); 
+
 	var button = new object ();
     button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
     button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
@@ -328,6 +358,9 @@ window.onload = function init () {
     StateManager.getState("clickedRight1").addChild(clickedRight2, StateManager.getState("clickedRight2"));
     StateManager.getState("clickedRight2").addChild(clickedRight3, StateManager.getState("clickedRight3"));
     StateManager.getState("clickedRight3").addChild(clickedRight4, StateManager.getState("root"));
+    StateManager.getState("clickedRight1").addChild(clickedLeft, StateManager.getState("root"));
+    StateManager.getState("clickedRight2").addChild(clickedLeft, StateManager.getState("root"));
+    StateManager.getState("clickedRight3").addChild(clickedLeft, StateManager.getState("root"));
     StateManager.getState("twobuttons").addChild(clickedLeft, StateManager.getState("root"));
 
     rightButtonMount.children[0].addOnMouseClickTrigger(function(object) {

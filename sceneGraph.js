@@ -22,10 +22,11 @@ class object {
         this.collider = _collider || new nullCollider ();
         this.rigidBody = _rigidBody;
 
-        if (this.rigidBody)
-            this.rigidBody.object = this;
         if (this.collider)
             this.collider.object = this;
+
+        if (this.rigidBody)
+            this.rigidBody.object = this;
 
         this.mouseTriggers = [];
         this.worldView = mat4.create ();
@@ -415,6 +416,19 @@ class sceneGraph {
     }
 }
 
+function buildSceneGraph () {
+    SGraph.root.children.push (cubes[0]);
+    SGraph.root.children.push (cubes[1]);
+    SGraph.root.children.push (cubes[4]);
+    //SGraph.root.children.push (cubes[5]);
+
+    for (var i = 6; i < cubes.length; i++) {
+        SGraph.root.children.push (cubes[i]);
+    }
+
+    SGraph.root.children[1].children.push (cubes[2]);
+    SGraph.root.children[1].children[0].children.push (cubes[3]);
+}
 
 function drawSceneGraph (dTime) {
     SGraph.set ();
