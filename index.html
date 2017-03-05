@@ -26,6 +26,9 @@ void main ()
         fPositionFromLight = lightProjectionMatrix * lightMatrix * modelMatrix * vPosition;
         gl_Position = fPositionFromLight;
         return;
+    } else if (vDrawType == 3) {
+        gl_Position = projectionMatrix * vPosition;
+        return;
     }
 
     fPos = (modelMatrix * vPosition).xyz;
@@ -171,6 +174,9 @@ void main () {
         }
 
         gl_FragColor = fColor * texture2D (texture, fTexCoord);
+    } else if (fDrawType == 3) {
+        vec4 fColor = vec4 (1.0, 1.0, 1.0, 1.0);
+        gl_FragColor = fColor;
     }
 }
 </script>
@@ -213,6 +219,10 @@ void main () {
 <iframe id="roofOBJ" src="Meshes/roof.txt" style="display: none;"></iframe>
 <iframe id="roofMAT" src="Meshes/roof_material.txt" style="display: none;"></iframe>
 <img id=   "roofTEX" src="Meshes/roof_texture.png" hidden></img>
+
+<iframe id="speakerOBJ" src="Meshes/speaker.txt" style="display: none;"></iframe>
+<iframe id="speakerMAT" src="Meshes/speaker_material.txt" style="display: none;"></iframe>
+<img id=   "speakerTEX" src="Meshes/speaker_texture.png" hidden></img>
 
 <iframe id="chairOBJ" src="Meshes/chair2.txt" style="display: none;"></iframe>
 <iframe id="chairMAT" src="Meshes/chair2_material.txt" style="display: none;"></iframe>

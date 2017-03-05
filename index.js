@@ -55,6 +55,7 @@ var transforms = [];
 var colliders = [];
 var rigidBodies = [];
 var clickEvents = [];
+var crosshair;
 
 // player variables; consider abstracting into a player class
 var cam;
@@ -257,6 +258,13 @@ window.onload = function init () {
 
 	cam = new camera ([0,-1.85,-15.8], glMatrix.toRadian(180), glMatrix.toRadian(5));
 
+    crosshair = new Crosshair ([
+            vec4.fromValues (0.0, 0.05, 0.5, 1.0),
+            vec4.fromValues (0.0, -0.05, 0.5, 1.0),
+            vec4.fromValues (0.05, 0.0, 0.5, 1.0),
+            vec4.fromValues (-0.05, 0.0, 0.5, 1.0)
+        ]);
+
 	// room
 	var room = new object ();
 	room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
@@ -268,6 +276,19 @@ window.onload = function init () {
 	roof.loadFromObj ("roofOBJ", "roofMAT", "roofTEX");
 	roof.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
 	room.children.push(roof);
+
+	var speaker = new object ();
+	var rotation = quat.create();
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(75));
+	speaker.loadFromObj ("speakerOBJ", "speakerMAT", "speakerTEX");
+	speaker.transform = new transform (vec3.fromValues (15, 11.3, -3), vec3.fromValues (2.0, 2.0, 2.0), quat.clone (rotation));
+	room.children.push(speaker);
+
+	var speaker2 = speaker.clone();
+	speaker2.transform.position = vec3.fromValues (-15, 11.3, -3);
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-75));
+	speaker2.transform.rotation = quat.clone (rotation);
+	room.children.push(speaker2);
 
 	// desk
 	var desk = new object ();
