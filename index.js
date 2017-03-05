@@ -264,6 +264,11 @@ window.onload = function init () {
 	room.tag = "world";
 	SGraph.root.children.push (room);
 
+	var roof = new object ();
+	roof.loadFromObj ("roofOBJ", "roofMAT", "roofTEX");
+	roof.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+	room.children.push(roof);
+
 	// desk
 	var desk = new object ();
 	desk.loadFromObj ("deskOBJ", "deskMAT", "deskTEX");
@@ -283,17 +288,20 @@ window.onload = function init () {
     var seat = new object ();
 	seat.loadFromObj ("seatOBJ", "seatMAT", "seatTEX");
 	var rotation = quat.create();
-	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
-	seat.transform = new transform (vec3.fromValues (0.0, 0, 0.22), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90));
+	seat.transform = new transform (vec3.fromValues(0.0,0.3,0.22), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
 	chair.children.push (seat);
 
-	var rows_of_chairs=4; 
+	var rows_of_chairs=4;
     var chairs_per_row=8;
     for(var i=0; i<rows_of_chairs; i++){
     	//create each large row of chairs
     	for(var j=0; j< chairs_per_row; j++){
     		var tempChair = chair.clone();
-    		tempChair.transform.position = vec3.fromValues (2.61*j-9.2, -3.8+2.8*i, -1.8+4*i);
+    		tempChair.transform.position = vec3.fromValues (2.61*j-9.2, -3.8+2.8*i, -1.9+0.7*Math.sin((j+1.3)/3)+4*i);
+    		var rotation = quat.create();
+    		quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90 - 10 + (2.5 * j)));
+    		tempChair.transform.rotation = quat.clone(rotation);
     		room.children.push (tempChair);
     	}
     	//also create the chairs on the edges of the room, on the outside of the aisles
