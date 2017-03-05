@@ -122,10 +122,10 @@ window.onload = function init () {
 
 	function lockChange() {
 		if (document.pointerLockElement === canvas || document.mozPointerLockElement === canvas) {
-			console.log('The pointer lock status is now locked');
+			// console.log('The pointer lock status is now locked');
 			document.addEventListener("mousemove", updateCamera, false);
 		} else {
-			console.log('The pointer lock status is now unlocked');  
+			// console.log('The pointer lock status is now unlocked');  
 			document.removeEventListener("mousemove", updateCamera, false);
 		}
 	}
@@ -270,19 +270,33 @@ window.onload = function init () {
 	buttonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
 	room.children.push (buttonMount);
 
-	// // first button, buttonMount.child[0]
+	// first button, buttonMount.child[0]
 	var button = new object ();
 	button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
 	button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
 	buttonMount.children.push (button);
 
-	// // desk, room.child[1]
+	// desk, room.child[1]
 	var desk = new object ();
 	desk.loadFromObj ("deskOBJ", "deskMAT", "deskTEX");
 	var rotation = quat.create();
 	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
 	desk.transform = new transform (vec3.fromValues (0.0, -6, -9), vec3.fromValues (1.4, 1.4, 1.4), quat.clone(rotation));
 	room.children.push (desk);
+
+	var chair = new object ();
+	chair.loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
+	var rotation = quat.create();
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
+	chair.transform = new transform (vec3.fromValues (0.0, -3.8, -1.3), vec3.fromValues (1.2, 1.2, 1.2), quat.clone(rotation));
+	room.children.push (chair);
+
+	var seat = new object ();
+	seat.loadFromObj ("seatOBJ", "seatMAT", "seatTEX");
+	var rotation = quat.create();
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
+	seat.transform = new transform (vec3.fromValues (0.0, 0, 0.22), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
+	chair.children.push (seat);
 
 	StateManager.addState("second");
 

@@ -101,7 +101,7 @@ class sceneCollisionManager {
 				}
 			}	
 
-			console.log (collisionPoint);
+			// console.log (collisionPoint);
 
 			// axis 2
 			axis = vec3.create ();
