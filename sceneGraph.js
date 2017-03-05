@@ -80,13 +80,13 @@ class object {
     }
 
     loadFromObj (ObjID, MatID, TexID) {
-        var ObjEle = document.getElementById (ObjID);
+        var ObjEle = document.getElementById(ObjID).contentWindow.document.body.textContent;
         if (!ObjEle) { 
             alert ("Unable to load object file " + ObjID);
             return -1;
         }
 
-        var MatEle = document.getElementById (MatID);
+        var MatEle = document.getElementById (MatID).contentWindow.document.body.textContent;
         if (!MatEle) { 
             alert ("Unable to load material file " + MatID);
             return -1;
@@ -98,7 +98,7 @@ class object {
             return -1;
         }
 
-        var lines = ObjEle.text.split ("\n");
+        var lines = ObjEle.split ("\n");
         var indexes = [];
         var vertices = [];
         var normals = [];
@@ -169,7 +169,7 @@ class object {
         }
 
 
-        lines = MatEle.text.split ("\n");
+        lines = MatEle.split ("\n");
 
         var shininess;
         var ambient;

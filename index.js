@@ -67,28 +67,28 @@ var movingdown = false;
 
 
 var cubeVertices = [
-    vec4.fromValues ( -0.5, -0.5,  0.5, 1.0 ),
-    vec4.fromValues ( -0.5,  0.5,  0.5, 1.0 ),
-    vec4.fromValues (  0.5,  0.5,  0.5, 1.0 ),
-    vec4.fromValues (  0.5, -0.5,  0.5, 1.0 ),
-    vec4.fromValues ( -0.5, -0.5, -0.5, 1.0 ),
-    vec4.fromValues ( -0.5,  0.5, -0.5, 1.0 ),
-    vec4.fromValues (  0.5,  0.5, -0.5, 1.0 ),
-    vec4.fromValues (  0.5, -0.5, -0.5, 1.0 )
+	vec4.fromValues ( -0.5, -0.5,  0.5, 1.0 ),
+	vec4.fromValues ( -0.5,  0.5,  0.5, 1.0 ),
+	vec4.fromValues (  0.5,  0.5,  0.5, 1.0 ),
+	vec4.fromValues (  0.5, -0.5,  0.5, 1.0 ),
+	vec4.fromValues ( -0.5, -0.5, -0.5, 1.0 ),
+	vec4.fromValues ( -0.5,  0.5, -0.5, 1.0 ),
+	vec4.fromValues (  0.5,  0.5, -0.5, 1.0 ),
+	vec4.fromValues (  0.5, -0.5, -0.5, 1.0 )
 ];
 
 var texCoords = [
-    vec2.fromValues (0.0, 0.0),
-    vec2.fromValues (0.0, 1.0),
-    vec2.fromValues (1.0, 1.0),
-    vec2.fromValues (1.0, 0.0)
+	vec2.fromValues (0.0, 0.0),
+	vec2.fromValues (0.0, 1.0),
+	vec2.fromValues (1.0, 1.0),
+	vec2.fromValues (1.0, 0.0)
 ];
 
 var planeVertices = [
-    vec4.fromValues (-10.0, 0.0, 10.0, 1.0),
-    vec4.fromValues (-10.0, 0.0, -10.0, 1.0),
-    vec4.fromValues (10.0, 0.0, -10.0, 1.0),
-    vec4.fromValues (10.0, 0.0, 10.0, 1.0)
+	vec4.fromValues (-10.0, 0.0, 10.0, 1.0),
+	vec4.fromValues (-10.0, 0.0, -10.0, 1.0),
+	vec4.fromValues (10.0, 0.0, -10.0, 1.0),
+	vec4.fromValues (10.0, 0.0, 10.0, 1.0)
 ];
 
 /** init: intialization function.
@@ -319,42 +319,42 @@ window.onload = function init () {
  *  @param: { float } current: the current frame time.
  */
 function render (current) {
-    // update the current and change in time
-    current = performance.now();
-    current *= 0.001;
-    var deltaTime = current - prev;
-    //cap the maximum delta time so that if you switch away from the tab and switch back everything won't go haywire
-    if(deltaTime > 0.1) deltaTime=0.1;    
-    prev = current;
+	// update the current and change in time
+	current = performance.now();
+	current *= 0.001;
+	var deltaTime = current - prev;
+	//cap the maximum delta time so that if you switch away from the tab and switch back everything won't go haywire
+	if(deltaTime > 0.1) deltaTime=0.1;    
+	prev = current;
 
-    // animate all of the objects
-    animationsManager.animateAll (deltaTime);
-    lightsManager.setupAll ();
+	// animate all of the objects
+	animationsManager.animateAll (deltaTime);
+	lightsManager.setupAll ();
 
-    // animate the camera rotation
-    cam.updateRotation (deltaTime);
-    gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), cam.position);
+	// animate the camera rotation
+	cam.updateRotation (deltaTime);
+	gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), cam.position);
 
-    if (movingforward) cam.camMoveForward(deltaTime * 4);
-    if (movingbackward) cam.camMoveBackward(deltaTime * 4);
-    if (movingleft) cam.camMoveLeft(deltaTime * 4);
-    if (movingright) cam.camMoveRight(deltaTime * 4);
-    if (movingup) cam.camMoveUp(deltaTime * 4);
-    if (movingdown) cam.camMoveDown(deltaTime * 4);
+	if (movingforward) cam.camMoveForward(deltaTime * 4);
+	if (movingbackward) cam.camMoveBackward(deltaTime * 4);
+	if (movingleft) cam.camMoveLeft(deltaTime * 4);
+	if (movingright) cam.camMoveRight(deltaTime * 4);
+	if (movingup) cam.camMoveUp(deltaTime * 4);
+	if (movingdown) cam.camMoveDown(deltaTime * 4);
 
-    // draw
-    drawSceneGraph (deltaTime);
+	// draw
+	drawSceneGraph (deltaTime);
 
-    // callback
-    window.requestAnimationFrame (render);
+	// callback
+	window.requestAnimationFrame (render);
 }
 
 function generatePlane () {
-    pointsArray = [];
-    normalsArray = [];
-    textureArray = [];
+	pointsArray = [];
+	normalsArray = [];
+	textureArray = [];
 
-    quad (1, 0, 3, 2, planeVertices, texCoords);
+	quad (1, 0, 3, 2, planeVertices, texCoords);
 }
 
 /** generateCube: function to generate the vertices for a recursive sphere 
@@ -373,96 +373,96 @@ function generatePlane () {
  *         normals for the generated sphere.
  */
 function generateCube () {
-    pointsArray = [];
-    normalsArray = [];
-    textureArray = [];
+	pointsArray = [];
+	normalsArray = [];
+	textureArray = [];
 
-    quad (1, 0, 3, 2, cubeVertices, texCoords);
-    quad (2, 3, 7, 6, cubeVertices, texCoords);
-    quad (0, 4, 7, 3, cubeVertices, texCoords);
-    quad (5, 1, 2, 6, cubeVertices, texCoords);
-    quad (4, 5, 6, 7, cubeVertices, texCoords);
-    quad (5, 4, 0, 1, cubeVertices, texCoords);
+	quad (1, 0, 3, 2, cubeVertices, texCoords);
+	quad (2, 3, 7, 6, cubeVertices, texCoords);
+	quad (0, 4, 7, 3, cubeVertices, texCoords);
+	quad (5, 1, 2, 6, cubeVertices, texCoords);
+	quad (4, 5, 6, 7, cubeVertices, texCoords);
+	quad (5, 4, 0, 1, cubeVertices, texCoords);
 }
 
 function generateCubeNormals (vertices) {
-    normalsArray = [];
+	normalsArray = [];
 
-    AUX_generateCubeNormals (1, 0, 3, 2, vertices);
-    AUX_generateCubeNormals (2, 3, 7, 6, vertices);
-    AUX_generateCubeNormals (0, 4, 7, 3, vertices);
-    AUX_generateCubeNormals (5, 1, 2, 6, vertices);
-    AUX_generateCubeNormals (4, 5, 6, 7, vertices);
-    AUX_generateCubeNormals (5, 4, 0, 1, vertices);
+	AUX_generateCubeNormals (1, 0, 3, 2, vertices);
+	AUX_generateCubeNormals (2, 3, 7, 6, vertices);
+	AUX_generateCubeNormals (0, 4, 7, 3, vertices);
+	AUX_generateCubeNormals (5, 1, 2, 6, vertices);
+	AUX_generateCubeNormals (4, 5, 6, 7, vertices);
+	AUX_generateCubeNormals (5, 4, 0, 1, vertices);
 }
 
 function AUX_generateCubeNormals (a, b, c, d, vertices) {
-    var t1 = vec3.create ();
-    var t2 = vec3.create ();
-    vec4.subtract (t1, vertices[b], vertices[a]);
-    vec4.subtract (t2, vertices[c], vertices[b]);
+	var t1 = vec3.create ();
+	var t2 = vec3.create ();
+	vec4.subtract (t1, vertices[b], vertices[a]);
+	vec4.subtract (t2, vertices[c], vertices[b]);
 
-    t1 = vec3.fromValues (t1[0], t1[1], t1[2]);
-    t2 = vec3.fromValues (t2[0], t2[1], t2[2]);
+	t1 = vec3.fromValues (t1[0], t1[1], t1[2]);
+	t2 = vec3.fromValues (t2[0], t2[1], t2[2]);
 
-    var normal = vec3.create ();
-    vec3.cross (normal, t1, t2);
+	var normal = vec3.create ();
+	vec3.cross (normal, t1, t2);
 
-    normalsArray.push (normal);
-    normalsArray.push (normal);
-    normalsArray.push (normal);
-    normalsArray.push (normal);
-    normalsArray.push (normal);
-    normalsArray.push (normal);
+	normalsArray.push (normal);
+	normalsArray.push (normal);
+	normalsArray.push (normal);
+	normalsArray.push (normal);
+	normalsArray.push (normal);
+	normalsArray.push (normal);
 }
 
 function generateCubeTexCoords (texCoords) {
-    textureArray = [];
+	textureArray = [];
 
-    AUX_generateCubeTexCoords (1, 0, 3, 2, texCoords);
-    AUX_generateCubeTexCoords (2, 3, 7, 6, texCoords);
-    AUX_generateCubeTexCoords (0, 4, 7, 3, texCoords);
-    AUX_generateCubeTexCoords (5, 1, 2, 6, texCoords);
-    AUX_generateCubeTexCoords (4, 5, 6, 7, texCoords);
-    AUX_generateCubeTexCoords (5, 4, 0, 1, texCoords);
+	AUX_generateCubeTexCoords (1, 0, 3, 2, texCoords);
+	AUX_generateCubeTexCoords (2, 3, 7, 6, texCoords);
+	AUX_generateCubeTexCoords (0, 4, 7, 3, texCoords);
+	AUX_generateCubeTexCoords (5, 1, 2, 6, texCoords);
+	AUX_generateCubeTexCoords (4, 5, 6, 7, texCoords);
+	AUX_generateCubeTexCoords (5, 4, 0, 1, texCoords);
 }
 
 function AUX_generateCubeTexCoords (a, b, c, d, texCoords) {
-    textureArray.push (texCoords[3]);
-    textureArray.push (texCoords[2]);
-    textureArray.push (texCoords[1]);
-    textureArray.push (texCoords[3]);
-    textureArray.push (texCoords[1]);
-    textureArray.push (texCoords[0]); 
+	textureArray.push (texCoords[3]);
+	textureArray.push (texCoords[2]);
+	textureArray.push (texCoords[1]);
+	textureArray.push (texCoords[3]);
+	textureArray.push (texCoords[1]);
+	textureArray.push (texCoords[0]); 
 }
 
 function generateCubeVertices (vertices) {
-    pointsArray = [];
+	pointsArray = [];
 
-    AUX_generateCubeVertices (1, 0, 3, 2, vertices);
-    AUX_generateCubeVertices (2, 3, 7, 6, vertices);
-    AUX_generateCubeVertices (0, 4, 7, 3, vertices);
-    AUX_generateCubeVertices (5, 1, 2, 6, vertices);
-    AUX_generateCubeVertices (4, 5, 6, 7, vertices);
-    AUX_generateCubeVertices (5, 4, 0, 1, vertices);
+	AUX_generateCubeVertices (1, 0, 3, 2, vertices);
+	AUX_generateCubeVertices (2, 3, 7, 6, vertices);
+	AUX_generateCubeVertices (0, 4, 7, 3, vertices);
+	AUX_generateCubeVertices (5, 1, 2, 6, vertices);
+	AUX_generateCubeVertices (4, 5, 6, 7, vertices);
+	AUX_generateCubeVertices (5, 4, 0, 1, vertices);
 }
 
 function AUX_generateCubeVertices (a, b, c, d, vertices) {
-    pointsArray.push (vertices[a]); 
-    pointsArray.push (vertices[b]);  
-    pointsArray.push (vertices[c]);  
-    pointsArray.push (vertices[a]);  
-    pointsArray.push (vertices[c]);
-    pointsArray.push (vertices[d]);  
+	pointsArray.push (vertices[a]); 
+	pointsArray.push (vertices[b]);  
+	pointsArray.push (vertices[c]);  
+	pointsArray.push (vertices[a]);  
+	pointsArray.push (vertices[c]);
+	pointsArray.push (vertices[d]);  
 }
 
 /** quad: generateCube helper function.
  */
 function quad (a, b, c, d, vertices, texCoords) {
 
-    AUX_generateCubeTexCoords (1, 0, 3, 2, texCoords);
-    AUX_generateCubeVertices (1, 0, 3, 2, vertices);
-    AUX_generateCubeNormals (1, 0, 3, 2, vertices);
+	AUX_generateCubeTexCoords (1, 0, 3, 2, texCoords);
+	AUX_generateCubeVertices (1, 0, 3, 2, vertices);
+	AUX_generateCubeNormals (1, 0, 3, 2, vertices);
 }
 
 
@@ -482,94 +482,94 @@ function quad (a, b, c, d, vertices, texCoords) {
  *         normals for the generated sphere.
  */
 function generateSphere (complexity) {
-    pointsArray = [];
-    normalsArray = [];
-    textureArray = [];
+	pointsArray = [];
+	normalsArray = [];
+	textureArray = [];
 
-    var va = vec4.fromValues (0.0, 0.0, -1.0,1);
-    var vb = vec4.fromValues (0.0, 0.942809, 0.333333, 1);
-    var vc = vec4.fromValues (-0.816497, -0.471405, 0.333333, 1);
-    var vd = vec4.fromValues (0.816497, -0.471405, 0.333333,1);
+	var va = vec4.fromValues (0.0, 0.0, -1.0,1);
+	var vb = vec4.fromValues (0.0, 0.942809, 0.333333, 1);
+	var vc = vec4.fromValues (-0.816497, -0.471405, 0.333333, 1);
+	var vd = vec4.fromValues (0.816497, -0.471405, 0.333333,1);
 
-    tetrahedron (va, vb, vc, vd, complexity);
+	tetrahedron (va, vb, vc, vd, complexity);
 }
 
 /** triangle: generateSphere helper function.
  */
 function triangle (a, b, c) {
 
-    pointsArray.push (a);
-    pointsArray.push (b);      
-    pointsArray.push (c);
+	pointsArray.push (a);
+	pointsArray.push (b);      
+	pointsArray.push (c);
 
-    var N1 = vec3.fromValues (a[0], a[1], a[2], 0.0);
-    var N2 = vec3.fromValues (b[0], b[1], b[2], 0.0);
-    var N3 = vec3.fromValues (c[0], c[1], c[2], 0.0);
+	var N1 = vec3.fromValues (a[0], a[1], a[2], 0.0);
+	var N2 = vec3.fromValues (b[0], b[1], b[2], 0.0);
+	var N3 = vec3.fromValues (c[0], c[1], c[2], 0.0);
 
-    normalsArray.push (N1);
-    normalsArray.push (N2);
-    normalsArray.push (N3);
+	normalsArray.push (N1);
+	normalsArray.push (N2);
+	normalsArray.push (N3);
 
-    var tx1 = Math.atan2(a[0], a[2]) / (2 * Math.PI) + 0.5;
-    var ty1 = Math.asin(a[1]) / Math.PI + .5;
-    var tx2 = Math.atan2(b[0], b[2]) / (2 * Math.PI) + 0.5;
-    var ty2 = Math.asin(b[1]) / Math.PI + .5;
-    var tx3 = Math.atan2(c[0], c[2]) / (2 * Math.PI) + 0.5;
-    var ty3 = Math.asin(c[1]) / Math.PI + .5;
+	var tx1 = Math.atan2(a[0], a[2]) / (2 * Math.PI) + 0.5;
+	var ty1 = Math.asin(a[1]) / Math.PI + .5;
+	var tx2 = Math.atan2(b[0], b[2]) / (2 * Math.PI) + 0.5;
+	var ty2 = Math.asin(b[1]) / Math.PI + .5;
+	var tx3 = Math.atan2(c[0], c[2]) / (2 * Math.PI) + 0.5;
+	var ty3 = Math.asin(c[1]) / Math.PI + .5;
 
-    textureArray.push (vec2.fromValues (tx1, ty1));
-    textureArray.push (vec2.fromValues (tx2, ty2));
-    textureArray.push (vec2.fromValues (tx3, ty3));
+	textureArray.push (vec2.fromValues (tx1, ty1));
+	textureArray.push (vec2.fromValues (tx2, ty2));
+	textureArray.push (vec2.fromValues (tx3, ty3));
 }
 
 /** divideTriangle: generateSphere helper function.
  */
 function divideTriangle (a, b, c, count) {
-    if (count > 0) {
-                
-        var ab = mix (a, b, 0.5);
-        var ac = mix (a, c, 0.5);
-        var bc = mix (b, c, 0.5);
-                
-        vec3.normalize (ab, ab);
-        vec3.normalize (ac, ac);
-        vec3.normalize (bc, bc);
-                                
-        divideTriangle (a, ab, ac, count - 1);
-        divideTriangle (ab, b, bc, count - 1);
-        divideTriangle (bc, c, ac, count - 1);
-        divideTriangle (ab, bc, ac, count - 1);
-    }
-    else { 
-        triangle (a, b, c);
-    }
+	if (count > 0) {
+				
+		var ab = mix (a, b, 0.5);
+		var ac = mix (a, c, 0.5);
+		var bc = mix (b, c, 0.5);
+				
+		vec3.normalize (ab, ab);
+		vec3.normalize (ac, ac);
+		vec3.normalize (bc, bc);
+								
+		divideTriangle (a, ab, ac, count - 1);
+		divideTriangle (ab, b, bc, count - 1);
+		divideTriangle (bc, c, ac, count - 1);
+		divideTriangle (ab, bc, ac, count - 1);
+	}
+	else { 
+		triangle (a, b, c);
+	}
 }
 
 /** tetrahedron: generateSphere helper function.
  */
 function tetrahedron (a, b, c, d, n, type) {
-    divideTriangle (a, b, c, n, type);
-    divideTriangle (d, c, b, n, type);
-    divideTriangle (a, d, b, n, type);
-    divideTriangle (a, c, d, n, type);
+	divideTriangle (a, b, c, n, type);
+	divideTriangle (d, c, b, n, type);
+	divideTriangle (a, d, b, n, type);
+	divideTriangle (a, c, d, n, type);
 }
 
 function mix (u, v, s)
 {
-    if (typeof s !== "number") {
-        throw "mix: the last paramter " + s + " must be a number";
-    }
-    
-    if (u.length != v.length) {
-        throw "vector dimension mismatch";
-    }
+	if (typeof s !== "number") {
+		throw "mix: the last paramter " + s + " must be a number";
+	}
+	
+	if (u.length != v.length) {
+		throw "vector dimension mismatch";
+	}
 
-    var result = [];
-    for (var i = 0; i < u.length; ++i) {
-        result.push ((1.0 - s) * u[i] +  s * v[i]);
-    }
+	var result = [];
+	for (var i = 0; i < u.length; ++i) {
+		result.push ((1.0 - s) * u[i] +  s * v[i]);
+	}
 
-    return result;
+	return result;
 }
 
 /**	Flattens an array of Float32Array's
@@ -577,21 +577,21 @@ function mix (u, v, s)
  *	@ret { Float32Array } ret: a flattened array of floats
  */
 function flattenArray (array) {
-    var flattenedArray = [];
+	var flattenedArray = [];
 
-    for (var i = 0; i < array.length; i++) {
-    	for (var j = 0; j < array[i].length; j++) {
-    		flattenedArray.push (array[i][j]);
-    	}
-    }
+	for (var i = 0; i < array.length; i++) {
+		for (var j = 0; j < array[i].length; j++) {
+			flattenedArray.push (array[i][j]);
+		}
+	}
 
-    return new Float32Array (flattenedArray);
+	return new Float32Array (flattenedArray);
 }
 
 function initShadowFramebuffer () {
     // Query the extension
     var depthTextureExt = gl.getExtension ("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
-    if(!depthTexture) { console.log("Depth Texture isn't working"); }
+    if(!depthTextureExt) { console.log("Depth Texture isn't working"); }
 
     // Create a color texture
     var colorTexture = gl.createTexture();
@@ -624,26 +624,44 @@ function initShadowFramebuffer () {
 }
 
 function initColorFramebuffer () {
-    var texture;
-    var framebuffer = gl.createFramebuffer();
+	var texture;
+	var framebuffer = gl.createFramebuffer();
 
-    texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    gl.generateMipmap (gl.TEXTURE_2D);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); 
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+	texture = gl.createTexture();
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+	gl.generateMipmap (gl.TEXTURE_2D);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); 
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 
-    gl.bindFramebuffer (gl.FRAMEBUFFER, framebuffer);
-    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+	gl.bindFramebuffer (gl.FRAMEBUFFER, framebuffer);
+	gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
 
-    framebuffer.texture = texture;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	framebuffer.texture = texture;
+	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    return framebuffer;
+	return framebuffer;
+}
+
+function readTextFile(file)
+{
+	var rawFile = new XMLHttpRequest();
+	rawFile.open("GET", file, false);
+	rawFile.onreadystatechange = function ()
+	{
+		if(rawFile.readyState === 4)
+		{
+			if(rawFile.status === 200 || rawFile.status == 0)
+			{
+				var allText = rawFile.responseText;
+				alert(allText);
+			}
+		}
+	}
+	rawFile.send(null);
 }
 
 /** @endfile: test.js */
