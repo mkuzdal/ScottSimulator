@@ -296,6 +296,9 @@ window.onload = function init () {
     StateManager.getState("clickedRight1").addChild(clickedRight2, StateManager.getState("clickedRight2"));
     StateManager.getState("clickedRight2").addChild(clickedRight3, StateManager.getState("clickedRight3"));
     StateManager.getState("clickedRight3").addChild(clickedRight4, StateManager.getState("root"));
+    StateManager.getState("clickedRight1").addChild(clickedLeft, StateManager.getState("root"));
+    StateManager.getState("clickedRight2").addChild(clickedLeft, StateManager.getState("root"));
+    StateManager.getState("clickedRight3").addChild(clickedLeft, StateManager.getState("root"));
     StateManager.getState("twobuttons").addChild(clickedLeft, StateManager.getState("root"));
 
     rightButtonMount.children[0].addOnMouseClickTrigger(function(object) {
