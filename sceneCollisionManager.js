@@ -113,7 +113,6 @@ class sceneCollisionManager {
 				}
 			}	
 
-
 			// axis 2
 			axis = vec3.create ();
 			vec3.sub (axis, collider1.currentVertices[7], collider1.currentVertices[5]);

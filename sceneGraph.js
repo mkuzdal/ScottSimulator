@@ -158,7 +158,7 @@ class object {
         collider.push (vec4.fromValues (max_X, min_Y, max_Z, 1.0));
         collider.push (vec4.fromValues (max_X, max_Y, min_Z, 1.0));
         collider.push (vec4.fromValues (max_X, max_Y, max_Z, 1.0));
-        this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z));
+        this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z), "static");
         this.collider.object = this;
 
         for (var i = 0; i < points_Array.length; i++) {
@@ -426,8 +426,8 @@ function buildSceneGraph () {
         SGraph.root.children.push (cubes[i]);
     }
 
-    SGraph.root.children[1].children.push (cubes[2]);
-    SGraph.root.children[1].children[0].children.push (cubes[3]);
+    //SGraph.root.children[1].children.push (cubes[2]);
+    //SGraph.root.children[1].children[0].children.push (cubes[3]);
 }
 
 function drawSceneGraph (dTime) {
@@ -483,8 +483,6 @@ function drawSceneGraph (dTime) {
     SGraph.drawTree (DRAW_TYPE_DEFAULT);
 
     SGraph.update (dTime);
-
-    gl.flush ();
 }
 
 

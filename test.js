@@ -290,7 +290,7 @@ window.onload = function init () {
 
     // create the transforms for each of the 6 bodies.
     transforms =        [   new transform (vec3.fromValues (0.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
-                            new transform (vec3.fromValues (-1.0, 20.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                            new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                             new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
                             new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ())
                         ];
@@ -309,7 +309,7 @@ window.onload = function init () {
 
     // create the object for each of the 6 bodies.
     cubes  =            [   new object (transforms[0], materials[0], geometries[0], textures[0], colliders[0], rigidBodies[0]),
-                            new object (transforms[1], materials[1], geometries[1], textures[1], colliders[1], rigidBodies[1]),
+                            new object (transforms[1], materials[1], geometries[1], textures[1], colliders[1]),
                             new object (transforms[2], materials[2], geometries[0], textures[0], colliders[2]),
                             new object (transforms[3], materials[3], geometries[1], textures[1], colliders[3])
                         ];
@@ -352,7 +352,7 @@ window.onload = function init () {
         cubes[i].tag = i;
     }
 
-    cubes[1].active = false;
+    //cubes[1].active = false;
     cubes[5].tag = "world";
     cubes[4].tag = "world";
 
@@ -379,6 +379,7 @@ function render (current) {
     current = performance.now();
     current *= 0.001;
     var deltaTime = current - prev;
+    if(deltaTime > 0.1) deltaTime=0.1;
     prev = current;
 
     // animate all of the objects
@@ -645,7 +646,7 @@ function flattenArray (array) {
 function initShadowFramebuffer () {
     // Query the extension
     var depthTextureExt = gl.getExtension ("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
-    if(!depthTexture) { console.log("Depth Texture isn't working"); }
+    if(!depthTextureExt) { console.log("Depth Texture isn't working"); }
 
     // Create a color texture
     var colorTexture = gl.createTexture();

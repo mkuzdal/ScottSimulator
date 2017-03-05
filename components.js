@@ -1,9 +1,9 @@
 
 class mouseTrigger {
-    constructor (_object, _function, type) {
+    constructor (_object, _function, _type) {
         this.func = _function;
         this.object = _object;
-        this.type = type;
+        this.type = _type;
 
         clickManager.addTrigger (this);
     }
@@ -80,6 +80,7 @@ class nullCollider {
         this.type = "null";
 
         this.matrix = mat4.create ();
+        this.physics = "static";
     }
 
     setup () {
@@ -188,11 +189,12 @@ class polygonCollider {
 } */
 
 class boxCollider {
-    constructor (_min, _max) {
+    constructor (_min, _max, _physics) {
         this.min = _min;
         this.max = _max;
         this.center = vec3.fromValues ((_min[0] + _max[0])/2, (_min[1] + _max[1])/2, (_min[2] + _max[2])/2);
         this.type = "box";
+        this.physics = _physics;
 
         this.min = vec4.fromValues (this.min[0], this.min[1], this.min[2], 1.0);
         this.max = vec4.fromValues (this.max[0], this.max[1], this.max[2], 1.0);
@@ -308,10 +310,11 @@ class boxCollider {
 }
 
 class sphereCollider {
-    constructor (_center, _radius) {
+    constructor (_center, _radius, _physics) {
         this.center = _center;
         this.radius = _radius;
         this.type = "sphere"
+        this.phyiscs = _physics;
 
         this.matrix = mat4.create ();
         this.scaling = 1.0;

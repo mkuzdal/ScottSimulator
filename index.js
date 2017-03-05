@@ -339,7 +339,6 @@ window.onload = function init () {
     room.children.push (leftButtonMount);
     SGraph.root.children.push (room);
 
-
     StateManager.addState("twobuttons");
     StateManager.addState("clickedRight1");
     StateManager.addState("clickedRight2");
@@ -375,7 +374,6 @@ window.onload = function init () {
 	// button.addOnMouseClickTrigger(function(object) {
 	//     StateManager.apply("clickedButton");
 	// });
-
 
 
 	prev = performance.now();
