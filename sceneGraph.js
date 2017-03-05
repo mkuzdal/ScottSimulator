@@ -229,12 +229,12 @@ class object {
         switch (this.collider.type) {
             case "box":
             {
-                newCollider = new boxCollider (this.collider.min, this.collider.max);
+                newCollider = new boxCollider (this.collider.min, this.collider.max, this.collider.physics);
                 break;
             }
             case "sphere":
             {
-                newCollider = new sphereCollider (this.collider.center, this.collider.radius);
+                newCollider = new sphereCollider (this.collider.center, this.collider.radius, this.collider.physics);
                 break;
             }
         }
@@ -308,9 +308,7 @@ class sceneGraph {
                 this.drawNode (root);
             } else if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
                 this.drawNode (root);
-            } else {
-                //console.log ("HERE");
-            }
+            } 
         }
         for (var i = 0; i < root.children.length; i++) {
             this.__drawTree_AUX (root.children[i], PC, PL, type);
@@ -391,8 +389,11 @@ class sceneGraph {
             root.collider.scaling = scaling_prime;
         }
 
-        root.collider.setup ();
-        collisionManager.objects.push (root);
+        if (root.collider.type != "null") {
+            root.collider.setup ();
+            collisionManager.objects.push (root);
+        }
+
         for (var i = 0; i < root.children.length; i++) {
             this.__set_AUX (root.children[i], CTM_prime, scaling_prime);
         }
@@ -426,8 +427,8 @@ function buildSceneGraph () {
         SGraph.root.children.push (cubes[i]);
     }
 
-    //SGraph.root.children[1].children.push (cubes[2]);
-    //SGraph.root.children[1].children[0].children.push (cubes[3]);
+    SGraph.root.children[1].children.push (cubes[2]);
+    SGraph.root.children[1].children[0].children.push (cubes[3]);
 }
 
 function drawSceneGraph (dTime) {

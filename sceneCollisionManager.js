@@ -16,7 +16,6 @@ class sceneCollisionManager {
 
 	detectCollision (collider1, collider2) {
 		if (collider1.type == "box" && collider2.type == "box") {
-			
 			var penetrationNormal = vec3.create ();
 			var penetrationDistance = 10000;
 			var collisionPoint = vec3.fromValues (0.0, 0.0, 0.0);
@@ -577,7 +576,7 @@ class sceneCollisionManager {
 					}
 				}
 			}
-
+		
 			var manifold = new collisionManifold ();
 			if (penetrationDistance != 0) {
         		manifold.penetrationDistance = penetrationDistance;
@@ -650,13 +649,17 @@ class sceneCollisionManager {
 
 	detectAllCollisions () {
 		for (var i = 0; i < this.objects.length; i++) {
-			for (var j = i + 1; j < this.objects.length; j++) {
-				if (this.objects[i].collider.tag != "null" && this.objects[j].collider.tag != "null") {
-					var manifold = this.detectCollision (this.objects[i].collider, this.objects[j].collider);
-					if (manifold) {
-						resolveCollision (this.objects[i], this.objects[j], manifold);
+			if (this.objects[i].collider.physics == "dynamic") {
+				for (var j = 0; j < this.objects.length; j++) {
+					if (i != j) {
+						var manifold = this.detectCollision (this.objects[i].collider, this.objects[j].collider);
+						if (manifold) {
+							resolveCollision (this.objects[i], this.objects[j], manifold);
+						}
 					}
 				}
+				this.objects.splice (i, 1);
+				i--;
 			}
 		}
 		this.objects = [];
@@ -776,7 +779,6 @@ function checkAxis (axis, collider1, collider2, collisionPoint, penetrationDista
 			}
 		}
 	}
-
 	return;	
 }
 

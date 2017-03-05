@@ -295,21 +295,21 @@ window.onload = function init () {
                             new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ())
                         ];
 
-    colliders =         [   new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0),
-                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)), //new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 0.5),
-                            new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0),
-                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5))
+    colliders =         [   new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0, "dynamic"),
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "dynamic"),
+                            new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0, "dynamic"),
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "dynamic")
                         ];
 
     rigidBodies =       [   new rigidBody (50.0, 4.0, "dynamic"),
                             new rigidBody (5.0, 1.0, "dynamic"),
-                            new rigidBody (5.0, "dynamic"),
-                            new rigidBody (5.0, "dynamic"),
+                            new rigidBody (5.0, 2.0, "dynamic"),
+                            new rigidBody (5.0, 1.0, "dynamic"),
                         ]; 
 
     // create the object for each of the 6 bodies.
     cubes  =            [   new object (transforms[0], materials[0], geometries[0], textures[0], colliders[0], rigidBodies[0]),
-                            new object (transforms[1], materials[1], geometries[1], textures[1], colliders[1]),
+                            new object (transforms[1], materials[1], geometries[1], textures[1], colliders[1], rigidBodies[1]),
                             new object (transforms[2], materials[2], geometries[0], textures[0], colliders[2]),
                             new object (transforms[3], materials[3], geometries[1], textures[1], colliders[3])
                         ];

@@ -16,8 +16,6 @@ class rigidBody {
 			this.force = vec3.create ();
 		}
 
-		this.force = vec3.create ();
-
 		this.omega = vec3.fromValues (0.0, 0.0, 0.0);
 		this.torque = vec3.fromValues (0.0, 0.0, 0.0);
 
@@ -48,8 +46,6 @@ class rigidBody {
 				vec3.scale (axisOfRot, this.omega, 1 / angularVel);
 			else 
 				axisOfRot = vec3.clone (this.omega);
-
-			console.log (axisOfRot);
 
 			quat.setAxisAngle (rotation, axisOfRot, angularVel * dt);
 			quat.mul (this.object.transform.rotation, this.object.transform.rotation, rotation);
