@@ -123,6 +123,24 @@ class animationHandler {
             }
         }
     }
+
+    removeAnimation (animation) {
+        for (var i = 0; i < this.animations.length; i++) {
+            if (this.animations[i] === animation) {
+                this.animations.splice (i, 1);
+                return;
+            }
+        }
+    }
+
+    removeAnimationsByTag (tag) {
+        for (var i = 0; i < this.animations.length; i++) {
+            if (this.animations[i] == tag) {
+                this.animations.splice (i, 1);
+                i--;
+            }
+        }
+    }
 }
 
 /** animationRotation: a class that defines a rotation for an object. When passed
@@ -179,6 +197,12 @@ class animationHold {
         var direction = vec3.fromValues (-storage[8], -storage[9], -storage[10]);
         vec3.normalize (direction, direction);
         vec3.scale (direction, direction, this.distance);
+
+        if (clickManager.clicked) {
+            this.object.rigidBody.type = "dynamic";
+            vec3.scale (this.object.rigidBody.P, vec3.clone (direction), 5.0);
+            animationsManager.removeAnimation (this);
+        }
 
         vec3.add (direction, direction, cam.position);
         this.object.transform.position = direction;

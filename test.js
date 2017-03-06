@@ -38,6 +38,9 @@ var lightsManager;
 var animationsManager;
 var clickManager;
 
+var player;
+var playerControler;
+
 // previous frame time
 var prev = 0;
 
@@ -141,10 +144,6 @@ window.onload = function init () {
     window.addEventListener ("keydown", function (e) {
         switch (event.keyCode) {
             case 187: // =
-            {
-                ch.active = !ch.active;
-                break;
-            }
             case 73: // i
             case 79: // o
             case 49: // 1
@@ -285,6 +284,19 @@ window.onload = function init () {
     generateCubeTexCoords (texCoords);
 
     cam = new camera ();
+    player = new object (new transform (vec3.fromValues (0.0, 0.0, 15.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                         null, 
+                         null, 
+                         null,
+                         new boxCollider (vec3.fromValues (-1.0, -4.0, -1.0), vec3.fromValues (1.0, 1.0, 1.0), "dynamic"),
+                         new rigidBody (5.0, "dynamic"));
+
+    player.camera = cam;
+    player.rigidBody.angularRigidBody = false;
+    player.rigidBody.restitution = 0.1;
+    player.tag = "player";
+
+    playerControler = new PlayerControler (player);
 
     geometries.push (new geometry (pointsArray, normalsArray, textureArray));
     textures.push (new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
@@ -327,10 +339,24 @@ window.onload = function init () {
     cubes[0].loadFromObj ("stoolOBJ", "stoolMAT", "stoolTEX");
     cubes[0].transform = transforms[0];
     cubes[0].addRigidBody (new rigidBody (10.0, "dynamic"));
+    cubes[0].collider.physics = "dynamic";
 
     cubes[0].addOnMouseClickTrigger (function (object) {
         animationsManager.animations.push (new animationHold (object));
     }); 
+
+    cubes[1].addOnMouseClickTrigger (function (object) {
+        var storage = mat4.create ();
+        mat4.fromQuat (storage, cam.rotation);
+            
+        var direction = vec3.fromValues (-storage[8], -storage[9], -storage[10]);
+        vec3.normalize (direction, direction);
+
+        var impulse = vec3.create ();
+        vec3.scale (impulse, direction, 1000.0);
+
+        object.rigidBody.addImpulse (impulse);
+    })
 
 
     animationsManager.animations.push (new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (1.0, 1.0, 0.0)));
@@ -372,6 +398,18 @@ window.onload = function init () {
         cubes.push (c);
     } 
 
+    cubes.push (new object (new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                            null, 
+                            null, 
+                            null, 
+                            new boxCollider (vec3.fromValues (-100.0, -100.0, -0.5), vec3.fromValues (100.0, 100.0, 0.5), "trigger"),
+                            null
+                ));
+
+    cubes[6].collider.collisionFunction = function (object1, object2) {
+        console.log ("HERE");
+    }
+
     buildSceneGraph ();
 
     prev = performance.now();
@@ -399,18 +437,33 @@ function render (current) {
     cam.updateRotation (deltaTime);
     gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), cam.position);
 
-    if (movingforward) cam.camMoveForward(deltaTime * 4);
-    if (movingbackward) cam.camMoveBackward(deltaTime * 4);
-    if (movingleft) cam.camMoveLeft(deltaTime * 4);
-    if (movingright) cam.camMoveRight(deltaTime * 4);
-    if (movingup) cam.camMoveUp(deltaTime * 4);
-    if (movingdown) cam.camMoveDown(deltaTime * 4);
+    if (movingforward) playerControler.moveForward(deltaTime * 12);
+    if (movingbackward) playerControler.moveBackward(deltaTime * 12);
+    if (movingleft) playerControler.moveLeft(deltaTime * 12);
+    if (movingright) playerControler.moveRight(deltaTime * 12);
+    if (movingup) playerControler.jump ();
+    if (movingdown) playerControler.moveDown(deltaTime * 12);
 
     // draw
     drawSceneGraph (deltaTime);
 
     // callback
     window.requestAnimationFrame (render);
+}
+
+function buildSceneGraph () {
+    SGraph.root.children.push (cubes[0]);
+    SGraph.root.children.push (cubes[1]);
+    SGraph.root.children.push (cubes[4]);
+    //SGraph.root.children.push (cubes[5]);
+
+    for (var i = 6; i < cubes.length; i++) {
+        SGraph.root.children.push (cubes[i]);
+    }
+
+    SGraph.root.children.push (player);
+    //SGraph.root.children[1].children.push (cubes[2]);
+    //SGraph.root.children[1].children[0].children.push (cubes[3]);
 }
 
 function generatePlane () {

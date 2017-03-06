@@ -21,6 +21,7 @@ class object {
         this.geometry = _geometry;
         this.texture = _texture;
         this.collider = _collider || new nullCollider ();
+        this.camera = null;
 
         if (this.collider) {
             this.collider.object = this;
@@ -47,13 +48,16 @@ class object {
             this.rigidBody.update (dTime);
         }
         this.transform.update ();
+
+        if (this.camera) {
+            this.camera.position = vec3.clone (this.transform.position);
+            this.transform.rotation = quat.clone (this.camera.rotation);
+        }
     }
 
     setup (CTM) {
         if (this.material) {
             this.material.setup ();
-        } if (this.geometry) {
-            this.geometry.setup ();
         } if (this.texture) {
             this.texture.setup (); 
         } 
@@ -63,18 +67,20 @@ class object {
         } else {
             gl.uniform4fv (gl.getUniformLocation (program, "fTriggerID"), vec4.fromValues (0.0, 0.0, 0.0, 1.0));   
         }
+        if (this.geometry) {
+            this.geometry.setup ();
+            gl.uniformMatrix4fv (modelMatrixLoc, false, this.collider.matrix);
+            gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.view);
+            gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
+            //gl.uniformMatrix4fv (cameraMatrixLoc, false, lightsManager.lightSources[0].view);
+            //gl.uniformMatrix4fv (projectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix); 
+            gl.uniformMatrix4fv (lightProjectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix);
+            gl.uniformMatrix4fv (lightMatrixLoc, false, lightsManager.lightSources[0].view);
 
-        gl.uniformMatrix4fv (modelMatrixLoc, false, this.collider.matrix);
-        gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.view);
-        gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
-        //gl.uniformMatrix4fv (cameraMatrixLoc, false, lightsManager.lightSources[0].view);
-        //gl.uniformMatrix4fv (projectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix); 
-        gl.uniformMatrix4fv (lightProjectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix);
-        gl.uniformMatrix4fv (lightMatrixLoc, false, lightsManager.lightSources[0].view);
-
-        var CTMN = mat3.create ();
-        mat3.normalFromMat4 (CTMN, this.collider.matrix);
-        gl.uniformMatrix3fv (normalMatrixLoc, false, CTMN);
+            var CTMN = mat3.create ();
+            mat3.normalFromMat4 (CTMN, this.collider.matrix);
+            gl.uniformMatrix3fv (normalMatrixLoc, false, CTMN);
+        }
     }
 
     draw () {
@@ -152,7 +158,7 @@ class object {
         }
 
         var collider = [];
-        this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z), "dynamic");
+        this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z), "static");
         this.collider.object = this;
 
         for (var i = 0; i < points_Array.length; i++) {
@@ -438,24 +444,12 @@ class sceneGraph {
     }
 }
 
-function buildSceneGraph () {
-    SGraph.root.children.push (cubes[0]);
-    SGraph.root.children.push (cubes[1]);
-    SGraph.root.children.push (cubes[4]);
-    //SGraph.root.children.push (cubes[5]);
-
-    for (var i = 6; i < cubes.length; i++) {
-        SGraph.root.children.push (cubes[i]);
-    }
-
-    //SGraph.root.children[1].children.push (cubes[2]);
-    //SGraph.root.children[1].children[0].children.push (cubes[3]);
-}
-
 function drawSceneGraph (dTime) {
     SGraph.set ();
     lightsManager.setupAll ();
     collisionManager.detectAllCollisions ();
+    collisionManager.handleAllContactCollisions ();
+    SGraph.update (dTime);
 
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
@@ -506,8 +500,6 @@ function drawSceneGraph (dTime) {
 
     crosshair.setup ();
     crosshair.draw ();
-
-    SGraph.update (dTime);
 }
 
 
