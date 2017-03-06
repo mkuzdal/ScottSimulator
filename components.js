@@ -112,7 +112,7 @@ class boxCollider {
         this.matrix = mat4.create ();
         this.currentCenter = vec3.create ();
 
-        this.onEnter = null;
+        this.collisionFunction = null;
     }
 
     setup () {
@@ -223,6 +223,8 @@ class sphereCollider {
 
         this.currentCenter = vec3.clone (this.center);
         this.currentRadius = this.radius;
+
+        this.collisionFunction = null;
     }
 
     setup () {

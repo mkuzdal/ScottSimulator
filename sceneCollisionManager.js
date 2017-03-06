@@ -744,6 +744,32 @@ class sceneCollisionManager {
 	}
 
 	detectAllCollisions () {
+		var player
+		for (var i = 0; i < this.objects.length; i++) {
+			if (this.objects[i].tag == "player") {
+				player = this.objects[i];
+				this.objects.splice (i, 1);
+				break;
+			}
+		}
+
+		for (var i = 0; i < this.objects.length; i++) {
+			var manifold = this.detectCollision (player.collider, this.objects[i].collider);
+			if (manifold) {
+				resolveCollision (player, this.objects[i], manifold);
+				if (player.collider.collisionFunction) {
+					player.collider.collisionFunction (player, this.objects[i]);
+				}
+				if (this.objects[i].collider.collisionFunction) {
+					this.objects[i].collider.collisionFunction (this.objects[i], player);
+				}
+			}
+			if (this.objects[i].collider.physics == "trigger") {
+				this.objects.splice (i, 1);
+				i--;
+			}
+		}
+
 		for (var i = 0; i < this.objects.length; i++) {
 			if (this.objects[i].collider.physics == "dynamic") {
 				for (var j = 0; j < this.objects.length; j++) {
@@ -751,6 +777,12 @@ class sceneCollisionManager {
 						var manifold = this.detectCollision (this.objects[i].collider, this.objects[j].collider);
 						if (manifold) {
 							resolveCollision (this.objects[i], this.objects[j], manifold);
+							if (this.objects[i].collider.collisionFunction) {
+								this.objects[i].collider.collisionFunction (this.objects[i], this.objects[j]);
+							}
+							if (this.objects[j].collider.collisionFunction) {
+								this.objects[j].collider.collisionFunction (this.objects[j], this.objects[i]);
+							}
 						}
 					}
 				}
@@ -758,20 +790,6 @@ class sceneCollisionManager {
 				i--;
 			}
 		}
-
-		if (this.player) {
-			for (var i = 0; i < this.objects.length; i++) {
-				var manifold = this.detectCollision (this.player.object.collider, this.objects[i].collider);
-				if (manifold) {
-					resolveCollision (this.player.object, this.objects[i], manifold);
-				}
-
-				if (this.objects[i].collider.onEnter) {
-					this.objects[i].collider.onEnter (this.player);
-				}
-			}
-		}
-
 		this.objects = [];
 	}
 } 
