@@ -258,12 +258,12 @@ window.onload = function init () {
 	lightsManager.lightSources[0].tag = "red";
 
 	cam = new camera ([0,-1.85,-15.8], glMatrix.toRadian(180), glMatrix.toRadian(5));
-    player = new object (new transform (vec3.fromValues (0.0, -1.85, -15.8), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    player = new object (new transform (vec3.fromValues (0.0, 10.0, -15.8), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                          null, 
                          null, 
                          null,
-                         new boxCollider (vec3.fromValues (-1.0, -4.0, -1.0), vec3.fromValues (1.0, 1.0, 1.0), "dynamic"),
-                         new rigidBody (100.0, "dynamic"));
+                         new boxCollider (vec3.fromValues (-1.5, -7.5, -1.5), vec3.fromValues (1.5, 0.0, 1.5), "static"),
+                         new rigidBody (100.0, "static"));
 
     player.camera = cam;
     player.rigidBody.angularRigidBody = false;
@@ -292,14 +292,87 @@ window.onload = function init () {
     generateCubeNormals (cubeVertices);
     generateCubeVertices (cubeVertices);
     generateCubeTexCoords (texCoords);
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, -4.0, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, -9.5, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
                             new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                             new geometry (pointsArray, normalsArray, textureArray),
                             new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
-    SGraph.root.children.push (roomColliders[0]);
+    roomColliders.push ( new object (new transform (vec3.fromValues (17.5, 0.0, 0.0), vec3.fromValues (1.0, 30.0, 50.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+    roomColliders.push ( new object (new transform (vec3.fromValues (-17.5, 0.0, 0.0), vec3.fromValues (1.0, 30.0, 50.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 0.0, -17.5), vec3.fromValues (50.0, 30.0, 1.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 0.0, -17.5), vec3.fromValues (50.0, 30.0, 1.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+    
+    for(var i=0; i < 4; i++) {
+        roomColliders.push ( new object (new transform (vec3.fromValues (0.0, -6.1+2.9*i, -2.5+i*4), vec3.fromValues (50.0, 1.0, 3.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+        roomColliders.push ( new object (new transform (vec3.fromValues (-12.0, -7.55+2.9*i, -4.5+i*4), vec3.fromValues (4.0, 1.0, 3.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+        roomColliders.push ( new object (new transform (vec3.fromValues (12.0, -7.55+2.9*i, -4.5+i*4), vec3.fromValues (4.0, 1.0, 3.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+    }
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 5.5, 15.3), vec3.fromValues (50.0, 1.0, 5.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 9.0, 18.0), vec3.fromValues (50.0, 30.0, 1.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 10.0, 12.0), vec3.fromValues (21.0, 8.0, 0.5), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+    for (var i=0; i<roomColliders.length; i++) SGraph.root.children.push (roomColliders[i]);
 
 	var roof = new object ();
 	roof.loadFromObj ("roofOBJ", "roofMAT", "roofTEX");
@@ -400,7 +473,7 @@ window.onload = function init () {
     StateManager.addState("clickedRight3");
     StateManager.addState("clickedLeft");
 
-    var lookedDown = new Event("lookDown", new Activity(document.getElementById('AUDIOWOOHOO'), function(){}, function(){console.log('Scott clicks the left button.')}));
+    var lookedDown = new Event("lookDown", new Activity(null, function(){}, function(){console.log('Scott clicks the left button.')}));
     var clickedRight1 = new Event("clickedRight", new Activity(document.getElementById('AUDIOBRIBED'), function(){}, function(){console.log('You did not hear me. I said the left button')}));
     var clickedRight2 = new Event("clickedRight", new Activity(document.getElementById('AUDIOFOUNDOIL'), function(){}, function(){console.log('LEFT. As in your left')}));
     var clickedRight3 = new Event("clickedRight", new Activity(document.getElementById('AUDIODIE'), function(){}, function(){console.log('You have done it now Scott...')}));
