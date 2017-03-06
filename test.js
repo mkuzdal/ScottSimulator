@@ -106,8 +106,8 @@ window.onload = function init () {
     gl.viewport (0, 0, canvas.width, canvas.height);
     gl.clearColor (0.0, 0.0, 0.0, 1.0);
     
-    //gl.enable (gl.BLEND);
-    //gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.enable (gl.BLEND);
+    gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.enable (gl.DEPTH_TEST);
 
@@ -297,6 +297,8 @@ window.onload = function init () {
 
     player.camera = cam;
     player.rigidBody.angularRigidBody = false;
+    player.rigidBody.dynamicFriction = 100000.0;
+    player.rigidBody.staticFriction = 100000.0;
     player.tag = "player";
 
     playerControler = new PlayerControler (player);
@@ -386,6 +388,18 @@ window.onload = function init () {
         c.transform.position = vec3.fromValues (40 * Math.cos (Math.PI * angle / 180), c.transform.position[1], 10 * Math.sin (Math.PI * angle / 180));
         cubes.push (c);
     } 
+
+    cubes.push (new object (new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                            null, 
+                            null, 
+                            null, 
+                            new boxCollider (vec3.fromValues (-100.0, -100.0, -0.5), vec3.fromValues (100.0, 100.0, 0.5), "trigger"),
+                            null
+                ));
+
+    cubes[6].collider.collisionFunction = function (object1, object2) {
+        console.log ("HERE");
+    }
 
     buildSceneGraph ();
 

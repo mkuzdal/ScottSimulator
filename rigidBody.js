@@ -1,5 +1,5 @@
 var gravity = 10.0;
-var THRESHHOLD = 0.15;
+var THRESHHOLD = 1.05;
 
 class rigidBody {
 	constructor (_M, _type) {
