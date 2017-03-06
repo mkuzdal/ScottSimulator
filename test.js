@@ -342,6 +342,7 @@ window.onload = function init () {
     cubes[0].loadFromObj ("stoolOBJ", "stoolMAT", "stoolTEX");
     cubes[0].transform = transforms[0];
     cubes[0].addRigidBody (new rigidBody (10.0, "dynamic"));
+    cubes[0].collider.physics = "dynamic";
 
     cubes[0].addOnMouseClickTrigger (function (object) {
         animationsManager.animations.push (new animationHold (object));
@@ -427,6 +428,23 @@ function render (current) {
     // callback
     window.requestAnimationFrame (render);
 }
+
+
+function buildSceneGraph () {
+    SGraph.root.children.push (cubes[0]);
+    SGraph.root.children.push (cubes[1]);
+    SGraph.root.children.push (cubes[4]);
+    //SGraph.root.children.push (cubes[5]);
+
+    for (var i = 6; i < cubes.length; i++) {
+        SGraph.root.children.push (cubes[i]);
+    }
+
+    SGraph.root.children.push (player);
+    //SGraph.root.children[1].children.push (cubes[2]);
+    //SGraph.root.children[1].children[0].children.push (cubes[3]);
+}
+
 
 function generatePlane () {
     pointsArray = [];

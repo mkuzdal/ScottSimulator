@@ -158,7 +158,7 @@ class object {
         }
 
         var collider = [];
-        this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z), "dynamic");
+        this.collider = new boxCollider (vec3.fromValues (min_X, min_Y, min_Z), vec3.fromValues (max_X, max_Y, max_Z), "static");
         this.collider.object = this;
 
         for (var i = 0; i < points_Array.length; i++) {
@@ -442,21 +442,6 @@ class sceneGraph {
             this.__update_AUX (dTime, root.children[i]);
         }
     }
-}
-
-function buildSceneGraph () {
-    SGraph.root.children.push (cubes[0]);
-    SGraph.root.children.push (cubes[1]);
-    SGraph.root.children.push (cubes[4]);
-    //SGraph.root.children.push (cubes[5]);
-
-    for (var i = 6; i < cubes.length; i++) {
-        SGraph.root.children.push (cubes[i]);
-    }
-
-    SGraph.root.children.push (player);
-    //SGraph.root.children[1].children.push (cubes[2]);
-    //SGraph.root.children[1].children[0].children.push (cubes[3]);
 }
 
 function drawSceneGraph (dTime) {

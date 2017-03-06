@@ -38,8 +38,6 @@ var lightsManager;
 var animationsManager;
 var clickManager;
 
-var clicked = false;
-
 // previous frame time
 var prev = 0;
 
@@ -65,6 +63,9 @@ var movingleft = false;
 var movingright = false;
 var movingup = false;
 var movingdown = false;
+
+var player;
+var playerControler;
 
 
 var cubeVertices = [
@@ -132,7 +133,7 @@ window.onload = function init () {
 	}
 
 	function updateCamera(e) {
-		cam.mouseLook (e.movementX, e.movementY);
+		player.camera.mouseLook (e.movementX, e.movementY);
 	}
 
 	canvas.addEventListener ("mousedown", function (e) {
@@ -257,6 +258,19 @@ window.onload = function init () {
 	lightsManager.lightSources[0].tag = "red";
 
 	cam = new camera ([0,-1.85,-15.8], glMatrix.toRadian(180), glMatrix.toRadian(5));
+    player = new object (new transform (vec3.fromValues (0.0, -1.85, -15.8), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                         null, 
+                         null, 
+                         null,
+                         new boxCollider (vec3.fromValues (-1.0, -4.0, -1.0), vec3.fromValues (1.0, 1.0, 1.0), "dynamic"),
+                         new rigidBody (100.0, "dynamic"));
+
+    player.camera = cam;
+    player.rigidBody.angularRigidBody = false;
+    player.tag = "player";
+    playerControler = new PlayerControler (player);
+    SGraph.root.children.push (player);
+
 
     crosshair = new Crosshair ([
             vec4.fromValues (0.0, 0.05, 0.5, 1.0),
@@ -271,6 +285,21 @@ window.onload = function init () {
 	room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
 	room.tag = "world";
 	SGraph.root.children.push (room);
+    room.collider = new nullCollider ();
+
+    var roomColliders = [];
+
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, -4.0, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+    SGraph.root.children.push (roomColliders[0]);
 
 	var roof = new object ();
 	roof.loadFromObj ("roofOBJ", "roofMAT", "roofTEX");
@@ -347,6 +376,8 @@ window.onload = function init () {
     stool.loadFromObj("stoolOBJ", "stoolMAT", "stoolTEX");
 	stool.transform = new transform (vec3.fromValues(-16, -7.48, -8.5), vec3.fromValues(0.4, 0.4, 0.4), quat.clone(rotation)); 
 	room.children.push(stool); 
+    stool.addRigidBody (new rigidBody (10.0, "dynamic"));
+    stool.collider.physics = "dynamic";
 
 	var button = new object ();
     button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
@@ -415,23 +446,24 @@ function render (current) {
 	current *= 0.001;
 	var deltaTime = current - prev;
 	//cap the maximum delta time so that if you switch away from the tab and switch back everything won't go haywire
-	if(deltaTime > 0.1) deltaTime=0.1;    
+	if(deltaTime > 0.1) deltaTime=0.1;
 	prev = current;
 
 	// animate all of the objects
 	animationsManager.animateAll (deltaTime);
 	lightsManager.setupAll ();
 
-	// animate the camera rotation
-	cam.updateRotation (deltaTime);
-	gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), cam.position);
+    // animate the camera rotation
+    player.camera.updateRotation (deltaTime);
+    gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), player.camera.position);
 
-	if (movingforward) cam.camMoveForward(deltaTime * 4);
-	if (movingbackward) cam.camMoveBackward(deltaTime * 4);
-	if (movingleft) cam.camMoveLeft(deltaTime * 4);
-	if (movingright) cam.camMoveRight(deltaTime * 4);
-	if (movingup) cam.camMoveUp(deltaTime * 4);
-	if (movingdown) cam.camMoveDown(deltaTime * 4);
+
+    if (movingforward) playerControler.moveForward(deltaTime * 16);
+    if (movingbackward) playerControler.moveBackward(deltaTime * 16);
+    if (movingleft) playerControler.moveLeft(deltaTime * 16);
+    if (movingright) playerControler.moveRight(deltaTime * 16);
+    if (movingup) playerControler.jump ();
+    if (movingdown) playerControler.moveDown(deltaTime * 16);
 
 	// draw
 	drawSceneGraph (deltaTime);
@@ -755,4 +787,4 @@ function readTextFile(file)
 	rawFile.send(null);
 }
 
-/** @endfile: test.js */
+/** @endfile: index.js */
