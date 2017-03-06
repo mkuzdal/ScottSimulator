@@ -90,11 +90,11 @@ class nullCollider {
 
 class boxCollider {
     constructor (_min, _max, _physics) {
-        this.min = _min;
-        this.max = _max;
-        this.center = vec3.fromValues ((_min[0] + _max[0])/2, (_min[1] + _max[1])/2, (_min[2] + _max[2])/2);
+        this.min = _min || vec3.fromValues (-0.5, -0.5, -0.5);
+        this.max = _max || vec3.fromValues (0.5, 0.5, 0.5);
+        this.center = vec3.fromValues ((this.min[0] + this.max[0])/2, (this.min[1] + this.max[1])/2, (this.min[2] + this.max[2])/2);
         this.type = "box";
-        this.physics = _physics;
+        this.physics = _physics || "static";
 
         this.min = vec4.fromValues (this.min[0], this.min[1], this.min[2], 1.0);
         this.max = vec4.fromValues (this.max[0], this.max[1], this.max[2], 1.0);
@@ -511,7 +511,7 @@ class Crosshair {
      * the crosshair is drawn with lines, connecting 2 vertices at a time
      */
     draw () {
-        gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.orthoProjectionMatrix);
+        gl.uniformMatrix4fv (projectionMatrixLoc, false, player.camera.orthoProjectionMatrix);
         gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_ORTHO); 
         gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_ORTHO); 
         for (var i=0; i < this.Nvertices; i+=2) {

@@ -150,7 +150,6 @@ function resolveCollision (object1, object2, manifold) {
   		var vrelNormal = vec3.dot (n, vrel);
 
         if (object1.tag == "player") {
-            console.log (vrelNormal);
             object1.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
             object1.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
             object1.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
@@ -160,7 +159,6 @@ function resolveCollision (object1, object2, manifold) {
   			return;
   		}
   		if (vrelNormal > -THRESHHOLD) {
-            object1.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
   			//collisionManager.collisions.push (manifold);
   			return;
   		}  
