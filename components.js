@@ -111,6 +111,8 @@ class boxCollider {
 
         this.matrix = mat4.create ();
         this.currentCenter = vec3.create ();
+
+        this.onEnter = null;
     }
 
     setup () {
@@ -507,7 +509,7 @@ class Crosshair {
      * the crosshair is drawn with lines, connecting 2 vertices at a time
      */
     draw () {
-        gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.orthoProjectionMatrix);
+        gl.uniformMatrix4fv (projectionMatrixLoc, false, player.camera.orthoProjectionMatrix);
         gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_ORTHO); 
         gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_ORTHO); 
         for (var i=0; i < this.Nvertices; i+=2) {

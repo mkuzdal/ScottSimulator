@@ -38,6 +38,9 @@ var lightsManager;
 var animationsManager;
 var clickManager;
 
+var player;
+var playerControler;
+
 // previous frame time
 var prev = 0;
 
@@ -130,7 +133,7 @@ window.onload = function init () {
     }
 
     function updateCamera(e) {
-        cam.mouseLook (e.movementX, e.movementY);
+        player.camera.mouseLook (e.movementX, e.movementY);
     }
 
     canvas.addEventListener ("mousedown", function (e) {
@@ -261,14 +264,14 @@ window.onload = function init () {
             vec4.fromValues (-0.05, 0.0, 0.5, 1.0)
         ]);
 /*
-    lightsManager.addSource (new light (new transform (vec3.fromValues (10.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    lightsManager.addSource (new light (new transform (vec3.fromValues (10.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (0.1, 0.1, 1.0, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
 
     lightsManager.lightSources[1].tag = "blue";
 
-    lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    lightsManager.addSource (new light (new transform (vec3.fromValues (-10.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (0.1, 1.0, 0.1, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
@@ -285,6 +288,18 @@ window.onload = function init () {
     generateCubeTexCoords (texCoords);
 
     cam = new camera ();
+    player = new object (new transform (vec3.fromValues (0.0, 0.0, 15.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                         null, 
+                         null, 
+                         null,
+                         new boxCollider (vec3.fromValues (-1.0, -4.0, -1.0), vec3.fromValues (1.0, 1.0, 1.0), "dynamic"),
+                         new rigidBody (100.0, "dynamic"));
+
+    player.camera = cam;
+    player.rigidBody.angularRigidBody = false;
+    player.tag = "player";
+
+    playerControler = new PlayerControler (player);
 
     geometries.push (new geometry (pointsArray, normalsArray, textureArray));
     textures.push (new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
@@ -330,8 +345,8 @@ window.onload = function init () {
 
     cubes[0].addOnMouseClickTrigger (function (object) {
         animationsManager.animations.push (new animationHold (object));
+        object.rigidBody.type = "static";
     }); 
-
 
     animationsManager.animations.push (new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (1.0, 1.0, 0.0)));
     animationsManager.animations.push (new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0)));
@@ -396,15 +411,15 @@ function render (current) {
     lightsManager.setupAll ();
 
     // animate the camera rotation
-    cam.updateRotation (deltaTime);
-    gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), cam.position);
+    player.camera.updateRotation (deltaTime);
+    gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), player.camera.position);
 
-    if (movingforward) cam.camMoveForward(deltaTime * 4);
-    if (movingbackward) cam.camMoveBackward(deltaTime * 4);
-    if (movingleft) cam.camMoveLeft(deltaTime * 4);
-    if (movingright) cam.camMoveRight(deltaTime * 4);
-    if (movingup) cam.camMoveUp(deltaTime * 4);
-    if (movingdown) cam.camMoveDown(deltaTime * 4);
+    if (movingforward) playerControler.moveForward(deltaTime * 16);
+    if (movingbackward) playerControler.moveBackward(deltaTime * 16);
+    if (movingleft) playerControler.moveLeft(deltaTime * 16);
+    if (movingright) playerControler.moveRight(deltaTime * 16);
+    if (movingup) playerControler.jump ();
+    if (movingdown) playerControler.moveDown(deltaTime * 16);
 
     // draw
     drawSceneGraph (deltaTime);

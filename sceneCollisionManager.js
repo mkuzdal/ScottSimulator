@@ -758,6 +758,20 @@ class sceneCollisionManager {
 				i--;
 			}
 		}
+
+		if (this.player) {
+			for (var i = 0; i < this.objects.length; i++) {
+				var manifold = this.detectCollision (this.player.object.collider, this.objects[i].collider);
+				if (manifold) {
+					resolveCollision (this.player.object, this.objects[i], manifold);
+				}
+
+				if (this.objects[i].collider.onEnter) {
+					this.objects[i].collider.onEnter (this.player);
+				}
+			}
+		}
+
 		this.objects = [];
 	}
 } 
@@ -777,7 +791,6 @@ function project2 (point, axis) {
 
 	return projection;
 }
-
 
 
 function average (points) {

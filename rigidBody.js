@@ -29,8 +29,11 @@ class rigidBody {
 		this.frictionDynamic = 0.2;
 
 		this.inv_I = mat3.clone (this.inv_Ibody);
+		this.f = vec3.fromValues (0.0, 0.0, 0.0);
 
 		this.object = null;
+
+		this.angularRigidBody = true;
 	}
 
 	update (dTime) {
@@ -38,6 +41,7 @@ class rigidBody {
 			var dt = dTime;
 
 			vec3.scaleAndAdd (this.P, this.P, this.force, dt);
+			vec3.scaleAndAdd (this.P, this.P, this.f, dt);
 			vec3.scale (this.velocity, this.P, this.inv_mass);
 			vec3.scaleAndAdd (this.object.transform.position, this.object.transform.position, this.velocity, dt);
 			
@@ -54,24 +58,33 @@ class rigidBody {
 			vec3.scaleAndAdd (this.L, this.L, this.torque, dt);
 			vec3.transformMat3 (this.omega, this.L, this.inv_I);
 
-			var rotation = quat.create ();
-			var angularVel = Math.sqrt (this.omega[0] * this.omega[0] + this.omega[1] * this.omega[1] + this.omega[2] * this.omega[2]);
-			var axisOfRot = vec3.create ();
-			if (angularVel > 0)
-				vec3.scale (axisOfRot, this.omega, 1 / angularVel);
-			else 
-				axisOfRot = vec3.clone (this.omega);
-
-			quat.setAxisAngle (rotation, axisOfRot, angularVel * dt);
-			quat.mul (this.object.transform.rotation, rotation, this.object.transform.rotation);
-
 			vec3.lerp (this.P, this.P, vec3.fromValues (0.0, 0.0, 0.0), dt * this.frictionDynamic);
-			vec3.lerp (this.L, this.L, vec3.fromValues (0.0, 0.0, 0.0), dt * this.frictionDynamic);
+
+			if (this.angularRigidBody) {
+				var rotation = quat.create ();
+				var angularVel = Math.sqrt (this.omega[0] * this.omega[0] + this.omega[1] * this.omega[1] + this.omega[2] * this.omega[2]);
+				var axisOfRot = vec3.create ();
+				if (angularVel > 0)
+					vec3.scale (axisOfRot, this.omega, 1 / angularVel);
+				else 
+					axisOfRot = vec3.clone (this.omega);
+
+				quat.setAxisAngle (rotation, axisOfRot, angularVel * dt);
+				quat.mul (this.object.transform.rotation, rotation, this.object.transform.rotation);
+
+				vec3.lerp (this.L, this.L, vec3.fromValues (0.0, 0.0, 0.0), dt * this.frictionDynamic);
+			}
+
+			this.f = vec3.fromValues (0.0, 0.0, 0.0);
 		}
 	}
 
 	addForce (F) {
 		vec3.add (this.force, this.force, F);
+	}
+
+	addImpulse (F) {
+		vec3.add (this.f, this.f, F);
 	}
 
 	addTorque (T) {
@@ -167,7 +180,6 @@ function resolveCollision (object1, object2, manifold) {
   		vec3.add (object1.rigidBody.L, object1.rigidBody.L, angularImpulse1);
     	vec3.sub (object2.rigidBody.L, object2.rigidBody.L, angularImpulse2);
 
-
     	// friction:	
     	var tangent = vec3.create ();
     	vec3.sub (tangent, vrel, vec3.scale (storage, manifold.normal, vec3.dot (vrel, manifold.normal)));
@@ -186,6 +198,7 @@ function resolveCollision (object1, object2, manifold) {
 
     	vec3.add (object1.rigidBody.P, object1.rigidBody.P, frictionImpulse);
   		vec3.sub (object2.rigidBody.P, object2.rigidBody.P, frictionImpulse);
+
 	} else if (object1.rigidBody.type == "dynamic" && object2.rigidBody.type == "dynamic") {
 		object1 = manifold.vertexBody;
 		object2 = manifold.faceBody;
