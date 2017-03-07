@@ -2,7 +2,7 @@ function buildSceneGraph () {
 	// room
 	var room = new object ();
 	room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
-	room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+	room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ());
 	room.tag = "world";
 	SGraph.root.children.push (room);
     room.collider = new nullCollider ();
@@ -73,7 +73,7 @@ function buildSceneGraph () {
                             new rigidBody (1000.0, "static"))
                     );
 
-    for (var i=0; i<roomColliders.length; i++) SGraph.root.children.push (roomColliders[i]);
+    for (var i=0; i<roomColliders.length; i++) room.children.push (roomColliders[i]);
 
 	var roof = new object ();
 	roof.loadFromObj ("roofOBJ", "roofMAT", "roofTEX");
