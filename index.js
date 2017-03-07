@@ -11,7 +11,7 @@ var canvas;
 var gl;
 var program;
 
-var frameBufferObject;
+var shadowFramebuffer;
 var colorFramebuffer;
 
 var OFFSCREEN_WIDTH = 1024;
@@ -233,7 +233,7 @@ window.onload = function init () {
 	gl.useProgram (program);
 
 	colorFramebuffer = initColorFramebuffer ();
-	frameBufferObject = initShadowFramebuffer ();
+	shadowFramebuffer = initShadowFramebuffer ();
 
 	// Get the local variable for each of the matrix uniforms
 	modelMatrixLoc = gl.getUniformLocation (program, "modelMatrix");
@@ -250,7 +250,7 @@ window.onload = function init () {
 	clickManager = new triggerHandler ();
 	audioManager = new audioHandler ();
 
-	lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+	lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 30.0, 10.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
 							  vec4.fromValues (0.4, 0.4, 0.4, 1.0),
 							  vec4.fromValues (0.8, 0.8, 0.8, 1.0),
 							  vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
@@ -271,7 +271,6 @@ window.onload = function init () {
     playerControler = new PlayerControler (player);
     SGraph.root.children.push (player);
 
-
     crosshair = new Crosshair ([
             vec4.fromValues (0.0, 0.05, 0.5, 1.0),
             vec4.fromValues (0.0, -0.05, 0.5, 1.0),
@@ -279,7 +278,6 @@ window.onload = function init () {
             vec4.fromValues (-0.05, 0.0, 0.5, 1.0)
         ]);
 
-<<<<<<< HEAD
 	// room
 	var room = new object ();
 	room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
@@ -451,44 +449,6 @@ window.onload = function init () {
     room.children.push (rightButtonMount);
     room.children.push (leftButtonMount);
     SGraph.root.children.push (room);
-
-    StateManager.addState("twobuttons");
-    StateManager.addState("clickedRight1");
-    StateManager.addState("clickedRight2");
-    StateManager.addState("clickedRight3");
-    StateManager.addState("clickedLeft");
-
-    var lookedDown = new Event("lookDown", new Activity(null, function(){}, function(){console.log('Scott clicks the left button.')}));
-    var clickedRight1 = new Event("clickedRight", new Activity(document.getElementById('AUDIOBRIBED'), function(){}, function(){console.log('You did not hear me. I said the left button')}));
-    var clickedRight2 = new Event("clickedRight", new Activity(document.getElementById('AUDIOFOUNDOIL'), function(){}, function(){console.log('LEFT. As in your left')}));
-    var clickedRight3 = new Event("clickedRight", new Activity(document.getElementById('AUDIODIE'), function(){}, function(){console.log('You have done it now Scott...')}));
-    var clickedRight4 = new Event("clickedRight", new Activity(document.getElementById('AUDIOGIVEUP'), function(){}, function(){console.log('Alright, that is it. Game over...')}));
-    var clickedLeft = new Event("clickedLeft", new Activity(document.getElementById('AUDIOSONAR'), function(){}, function(){console.log('Good job')}));
-
-    StateManager.getState("root").addChild(lookedDown, StateManager.getState("twobuttons"));
-    StateManager.getState("twobuttons").addChild(clickedRight1, StateManager.getState("clickedRight1"));
-    StateManager.getState("clickedRight1").addChild(clickedRight2, StateManager.getState("clickedRight2"));
-    StateManager.getState("clickedRight2").addChild(clickedRight3, StateManager.getState("clickedRight3"));
-    StateManager.getState("clickedRight3").addChild(clickedRight4, StateManager.getState("root"));
-    StateManager.getState("clickedRight1").addChild(clickedLeft, StateManager.getState("root"));
-    StateManager.getState("clickedRight2").addChild(clickedLeft, StateManager.getState("root"));
-    StateManager.getState("clickedRight3").addChild(clickedLeft, StateManager.getState("root"));
-    StateManager.getState("twobuttons").addChild(clickedLeft, StateManager.getState("root"));
-
-    rightButtonMount.children[0].addOnMouseClickTrigger(function(object) {
-        StateManager.apply("clickedRight");
-    });
-    leftButtonMount.children[0].addOnMouseClickTrigger(function(object) {
-        StateManager.apply("clickedLeft");
-    }); 
-
-    StateManager.apply("lookDown");
-
-	// button.addOnMouseClickTrigger(function(object) {
-	//     StateManager.apply("clickedButton");
-	// });
-
-	buildStateMachine ();
 
 	prev = performance.now();
 	prev *= 0.001;
@@ -772,36 +732,25 @@ function flattenArray (array) {
 
 function initShadowFramebuffer () {
     // Query the extension
-    var depthTextureExt = gl.getExtension ("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
-    if(!depthTextureExt) { console.log("Depth Texture isn't working"); }
+    var texture;
+    var framebuffer = gl.createFramebuffer();
 
-    // Create a color texture
-    var colorTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, colorTexture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     gl.generateMipmap (gl.TEXTURE_2D);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); 
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-    // Create the depth texture
-    var depthTexture = gl.createTexture();
-    gl.bindTexture (gl.TEXTURE_2D, depthTexture);
-    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D (gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
-
-    var framebuffer = gl.createFramebuffer();
     gl.bindFramebuffer (gl.FRAMEBUFFER, framebuffer);
-    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture, 0);
-    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
+    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
 
-    framebuffer.texture = depthTexture;
-    
+    framebuffer.texture = texture;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
     return framebuffer;
 }
 
