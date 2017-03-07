@@ -145,11 +145,6 @@ function buildSceneGraph () {
 
     }
 
-    var person = new object();
-    var rotation = quat.create();
-    person.loadFromObj("personOBJ", "personMAT", "personTEX");
-    person.transform = new transform (vec3.fromValues(0, 0, 0), vec3.fromValues(1.0, 1.0, 1.0), quat.clone(rotation)); 
-    room.children.push(person);
 
     //add a stool in the corner 
     var stool = new object();

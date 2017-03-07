@@ -11,7 +11,7 @@ var canvas;
 var gl;
 var program;
 
-var frameBufferObject;
+var shadowFramebuffer;
 var colorFramebuffer;
 
 var OFFSCREEN_WIDTH = 1024;
@@ -105,9 +105,9 @@ window.onload = function init () {
     // GL setup for viewport and background color
     gl.viewport (0, 0, canvas.width, canvas.height);
     gl.clearColor (0.0, 0.0, 0.0, 1.0);
-    
-    //gl.enable (gl.BLEND);
-    //gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+   // gl.enable (gl.BLEND);
+   // gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.enable (gl.DEPTH_TEST);
 
@@ -229,7 +229,7 @@ window.onload = function init () {
     gl.useProgram (program);
 
     colorFramebuffer = initColorFramebuffer ();
-    frameBufferObject = initShadowFramebuffer ();
+    shadowFramebuffer = initShadowFramebuffer ();
 
     // Get the local variable for each of the matrix uniforms
     modelMatrixLoc = gl.getUniformLocation (program, "modelMatrix");
@@ -300,6 +300,8 @@ window.onload = function init () {
 
     geometries.push (new geometry (pointsArray, normalsArray, textureArray));
     textures.push (new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
+    textures.push (new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
+    textures.push (new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]));
 
     // create the materials for each of the 6 bodies (sun, planet1, planet2, planet3, planet4, moon)
     materials =         [   new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
@@ -330,8 +332,8 @@ window.onload = function init () {
     // create the object for each of the 6 bodies.
     cubes  =            [   new object (transforms[0], materials[0], geometries[0], textures[0], colliders[0]),
                             new object (transforms[1], materials[1], geometries[1], textures[1], colliders[1], rigidBodies[1]),
-                            new object (transforms[2], materials[2], geometries[0], textures[0], colliders[2]),
-                            new object (transforms[3], materials[3], geometries[1], textures[1], colliders[3])
+                            new object (transforms[2], materials[2], geometries[0], textures[2], colliders[2]),
+                            new object (transforms[3], materials[3], geometries[1], textures[3], colliders[3])
                         ];
 
     cubes[0] = null;
@@ -422,6 +424,7 @@ window.onload = function init () {
  *  @param: { float } current: the current frame time.
  */
 function render (current) {
+
     // update the current and change in time
     current = performance.now();
     current *= 0.001;
@@ -437,12 +440,12 @@ function render (current) {
     cam.updateRotation (deltaTime);
     gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), cam.position);
 
-    if (movingforward) playerControler.moveForward(deltaTime * 12);
-    if (movingbackward) playerControler.moveBackward(deltaTime * 12);
-    if (movingleft) playerControler.moveLeft(deltaTime * 12);
-    if (movingright) playerControler.moveRight(deltaTime * 12);
+    if (movingforward) playerControler.moveForward (deltaTime * 12);
+    if (movingbackward) playerControler.moveBackward (deltaTime * 12);
+    if (movingleft) playerControler.moveLeft (deltaTime * 12);
+    if (movingright) playerControler.moveRight (deltaTime * 12);
     if (movingup) playerControler.jump ();
-    if (movingdown) playerControler.moveDown(deltaTime * 12);
+    if (movingdown) playerControler.moveDown (deltaTime * 12);
 
     // draw
     drawSceneGraph (deltaTime);
@@ -706,37 +709,25 @@ function flattenArray (array) {
 }
 
 function initShadowFramebuffer () {
-    // Query the extension
-    var depthTextureExt = gl.getExtension ("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
-    if(!depthTextureExt) { console.log("Depth Texture isn't working"); }
+    var texture;
+    var framebuffer = gl.createFramebuffer();
 
-    // Create a color texture
-    var colorTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, colorTexture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     gl.generateMipmap (gl.TEXTURE_2D);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); 
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-    // Create the depth texture
-    var depthTexture = gl.createTexture();
-    gl.bindTexture (gl.TEXTURE_2D, depthTexture);
-    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D (gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
-
-    var framebuffer = gl.createFramebuffer();
     gl.bindFramebuffer (gl.FRAMEBUFFER, framebuffer);
-    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture, 0);
-    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
+    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
 
-    framebuffer.texture = depthTexture;
-    
+    framebuffer.texture = texture;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
     return framebuffer;
 }
 

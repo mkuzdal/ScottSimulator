@@ -429,22 +429,21 @@ class texture {
 
         this.texture = gl.createTexture();
         gl.bindTexture (gl.TEXTURE_2D, this.texture);
-        
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-
         gl.texImage2D (gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.image);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
         gl.generateMipmap (gl.TEXTURE_2D);
+        gl.bindTexture (gl.TEXTURE_2D, null);  
     }
 
     setup () {
         // bind textures
         gl.activeTexture (gl.TEXTURE1);
         gl.bindTexture (gl.TEXTURE_2D, this.texture);
-        gl.uniform1i (gl.getUniformLocation( program, "texture"), 1);
+        gl.uniform1i (gl.getUniformLocation (program, "texture"), 1); 
 
         for (var i = 0; i < this.options.length; i++) {
             gl.texParameteri (gl.TEXTURE_2D, this.options[i][0], this.options[i][1]);
-        }
+        } 
     }
 }
 

@@ -145,7 +145,7 @@ function resolveCollision (object1, object2, manifold) {
             object1.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
             return;
         } 
-        
+
   		var padot = object1.rigidBody.pointVelocity (manifold.collisionPoint);
   		var pbdot = object2.rigidBody.pointVelocity (manifold.collisionPoint);
   		var n = manifold.normal;
@@ -163,7 +163,7 @@ function resolveCollision (object1, object2, manifold) {
   			return;
   		}
   		if (vrelNormal > -THRESHHOLD) {
-  			collisionManager.collisions.push (manifold);
+  			//collisionManager.collisions.push (manifold);
   			return;
   		}  
 
@@ -248,7 +248,7 @@ function resolveCollision (object1, object2, manifold) {
   			return;
   		}
   		if (vrel > -THRESHHOLD) {
-  			collisionManager.collisions.push (manifold);
+  			//collisionManager.collisions.push (manifold);
   			return;
   		}
 

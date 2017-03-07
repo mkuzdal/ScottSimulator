@@ -11,7 +11,7 @@ var canvas;
 var gl;
 var program;
 
-var frameBufferObject;
+var shadowFramebuffer;
 var colorFramebuffer;
 
 var OFFSCREEN_WIDTH = 1024;
@@ -233,7 +233,7 @@ window.onload = function init () {
 	gl.useProgram (program);
 
 	colorFramebuffer = initColorFramebuffer ();
-	frameBufferObject = initShadowFramebuffer ();
+	shadowFramebuffer = initShadowFramebuffer ();
 
 	// Get the local variable for each of the matrix uniforms
 	modelMatrixLoc = gl.getUniformLocation (program, "modelMatrix");
@@ -250,7 +250,7 @@ window.onload = function init () {
 	clickManager = new triggerHandler ();
 	audioManager = new audioHandler ();
 
-	lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+	lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 30.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
 							  vec4.fromValues (0.4, 0.4, 0.4, 1.0),
 							  vec4.fromValues (0.8, 0.8, 0.8, 1.0),
 							  vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
@@ -564,37 +564,25 @@ function flattenArray (array) {
 }
 
 function initShadowFramebuffer () {
-    // Query the extension
-    var depthTextureExt = gl.getExtension ("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
-    if(!depthTextureExt) { console.log("Depth Texture isn't working"); }
+    var texture;
+    var framebuffer = gl.createFramebuffer();
 
-    // Create a color texture
-    var colorTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, colorTexture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     gl.generateMipmap (gl.TEXTURE_2D);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); 
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-    // Create the depth texture
-    var depthTexture = gl.createTexture();
-    gl.bindTexture (gl.TEXTURE_2D, depthTexture);
-    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D (gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
-
-    var framebuffer = gl.createFramebuffer();
     gl.bindFramebuffer (gl.FRAMEBUFFER, framebuffer);
-    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture, 0);
-    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0);
+    gl.framebufferTexture2D (gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
 
-    framebuffer.texture = depthTexture;
-    
+    framebuffer.texture = texture;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
     return framebuffer;
 }
 
