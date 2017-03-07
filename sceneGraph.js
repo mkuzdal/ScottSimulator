@@ -84,8 +84,11 @@ class object {
     }
 
     draw () {
-        if (this.geometry)
+        if (this.geometry) 
             gl.drawArrays (this.drawType, 0, this.geometry.Nvertices);
+        if (this.texture) {
+           // gl.bindTexture (gl.TEXTURE_2D, null);
+        }
     }
 
     loadFromObj (ObjID, MatID, TexID) {
@@ -244,7 +247,7 @@ class object {
         }
 
         var newGeometry = this.geometry;
-        var newTexture = this.texture;
+        var newTexture = new texture (this.texture.image, this.texture.options);
         var newObject = new object (newTransform, newMaterial, newGeometry, newTexture, newCollider, newRigidBody);
 
         newObject.drawType = this.drawType;
@@ -319,7 +322,7 @@ class sceneGraph {
             mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.view);
             mat4.mul (PL, lightsManager.lightSources[0].projectionMatrix, lightsManager.lightSources[0].view);
         }
-        mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.view);
+        //mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.view);
 
         for (var i = 0; i < this.root.children.length; i++) {
             this.__drawTree_AUX (this.root.children[i], PC, PL, type);
@@ -330,7 +333,7 @@ class sceneGraph {
 		if (!root.active)
 			return;
 
-        if (type != DRAW_TYPE_COLOR || root.tag != "world") {
+        if (type == DRAW_TYPE_DEFAULT || root.tag != "world") {
     		if (root.collider.type == "null") {
                 this.drawNode (root);
             } else if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
@@ -451,34 +454,25 @@ function drawSceneGraph (dTime) {
     collisionManager.handleAllContactCollisions ();
     SGraph.update (dTime);
 
-    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.enable(gl.DEPTH_TEST);
-    gl.bindTexture(gl.TEXTURE_2D, null);
-
-    gl.colorMask (false, false, false, false);
-
-    gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.CULL_FACE);
-    gl.cullFace (gl.FRONT);
-
-    gl.bindFramebuffer (gl.FRAMEBUFFER, frameBufferObject);
-    
-    gl.viewport (0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+    gl.viewport (0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT); 
     gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_SHADOW); 
     gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_SHADOW); 
+    gl.bindFramebuffer (gl.FRAMEBUFFER, shadowFramebuffer);
+    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.disable (gl.DEPTH_TEST);
 
     SGraph.drawTree (DRAW_TYPE_SHADOW);
 
-    gl.disable (gl.CULL_FACE);
-    gl.clear (gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
-    gl.colorMask (true, true, true, true);
+    gl.enable (gl.DEPTH_TEST);
     gl.bindFramebuffer (gl.FRAMEBUFFER, null);
-    gl.viewport (0, 0, canvas.width, canvas.height);
+    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-/*
+    gl.viewport (0, 0, canvas.width, canvas.height); 
+
     gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_COLOR); 
     gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_COLOR); 
     gl.bindFramebuffer (gl.FRAMEBUFFER, colorFramebuffer);
+    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.disable (gl.DEPTH_TEST);
 
     SGraph.drawTree (DRAW_TYPE_COLOR);
@@ -489,15 +483,19 @@ function drawSceneGraph (dTime) {
     gl.enable (gl.DEPTH_TEST);
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.bindFramebuffer (gl.FRAMEBUFFER, null);
-*/
+
     gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_DEFAULT); 
     gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_DEFAULT); 
 
     gl.activeTexture (gl.TEXTURE0);
-    gl.bindTexture (gl.TEXTURE_2D, frameBufferObject.texture);
-    gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 0);
+    gl.bindTexture (gl.TEXTURE_2D, shadowFramebuffer.texture);
+    gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 0); 
 
     SGraph.drawTree (DRAW_TYPE_DEFAULT);
+
+    gl.activeTexture (gl.TEXTURE0);
+    gl.bindTexture (gl.TEXTURE_2D, null);
+    gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 0); 
 
     crosshair.setup ();
     crosshair.draw ();
