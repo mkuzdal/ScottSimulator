@@ -414,7 +414,7 @@ window.onload = function init () {
     	//also create the chairs on the edges of the room, on the outside of the aisles
     	var rightChair = chair.clone();
     	var rightChairRotate = quat.create();
-		quat.setAxisAngle(rightChairRotate, [0,1,0], glMatrix.toRadian(-105));
+			quat.setAxisAngle(rightChairRotate, [0,1,0], glMatrix.toRadian(-105));
     	rightChair.transform.rotation = quat.clone(rightChairRotate);
     	rightChair.transform.position = vec3.fromValues(-15.5, -3.8+2.8*i, -1.8+4*i-1.2);
     	room.children.push(rightChair);
@@ -428,6 +428,12 @@ window.onload = function init () {
 
     }
 
+  var person = new object();
+  var rotation = quat.create();
+  person.loadFromObj("personOBJ", "personMAT", "personTEX");
+  person.transform = new transform (vec3.fromValues(0, 0, 0), vec3.fromValues(1.0, 1.0, 1.0), quat.clone(rotation)); 
+  room.children.push(person);
+  
     //add a stool in the corner 
     var stool = new object();
     stool.loadFromObj("stoolOBJ", "stoolMAT", "stoolTEX");
