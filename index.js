@@ -279,7 +279,6 @@ window.onload = function init () {
             vec4.fromValues (-0.05, 0.0, 0.5, 1.0)
         ]);
 
-<<<<<<< HEAD
 	// room
 	var room = new object ();
 	room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");

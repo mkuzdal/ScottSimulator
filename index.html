@@ -26,6 +26,7 @@ void main ()
         fPositionFromLight = lightProjectionMatrix * lightMatrix * modelMatrix * vPosition;
         gl_Position = fPositionFromLight;
         return;
+
     } else if (vDrawType == 3) {
         gl_Position = projectionMatrix * vPosition;
         return;
@@ -63,42 +64,32 @@ uniform vec4 fAmbientLight[5], fDiffuseLight[5], fSpecularLight[5];
 uniform vec3 fCameraPosition;
 
 vec4 pack (const float depth) {
-  const vec4 bitShift = vec4(255.0 * 255.0 * 255.0, 255.0 * 255.0, 255.0, 1.0);
-  const vec4 bitMask = vec4(0.0, 1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0);
+  const vec4 bitShift = vec4 (1.0, 255.0, 255.0 * 255.0, 255.0 * 255.0 * 255.0);
+  const vec4 bitMask = vec4 (1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0, 0.0);
 
-  vec4 res = fract(depth * bitShift);
+  vec4 res = fract (depth * bitShift);
   res -= res.xxyz * bitMask;
 
   return res;
 }
 
 float unpack (vec4 color) {
-   const vec4 bitShift = vec4 (1.0 / (255.0 * 255.0 * 255.0), 1.0 / (255.0 * 255.0), 1.0 / 255.0, 1.0);
+   const vec4 bitShift = vec4 (1.0, 1.0 / 255.0, 1.0 / (255.0 * 255.0), 1.0 / (255.0 * 255.0 * 255.0));
    return dot (color, bitShift);
 }
 
 float ShadowCalculation (vec4 fPositionFromLight) {
-   /* vec3 shadowCoord = (fPositionFromLight.xyz/fPositionFromLight.w)/2.0 + 0.5;
+    /*
+    vec3 shadowCoord = (fPositionFromLight.xyz/fPositionFromLight.w)/2.0 + 0.5;
     vec4 rgbaDepth = texture2D(shadowMap, shadowCoord.xy);
     float depth = unpack(rgbaDepth);
-    float visibility = (shadowCoord.z > depth + 0.0015) ? 0.7 : 1.0;
-    return visibility; */
-    /*
-    vec3 projCoords = fPositionFromLight.xyz / fPositionFromLight.w;
-    projCoords = projCoords * 0.5 + 0.5;
+    float visibility = (shadowCoord.z > depth + 0.15) ? 0.0 : 1.0;
+    return visibility;  */
 
-    float closestDepth = texture2D (shadowMap, projCoords.xy).r;
-    float currentDepth = projCoords.z;
+    vec3 shadowCoord = fPositionFromLight.xyz / fPositionFromLight.w;
+    shadowCoord = shadowCoord * 0.5 + 0.5; 
 
-    currentDepth *= 0.999;
-    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
-
-    return shadow;  */
-
-    vec3 projCoords = fPositionFromLight.xyz / fPositionFromLight.w;
-    projCoords = projCoords * 0.5 + 0.5; 
-
-    float bias = 0.00;
+    float bias = 0.15;
     float visibility = 0.0;
 
     vec2 poissonDisk[4];
@@ -108,24 +99,18 @@ float ShadowCalculation (vec4 fPositionFromLight) {
     poissonDisk[3] = vec2( 0.34495938, 0.29387760 );
 
     for (int i = 0; i < 4; i++) {
-        if (texture2D (shadowMap, projCoords.xy + poissonDisk[i]/700.0).r  < projCoords.z - bias) {
+        vec4 rgbaDepth = texture2D(shadowMap, shadowCoord.xy + poissonDisk[i]/700.0);
+        float depth = unpack(rgbaDepth);
+        if (depth < shadowCoord.z - bias) {
             visibility += 0.2;
         }
     }
 
-    if(projCoords.z > 1.0)
+    if(shadowCoord.z > 1.0)
         visibility = 0.0;
 
     return visibility;  
 } 
-
-float omnidirectionalShadow (vec3 lightPosition, float bias, float darkness, sampler2D sampler) {
-    vec3 direction = fPos - lightPosition;
-    float vertexDepth = clamp (length (direction), 0.0, 1.0);
-    float shadowMapDepth = unpack (texture2D (sampler, direction.xy)) + bias;
-
-    return (vertexDepth > shadowMapDepth) ? 1.0 : darkness;
-}
 
 void main () { 
     if (fDrawType == 0) {
@@ -166,10 +151,9 @@ void main () {
             if (dot (L, N) < 0.0)
                 specular = vec4 (0.0, 0.0, 0.0, 1.0);
 
-            //float shadow = omnidirectionalShadow (fLightPosition[0].xyz, 0.1, 0.0, shadowMap);
             float shadow = ShadowCalculation (fPositionFromLight);
             //float shadow = 0.0;
-            vec4 fLighting = (ambient + (1.0 - shadow) * (diffuse + specular));
+            vec4 fLighting = (ambient + (shadow) * (diffuse + specular));
             fColor = fColor + fLighting;
         }
 
@@ -180,7 +164,6 @@ void main () {
     }
 }
 </script>
-
 <script type="text/javascript" src="webgl-utils.js"></script>
 <script type="text/javascript" src="initShaders.js"></script>
 <script type="text/javascript" src="gl-matrix.js"></script>
