@@ -262,7 +262,7 @@ window.onload = function init () {
                          null, 
                          null, 
                          null,
-                         new boxCollider (vec3.fromValues (-1.5, -7.5, -1.5), vec3.fromValues (1.5, 0.0, 1.5), "dynamic"),
+                         new boxCollider (vec3.fromValues (-0.5, -7.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "dynamic"),
                          new rigidBody (100.0, "dynamic"));
 
     player.camera = cam;
@@ -282,7 +282,7 @@ window.onload = function init () {
 	// room
 	var room = new object ();
 	room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
-	room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+	room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ());
 	room.tag = "world";
 	SGraph.root.children.push (room);
     room.collider = new nullCollider ();
@@ -356,7 +356,7 @@ window.onload = function init () {
                             new rigidBody (1000.0, "static"))
                     );
 
-    for (var i=0; i<roomColliders.length; i++) SGraph.root.children.push (roomColliders[i]);
+    for (var i=0; i<roomColliders.length; i++) room.children.push (roomColliders[i]);
 
 	var roof = new object ();
 	roof.loadFromObj ("roofOBJ", "roofMAT", "roofTEX");

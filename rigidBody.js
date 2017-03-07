@@ -133,7 +133,11 @@ function resolveCollision (object1, object2, manifold) {
 			vec3.negate (manifold.normal, manifold.normal);
 		} 
 
-	    var percent = 1.0;
+        var percent = 1.0;
+        if (object.tag == "player") {
+	       percent = 4.0;
+        }
+
   	    vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, percent * manifold.penetrationDistance);
 
   		var padot = object1.rigidBody.pointVelocity (manifold.collisionPoint);
@@ -148,8 +152,8 @@ function resolveCollision (object1, object2, manifold) {
   		vec3.sub (vrel, padot, pbdot);
 
   		var vrelNormal = vec3.dot (n, vrel);
-
-        if (object1.tag == "player") {
+  
+        if (object1.tag == "player" && vec3.equals (manifold.normal, vec3.fromValues (0.0, 1.0, 0.0))) {
             object1.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
             object1.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
             object1.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);

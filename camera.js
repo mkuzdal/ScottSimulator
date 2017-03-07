@@ -20,7 +20,7 @@ class camera {
         this.pitch = _pitch			|| 0.0;
         this.fovy = _fovy           || 50.0;
         this.aspect = _aspect       || canvas.width / canvas.height;
-        this.far = _far             || 100;
+        this.far = _far             || 1000;
         this.near = _near           || 0.1;
         this.up = [0,1,0];
         this.sensitivity = _sensitivity || 0.2;
