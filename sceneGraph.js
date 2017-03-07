@@ -58,10 +58,10 @@ class object {
     setup (CTM) {
         if (this.material) {
             this.material.setup ();
-        }
-        if (this.texture) {
+        } if (this.texture) {
             this.texture.setup (); 
         } 
+
         if (this.mouseTriggers.length) {
             this.mouseTriggers[0].setup ();
         } else {
@@ -70,8 +70,8 @@ class object {
         if (this.geometry) {
             this.geometry.setup ();
             gl.uniformMatrix4fv (modelMatrixLoc, false, this.collider.matrix);
-            gl.uniformMatrix4fv (cameraMatrixLoc, false, player.camera.view);
-            gl.uniformMatrix4fv (projectionMatrixLoc, false, player.camera.perspectiveProjectionMatrix); 
+            gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.view);
+            gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
             //gl.uniformMatrix4fv (cameraMatrixLoc, false, lightsManager.lightSources[0].view);
             //gl.uniformMatrix4fv (projectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix); 
             gl.uniformMatrix4fv (lightProjectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix);
@@ -292,7 +292,7 @@ class object {
                     mat3.invert (inv_I_body, I_body);
                     this.rigidBody.inv_Ibody = inv_I_body;
                 } else if (this.collider.type == "sphere") {
-                    // TODO
+
                 }
             }
         }
@@ -301,7 +301,7 @@ class object {
 
 
 class sceneGraph {
-	constructor (_player) {
+	constructor () {
 		this.root = new object ();
 		this.root.children = [];
 
@@ -448,6 +448,8 @@ function drawSceneGraph (dTime) {
     SGraph.set ();
     lightsManager.setupAll ();
     collisionManager.detectAllCollisions ();
+    collisionManager.handleAllContactCollisions ();
+    SGraph.update (dTime);
 
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
@@ -498,8 +500,6 @@ function drawSceneGraph (dTime) {
 
     crosshair.setup ();
     crosshair.draw ();
-
-    SGraph.update (dTime);
 }
 
 

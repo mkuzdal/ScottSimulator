@@ -262,7 +262,7 @@ window.onload = function init () {
                          null, 
                          null, 
                          null,
-                         new boxCollider (vec3.fromValues (-1.5, -7.5, -1.5), vec3.fromValues (1.5, 0.0, 1.5), "dynamic"),
+                         new boxCollider (vec3.fromValues (-0.5, -7.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "dynamic"),
                          new rigidBody (100.0, "dynamic"));
 
     player.camera = cam;

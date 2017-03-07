@@ -1,5 +1,5 @@
 var gravity = 10.0;
-var THRESHHOLD = 1.05;
+var THRESHHOLD = 0.15;
 
 class rigidBody {
 	constructor (_M, _type) {
@@ -30,6 +30,7 @@ class rigidBody {
 
 		this.inv_I = mat3.clone (this.inv_Ibody);
 		this.f = vec3.fromValues (0.0, 0.0, 0.0);
+		this.t = vec3.fromValues (0.0, 0.0, 0.0);
 
 		this.object = null;
 
@@ -41,6 +42,7 @@ class rigidBody {
 			var dt = dTime;
 
 			vec3.scaleAndAdd (this.P, this.P, this.force, dt);
+
 			vec3.scaleAndAdd (this.P, this.P, this.f, dt);
 			vec3.scale (this.velocity, this.P, this.inv_mass);
 			vec3.scaleAndAdd (this.object.transform.position, this.object.transform.position, this.velocity, dt);
@@ -56,9 +58,10 @@ class rigidBody {
 			mat3.mul (this.inv_I, R, storage);
 
 			vec3.scaleAndAdd (this.L, this.L, this.torque, dt);
+			vec3.scaleAndAdd (this.L, this.L, this.t, dt);
 			vec3.transformMat3 (this.omega, this.L, this.inv_I);
 
-			vec3.lerp (this.P, this.P, vec3.fromValues (0.0, 0.0, 0.0), dt * this.frictionDynamic);
+			vec3.lerp (this.P, this.P, vec3.fromValues (0.0, 0.0, 0.0), Math.min (1.0, dt * this.frictionDynamic));
 
 			if (this.angularRigidBody) {
 				var rotation = quat.create ();
@@ -72,11 +75,16 @@ class rigidBody {
 				quat.setAxisAngle (rotation, axisOfRot, angularVel * dt);
 				quat.mul (this.object.transform.rotation, rotation, this.object.transform.rotation);
 
-				vec3.lerp (this.L, this.L, vec3.fromValues (0.0, 0.0, 0.0), dt * this.frictionDynamic);
+				vec3.lerp (this.L, this.L, vec3.fromValues (0.0, 0.0, 0.0), Math.min (dt * this.frictionDynamic));
 			}
 
-			this.f = vec3.fromValues (0.0, 0.0, 0.0);
-		}
+            if (this.type == "dynamic") {
+                this.force = vec3.fromValues (0.0, -gravity * this.mass, 0.0);
+            } else {
+                this.force = vec3.fromValues (0.0, 0.0, 0.0);
+            }
+            this.torque = vec3.fromValues (0.0, 0.0, 0.0);
+		} 
 	}
 
 	addForce (F) {
@@ -113,7 +121,7 @@ class rigidBody {
 
 function resolveCollision (object1, object2, manifold) {
 	if (object1.rigidBody == null || object2.rigidBody == null)
-		return
+		return;
 	if (object1.rigidBody.type == "static" && object2.rigidBody.type == "static")
 		return;
 	else if ((object1.rigidBody.type == "static" && object2.rigidBody.type == "dynamic") ||
@@ -125,8 +133,12 @@ function resolveCollision (object1, object2, manifold) {
 			vec3.negate (manifold.normal, manifold.normal);
 		} 
 
-		var percent = 1.1;
-  		vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, percent * manifold.penetrationDistance);
+        var percent = 1.0;
+        if (object.tag == "player") {
+	       percent = 4.0;
+        }
+
+  	    vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, percent * manifold.penetrationDistance);
 
   		var padot = object1.rigidBody.pointVelocity (manifold.collisionPoint);
   		var pbdot = object2.rigidBody.pointVelocity (manifold.collisionPoint);
@@ -140,11 +152,18 @@ function resolveCollision (object1, object2, manifold) {
   		vec3.sub (vrel, padot, pbdot);
 
   		var vrelNormal = vec3.dot (n, vrel);
+  
+        if (object1.tag == "player" && vec3.equals (manifold.normal, vec3.fromValues (0.0, 1.0, 0.0))) {
+            object1.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
+            object1.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
+            object1.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
+        }  
 
   		if (vrelNormal > THRESHHOLD) {
   			return;
   		}
   		if (vrelNormal > -THRESHHOLD) {
+  			//collisionManager.collisions.push (manifold);
   			return;
   		}  
 
@@ -197,13 +216,13 @@ function resolveCollision (object1, object2, manifold) {
     	}
 
     	vec3.add (object1.rigidBody.P, object1.rigidBody.P, frictionImpulse);
-  		vec3.sub (object2.rigidBody.P, object2.rigidBody.P, frictionImpulse);
+  		vec3.sub (object2.rigidBody.P, object2.rigidBody.P, frictionImpulse);   
 
 	} else if (object1.rigidBody.type == "dynamic" && object2.rigidBody.type == "dynamic") {
 		object1 = manifold.vertexBody;
 		object2 = manifold.faceBody;
 
-		var percent = 1.0; 
+		var percent = 0.8; 
   		var correction = vec3.create ();
   		vec3.scale (correction, manifold.normal, manifold.penetrationDistance * percent / (object1.rigidBody.inv_mass + object2.rigidBody.inv_mass));
   		vec3.scaleAndAdd (object1.transform.position, object1.transform.position, correction, object1.rigidBody.inv_mass);
@@ -223,11 +242,10 @@ function resolveCollision (object1, object2, manifold) {
   		var vrelNormal = vec3.dot (n, vrel);
 
   		if (vrel > THRESHHOLD) {
-  			//console.log ("HERE");
   			return;
   		}
   		if (vrel > -THRESHHOLD) {
-  			//console.log ("HERE");
+  			//collisionManager.collisions.push (manifold);
   			return;
   		}
 
@@ -289,6 +307,12 @@ function resolveCollision (object1, object2, manifold) {
   		vec3.cross (angularFrictionImpulse2, rb, frictionImpulse);
 
   		vec3.add (object1.rigidBody.L, object1.rigidBody.L, angularFrictionImpulse1);
-    	vec3.sub (object2.rigidBody.L, object2.rigidBody.L, angularFrictionImpulse2);
+    	vec3.sub (object2.rigidBody.L, object2.rigidBody.L, angularFrictionImpulse2);  
 	} 
 }
+
+
+
+
+
+

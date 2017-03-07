@@ -72,7 +72,8 @@ class PlayerControler {
     }
 
     jump () {
-        this.player.rigidBody.P = vec3.fromValues (0.0, 5 * this.player.rigidBody.mass, 0.0);
+        this.player.rigidBody.P = vec3.fromValues (0.0, 10 * this.player.rigidBody.mass, 0.0);
+        this.player.rigidBody.F = vec3.fromValues (0.0, -this.player.rigidBody.mass * gravity, 0.0);
     }
 }
 

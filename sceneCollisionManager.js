@@ -2,14 +2,11 @@
 var collisionManager;
 
 class collisionManifold {
-	constructor (_vertexBody, _faceBody, _collisionPoint, _normal, _edgeA, _edgeB, _vf, _penetrationDistance) {
+	constructor (_vertexBody, _faceBody, _collisionPoint, _normal, _penetrationDistance) {
 		this.vertexBody = _vertexBody;
 		this.faceBody = _faceBody;
 		this.collisionPoint = _collisionPoint;
 		this.normal = _normal;
-		this.edgeA = _edgeA;
-		this.edgeB = _edgeB;
-		this.vf = _vf;
 		this.penetrationDistance = _penetrationDistance;
 	}
 }
@@ -17,6 +14,7 @@ class collisionManifold {
 class sceneCollisionManager {
 	constructor () {
 		this.objects = [];
+		this.collisions = [];
 	}
 
 	detectCollision (collider1, collider2) {
@@ -156,7 +154,7 @@ class sceneCollisionManager {
 			var d1 = Math.abs (v1);
 			var d2 = Math.abs (v2);
 			if (d1 < d2) {
-				if (penetrationDistance > d1) {
+				if (penetrationDistance >= d1) {
 					// d1 is the new penetration distance
 					penetrationDistance = d1;
 					if (v1 > 0) {
@@ -170,7 +168,7 @@ class sceneCollisionManager {
 					faceBody = collider2.object;
 				}
 			} else {
-				if (penetrationDistance > d2) {
+				if (penetrationDistance >= d2) {
 					// d2 is the new penetration distance
 					penetrationDistance = d2;
 					if (v2 < 0) {
@@ -252,7 +250,7 @@ class sceneCollisionManager {
 			var d1 = Math.abs (v1);
 			var d2 = Math.abs (v2);
 			if (d1 < d2) {
-				if (penetrationDistance > d1) {
+				if (penetrationDistance >= d1) {
 					// d1 is the new penetration distance
 					penetrationDistance = d1;
 					if (v1 > 0) {
@@ -266,7 +264,7 @@ class sceneCollisionManager {
 					faceBody = collider2.object;
 				}
 			} else {
-				if (penetrationDistance > d2) {
+				if (penetrationDistance >= d2) {
 					// d2 is the new penetration distance
 					penetrationDistance = d2;
 					if (v2 < 0) {
@@ -349,7 +347,7 @@ class sceneCollisionManager {
 			d1 = Math.abs (v1);
 			d2 = Math.abs (v2);
 			if (d1 < d2) {
-				if (penetrationDistance > d1) {
+				if (penetrationDistance >= d1) {
 					// d1 is the new penetration distance
 					penetrationDistance = d1;
 					if (v1 > 0) {
@@ -363,7 +361,7 @@ class sceneCollisionManager {
 					faceBody = collider2.object;					
 				}
 			} else {
-				if (penetrationDistance > d2) {
+				if (penetrationDistance >= d2) {
 					// d2 is the new penetration distance
 					penetrationDistance = d2;
 					if (v2 < 0) {
@@ -446,7 +444,7 @@ class sceneCollisionManager {
 			d1 = Math.abs (v1);
 			d2 = Math.abs (v2);
 			if (d1 < d2) {
-				if (penetrationDistance > d1) {
+				if (penetrationDistance >= d1) {
 					// d1 is the new penetration distance
 					penetrationDistance = d1;
 					if (v1 > 0) {
@@ -460,7 +458,7 @@ class sceneCollisionManager {
 					faceBody = collider1.object;					
 				}
 			} else {
-				if (penetrationDistance > d2) {
+				if (penetrationDistance >= d2) {
 					// d2 is the new penetration distance
 					penetrationDistance = d2;
 					if (v2 < 0) {
@@ -543,7 +541,7 @@ class sceneCollisionManager {
 			d1 = Math.abs (v1);
 			d2 = Math.abs (v2);
 			if (d1 < d2) {
-				if (penetrationDistance > d1) {
+				if (penetrationDistance >= d1) {
 					// d1 is the new penetration distance
 					penetrationDistance = d1;
 					if (v1 > 0) {
@@ -557,7 +555,7 @@ class sceneCollisionManager {
 					faceBody = collider1.object;
 				}
 			} else {
-				if (penetrationDistance > d2) {
+				if (penetrationDistance >= d2) {
 					// d2 is the new penetration distance
 					penetrationDistance = d2;
 					if (v2 < 0) {
@@ -640,7 +638,7 @@ class sceneCollisionManager {
 			d1 = Math.abs (v1);
 			d2 = Math.abs (v2);
 			if (d1 < d2) {
-				if (penetrationDistance > d1) {
+				if (penetrationDistance >= d1) {
 					// d1 is the new penetration distance
 					penetrationDistance = d1;
 					if (v1 > 0) {
@@ -654,7 +652,7 @@ class sceneCollisionManager {
 					faceBody = collider1.object;
 				}
 			} else {
-				if (penetrationDistance > d2) {
+				if (penetrationDistance >= d2) {
 					// d2 is the new penetration distance
 					penetrationDistance = d2;
 					if (v2 < 0) {
@@ -744,7 +742,7 @@ class sceneCollisionManager {
 	}
 
 	detectAllCollisions () {
-		var player
+		var player = null;
 		for (var i = 0; i < this.objects.length; i++) {
 			if (this.objects[i].tag == "player") {
 				player = this.objects[i];
@@ -753,20 +751,29 @@ class sceneCollisionManager {
 			}
 		}
 
-		for (var i = 0; i < this.objects.length; i++) {
-			var manifold = this.detectCollision (player.collider, this.objects[i].collider);
-			if (manifold) {
-				resolveCollision (player, this.objects[i], manifold);
-				if (player.collider.collisionFunction) {
-					player.collider.collisionFunction (player, this.objects[i]);
+		if (player) {
+			for (var i = 0; i < this.objects.length; i++) {
+				var manifold = this.detectCollision (player.collider, this.objects[i].collider);
+				if (manifold) {
+					resolveCollision (player, this.objects[i], manifold);
+					if (player.collider.collisionFunction) {
+						player.collider.collisionFunction (player, this.objects[i]);
+					}
+					if (this.objects[i].collider.collisionFunction) {
+						this.objects[i].collider.collisionFunction (this.objects[i], player);
+					}
 				}
-				if (this.objects[i].collider.collisionFunction) {
-					this.objects[i].collider.collisionFunction (this.objects[i], player);
+				if (this.objects[i].collider.physics == "trigger") {
+					this.objects.splice (i, 1);
+					i--;
 				}
 			}
-			if (this.objects[i].collider.physics == "trigger") {
-				this.objects.splice (i, 1);
-				i--;
+		} else {
+			for (var i = 0; i < this.objects.length; i++) {
+				if (this.objects[i].collider.physics == "trigger") {
+					this.objects.splice (i, 1);
+					i--;
+				}
 			}
 		}
 
@@ -792,14 +799,46 @@ class sceneCollisionManager {
 		}
 		this.objects = [];
 	}
-} 
 
+	handleAllContactCollisions () {
+		var amat = compute_a (this.collisions);
+		var b_vec = compute_b (this.collisions);
+		var f_vec = qp_solve (amat, b_vec);
+		for (var i = 0; i < this.collisions.length; i++) {
+			var f = f_vec[i];
+			var n = this.collisions[i].normal;
+			var a = this.collisions[i].vertexBody;
+			var b = this.collisions[i].faceBody;
+			var p = this.collisions[i].collisionPoint;
+
+			var ra = vec3.create ();
+	  		var rb = vec3.create ();
+	  		vec3.sub (ra, p, a.collider.currentCenter);
+	  		vec3.sub (rb, p, b.collider.currentCenter);
+
+			vec3.scaleAndAdd (a.rigidBody.force, a.rigidBody.force, n, f);
+			var storage = vec3.create ();
+			vec3.scale (storage, n, f);
+			vec3.cross (storage, ra, storage);
+			vec3.add (a.rigidBody.torque, a.rigidBody.torque, storage);
+
+			vec3.scaleAndAdd (b.rigidBody.force, b.rigidBody.force, n, -f);
+			var storage = vec3.create ();
+			vec3.scale (storage, n, f);
+			vec3.cross (storage, rb, storage);
+			vec3.sub (b.rigidBody.torque, b.rigidBody.torque, storage);
+		}
+
+		this.collisions = [];
+	}
+
+
+} 
 
 function project (point, axis) {
 	var axis_prime = vec3.create ();
 	vec3.normalize (axis_prime, axis);
 	return vec3.dot (point, axis_prime);
-
 }
 
 function project2 (point, axis) {
@@ -809,7 +848,6 @@ function project2 (point, axis) {
 
 	return projection;
 }
-
 
 function average (points) {
 	var x = 0;
@@ -912,6 +950,198 @@ function checkAxis (axis, collider1, collider2) {
 	}	
 
 	return manifold;
+}
+
+function compute_ndot (manifold) {
+	var toReturn = vec3.create ();
+	vec3.cross (toReturn, manifold.faceBody.rigidBody.omega, manifold.normal);
+	return toReturn;
+}
+
+function compute_b (manifolds) {
+	var b_ret = [];
+	for (var i = 0; i < manifolds.length; i++) {
+		var a = manifolds[i].vertexBody;
+		var b = manifolds[i].faceBody;
+		var n = manifolds[i].normal;
+		var p = manifolds[i].collisionPoint;
+	  	var ra = vec3.create ();
+	  	var rb = vec3.create ();
+	  	vec3.sub (ra, p, a.collider.currentCenter);
+	  	vec3.sub (rb, p, b.collider.currentCenter);
+
+	  	var f_ext_a = vec3.clone (a.rigidBody.force);
+	  	var f_ext_b = vec3.clone (b.rigidBody.force);
+
+	  	var t_ext_a = vec3.clone (a.rigidBody.force);
+	  	var t_ext_b = vec3.clone (b.rigidBody.force);
+
+	  	var a_ext_part = vec3.create ();
+	  	var b_ext_part = vec3.create ();
+	  	var a_vel_part = vec3.create ();
+	  	var b_vel_part = vec3.create ();
+
+	  	var term1 = vec3.create ();
+	  	vec3.scale (term1, f_ext_a, a.rigidBody.inv_mass);
+	  	var storage = vec3.create ();
+	  	var term2 = vec3.create ();
+	  	vec3.transformMat3 (storage, t_ext_a, a.rigidBody.inv_I);
+	  	vec3.cross (term2, storage, ra); 
+
+	  	vec3.add (a_ext_part, term1, term2);
+
+	  	var term3 = vec3.create ();
+	  	vec3.scale (term3, f_ext_b, b.rigidBody.inv_mass);
+	  	storage = vec3.create ();
+	  	var term4 = vec3.create ();
+	  	vec3.transformMat3 (storage, t_ext_b, b.rigidBody.inv_I);
+	  	vec3.cross (term4, storage, rb); 
+
+	  	vec3.add (b_ext_part, term3, term4);
+
+	  	term1 = vec3.create ();
+	  	storage = vec3.create ();
+	  	vec3.cross (storage, a.rigidBody.omega, ra);
+	  	vec3.cross (term1, a.rigidBody.omega, storage);
+
+	  	term2 = vec3.create ();
+	  	storage = vec3.create ();
+	  	vec3.cross (storage, a.rigidBody.L, a.rigidBody.omega);
+	  	vec3.transformMat3 (storage, storage, a.rigidBody.inv_I);
+	  	vec3.cross (term2, storage, ra);
+
+	  	term3 = vec3.create ();
+	  	storage = vec3.create ();
+	  	vec3.cross (storage, b.rigidBody.omega, rb);
+	  	vec3.cross (term3, b.rigidBody.omega, storage);
+
+	  	term4 = vec3.create ();
+	  	storage = vec3.create ();
+	  	vec3.cross (storage, b.rigidBody.L, b.rigidBody.omega);
+	  	vec3.transformMat3 (storage, storage, b.rigidBody.inv_I);
+	  	vec3.cross (term4, storage, rb);
+
+	  	var k1;
+	  	var temp1 = vec3.create ();
+	  	var temp2 = vec3.create ();
+	  	storage = vec3.create ();
+	  	vec3.add (temp1, a_ext_part, a_vel_part);
+	  	vec3.add (temp2, b_ext_part, b_vel_part);
+	  	vec3.sub (storage, temp1, temp2);
+	  	k1 = vec3.dot (n, storage);
+
+	  	var ndot = compute_ndot (manifolds[i]);
+
+	  	var pt_1 = a.rigidBody.pointVelocity (p);
+	  	var pt_2 = b.rigidBody.pointVelocity (p);
+	  	storage = vec3.create ();
+	  	vec3.sub (storage, pt_1, pt_2);
+	  	var k2 = 2 * vec3.dot (ndot, storage);
+
+	  	b_ret.push (k1 + k2);
+	}
+
+	return b_ret;
+}
+
+function compute_a (manifolds) {
+	var a = [];
+	for (var i = 0; i < manifolds.length; i++) {
+		a.push ([]);
+		for (var j = 0; j < manifolds.length; j++) {
+			a[i].push (compute_aij (manifolds[i], manifolds[j]));
+		}
+	}
+
+	return a;
+}
+
+function compute_aij (manifold1, manifold2) {
+	if ((manifold1.vertexBody != manifold2.vertexBody) && (manifold1.faceBody != manifold2.faceBody) &&
+		(manifold1.vertexBody != manifold2.faceBody) && (manifold1.vertexBody != manifold2.faceBody))
+		return 0.0;
+
+	var ni = manifold1.normal;
+	var nj = manifold2.normal;
+	var pi = manifold1.collisionPoint;
+	var pj = manifold2.collisionPoint;
+	var ai = manifold1.vertexBody;
+	var bi = manifold1.faceBody;
+	var aj = manifold2.vertexBody;
+	var bj = manifold2.faceBody;
+
+	var ra = vec3.create ();
+  	var rb = vec3.create ();
+  	vec3.sub (ra, pi, ai.collider.currentCenter);
+  	vec3.sub (rb, pi, bi.collider.currentCenter);
+
+  	var force_on_a = vec3.create ();
+  	var torque_on_a = vec3.create ();
+
+  	if (aj == ai) {
+  		force_on_a = vec3.clone (nj);
+  		var storage = vec3.create ();
+  		vec3.sub (storage, pj, ai.collider.currentCenter);
+  		vec3.cross (torque_on_a, storage, nj);
+  	} else if (bj == ai) {
+  		vec3.negate (force_on_a, nj);
+  		var storage = vec3.create ();
+  		vec3.sub (storage, pj, ai.collider.currentCenter);
+  		vec3.cross (torque_on_a, storage, nj);
+  	}
+
+  	var force_on_b = vec3.create ();
+  	var torque_on_b = vec3.create ();
+
+  	if (aj == bi) {
+  		force_on_b = vec3.clone (nj);
+  		var storage = vec3.create ();
+  		vec3.sub (storage, pj, bi.collider.currentCenter);
+  		vec3.cross (torque_on_b, storage, nj);
+  	} else if (bj == bi) {
+  		vec3.negate (force_on_b, nj);
+  		var storage = vec3.create ();
+  		vec3.sub (storage, pj, bi.collider.currentCenter);
+  		vec3.cross (torque_on_b, storage, nj);
+  	}
+
+  	var a_linear = vec3.create ();
+  	vec3.scale (a_linear, force_on_a, ai.rigidBody.inv_mass);
+
+  	var a_angular = vec3.create ();
+  	var storage = vec3.create ();
+  	vec3.transformMat3 (storage, torque_on_a, ai.rigidBody.inv_I);
+  	vec3.cross (a_angular, storage, ra);
+
+  	var b_linear = vec3.create ();
+  	vec3.scale (b_linear, force_on_b, bi.rigidBody.inv_mass);
+
+  	var b_angular = vec3.create ();
+  	var storage = vec3.create ();
+  	vec3.transformMat3 (storage, torque_on_b, bi.rigidBody.inv_I);
+  	vec3.cross (b_angular, storage, rb);
+
+  	var term1 = vec3.create ();
+  	var term2 = vec3.create ();
+  	vec3.add (term1, a_linear, a_angular);
+  	vec3.add (term2, b_linear, b_angular);
+  	storage = vec3.create ();
+  	vec3.sub (storage, term1, term2);
+
+  	return vec3.dot (ni, storage);
+}
+
+function qp_solve (a_mat, b_vec) {
+	var force = [];
+	for (var i = 0; i < b_vec.length; i++) {
+		var term = 0.0;
+		for (var j = 0; j < b_vec.length; j++) {
+			term += a_mat[i][j] * b_vec[j];
+		}
+		force.push (term);
+	}
+
+	return force;
 }
 
 

@@ -106,8 +106,8 @@ window.onload = function init () {
     gl.viewport (0, 0, canvas.width, canvas.height);
     gl.clearColor (0.0, 0.0, 0.0, 1.0);
     
-    gl.enable (gl.BLEND);
-    gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    //gl.enable (gl.BLEND);
+    //gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.enable (gl.DEPTH_TEST);
 
@@ -133,7 +133,7 @@ window.onload = function init () {
     }
 
     function updateCamera(e) {
-        player.camera.mouseLook (e.movementX, e.movementY);
+        cam.mouseLook (e.movementX, e.movementY);
     }
 
     canvas.addEventListener ("mousedown", function (e) {
@@ -144,10 +144,6 @@ window.onload = function init () {
     window.addEventListener ("keydown", function (e) {
         switch (event.keyCode) {
             case 187: // =
-            {
-                ch.active = !ch.active;
-                break;
-            }
             case 73: // i
             case 79: // o
             case 49: // 1
@@ -264,14 +260,14 @@ window.onload = function init () {
             vec4.fromValues (-0.05, 0.0, 0.5, 1.0)
         ]);
 /*
-    lightsManager.addSource (new light (new transform (vec3.fromValues (10.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    lightsManager.addSource (new light (new transform (vec3.fromValues (10.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (0.1, 0.1, 1.0, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
 
     lightsManager.lightSources[1].tag = "blue";
 
-    lightsManager.addSource (new light (new transform (vec3.fromValues (-10.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (0.1, 1.0, 0.1, 1.0),
                               vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
@@ -293,12 +289,11 @@ window.onload = function init () {
                          null, 
                          null,
                          new boxCollider (vec3.fromValues (-1.0, -4.0, -1.0), vec3.fromValues (1.0, 1.0, 1.0), "dynamic"),
-                         new rigidBody (100.0, "dynamic"));
+                         new rigidBody (5.0, "dynamic"));
 
     player.camera = cam;
     player.rigidBody.angularRigidBody = false;
-    player.rigidBody.dynamicFriction = 100000.0;
-    player.rigidBody.staticFriction = 100000.0;
+    player.rigidBody.restitution = 0.1;
     player.tag = "player";
 
     playerControler = new PlayerControler (player);
@@ -348,8 +343,21 @@ window.onload = function init () {
 
     cubes[0].addOnMouseClickTrigger (function (object) {
         animationsManager.animations.push (new animationHold (object));
-        object.rigidBody.type = "static";
     }); 
+
+    cubes[1].addOnMouseClickTrigger (function (object) {
+        var storage = mat4.create ();
+        mat4.fromQuat (storage, cam.rotation);
+            
+        var direction = vec3.fromValues (-storage[8], -storage[9], -storage[10]);
+        vec3.normalize (direction, direction);
+
+        var impulse = vec3.create ();
+        vec3.scale (impulse, direction, 1000.0);
+
+        object.rigidBody.addImpulse (impulse);
+    })
+
 
     animationsManager.animations.push (new animationRotation (cubes[0], 0.0, 120.0, vec3.fromValues (1.0, 1.0, 0.0)));
     animationsManager.animations.push (new animationRotation (cubes[1], 0.0, 180.0, vec3.fromValues (1.0, 0.0, 0.0)));
@@ -361,7 +369,7 @@ window.onload = function init () {
     generateCubeVertices (cubeVertices);
     generateCubeTexCoords (texCoords);
 
-    cubes.push (new object (new transform (vec3.fromValues (0.0, -4.0, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
+    cubes.push (new object (new transform (vec3.fromValues (0.0, -4.0, 0.0), vec3.fromValues (1000.0, 3.0, 1000.0), quat.create ()),
                             new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                             new geometry (pointsArray, normalsArray, textureArray),
                             new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
@@ -426,15 +434,15 @@ function render (current) {
     lightsManager.setupAll ();
 
     // animate the camera rotation
-    player.camera.updateRotation (deltaTime);
-    gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), player.camera.position);
+    cam.updateRotation (deltaTime);
+    gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), cam.position);
 
-    if (movingforward) playerControler.moveForward(deltaTime * 16);
-    if (movingbackward) playerControler.moveBackward(deltaTime * 16);
-    if (movingleft) playerControler.moveLeft(deltaTime * 16);
-    if (movingright) playerControler.moveRight(deltaTime * 16);
+    if (movingforward) playerControler.moveForward(deltaTime * 12);
+    if (movingbackward) playerControler.moveBackward(deltaTime * 12);
+    if (movingleft) playerControler.moveLeft(deltaTime * 12);
+    if (movingright) playerControler.moveRight(deltaTime * 12);
     if (movingup) playerControler.jump ();
-    if (movingdown) playerControler.moveDown(deltaTime * 16);
+    if (movingdown) playerControler.moveDown(deltaTime * 12);
 
     // draw
     drawSceneGraph (deltaTime);
@@ -442,7 +450,6 @@ function render (current) {
     // callback
     window.requestAnimationFrame (render);
 }
-
 
 function buildSceneGraph () {
     SGraph.root.children.push (cubes[0]);
@@ -458,7 +465,6 @@ function buildSceneGraph () {
     //SGraph.root.children[1].children.push (cubes[2]);
     //SGraph.root.children[1].children[0].children.push (cubes[3]);
 }
-
 
 function generatePlane () {
     pointsArray = [];
