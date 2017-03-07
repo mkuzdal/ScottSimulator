@@ -473,10 +473,11 @@ function drawSceneGraph (dTime) {
     gl.clear (gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
     gl.colorMask (true, true, true, true);
     gl.bindFramebuffer (gl.FRAMEBUFFER, null);
+    gl.viewport (0, 0, canvas.width, canvas.height);
 
+/*
     gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_COLOR); 
     gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_COLOR); 
-    gl.viewport (0, 0, canvas.width, canvas.height);
     gl.bindFramebuffer (gl.FRAMEBUFFER, colorFramebuffer);
     gl.disable (gl.DEPTH_TEST);
 
@@ -488,7 +489,7 @@ function drawSceneGraph (dTime) {
     gl.enable (gl.DEPTH_TEST);
     gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.bindFramebuffer (gl.FRAMEBUFFER, null);
-
+*/
     gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_DEFAULT); 
     gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_DEFAULT); 
 

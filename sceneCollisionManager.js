@@ -816,17 +816,17 @@ class sceneCollisionManager {
 	  		vec3.sub (ra, p, a.collider.currentCenter);
 	  		vec3.sub (rb, p, b.collider.currentCenter);
 
-			vec3.scaleAndAdd (a.rigidBody.force, a.rigidBody.force, n, f);
+			vec3.scaleAndAdd (a.rigidBody.f, a.rigidBody.f, n, f);
 			var storage = vec3.create ();
 			vec3.scale (storage, n, f);
 			vec3.cross (storage, ra, storage);
-			vec3.add (a.rigidBody.torque, a.rigidBody.torque, storage);
+			vec3.add (a.rigidBody.t, a.rigidBody.t, storage);
 
-			vec3.scaleAndAdd (b.rigidBody.force, b.rigidBody.force, n, -f);
+			vec3.scaleAndAdd (b.rigidBody.f, b.rigidBody.f, n, -f);
 			var storage = vec3.create ();
 			vec3.scale (storage, n, f);
 			vec3.cross (storage, rb, storage);
-			vec3.sub (b.rigidBody.torque, b.rigidBody.torque, storage);
+			vec3.sub (b.rigidBody.t, b.rigidBody.t, storage);
 		}
 
 		this.collisions = [];
