@@ -283,11 +283,7 @@ window.onload = function init () {
 	// room
 	var room = new object ();
 	room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
-<<<<<<< HEAD
 	room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ());
-=======
-	room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
->>>>>>> 8d3d1bb84a128e25775b6eb44c9bdc5f5f34986f
 	room.tag = "world";
 	SGraph.root.children.push (room);
     room.collider = new nullCollider ();
@@ -361,11 +357,7 @@ window.onload = function init () {
                             new rigidBody (1000.0, "static"))
                     );
 
-<<<<<<< HEAD
     for (var i=0; i<roomColliders.length; i++) room.children.push (roomColliders[i]);
-=======
-    for (var i=0; i<roomColliders.length; i++) SGraph.root.children.push (roomColliders[i]);
->>>>>>> 8d3d1bb84a128e25775b6eb44c9bdc5f5f34986f
 
 	var roof = new object ();
 	roof.loadFromObj ("roofOBJ", "roofMAT", "roofTEX");
@@ -423,11 +415,7 @@ window.onload = function init () {
     	//also create the chairs on the edges of the room, on the outside of the aisles
     	var rightChair = chair.clone();
     	var rightChairRotate = quat.create();
-<<<<<<< HEAD
 		quat.setAxisAngle(rightChairRotate, [0,1,0], glMatrix.toRadian(-105));
-=======
-			quat.setAxisAngle(rightChairRotate, [0,1,0], glMatrix.toRadian(-105));
->>>>>>> 8d3d1bb84a128e25775b6eb44c9bdc5f5f34986f
     	rightChair.transform.rotation = quat.clone(rightChairRotate);
     	rightChair.transform.position = vec3.fromValues(-15.5, -3.8+2.8*i, -1.8+4*i-1.2);
     	room.children.push(rightChair);
@@ -441,15 +429,6 @@ window.onload = function init () {
 
     }
 
-<<<<<<< HEAD
-=======
-  var person = new object();
-  var rotation = quat.create();
-  person.loadFromObj("personOBJ", "personMAT", "personTEX");
-  person.transform = new transform (vec3.fromValues(0, 0, 0), vec3.fromValues(1.0, 1.0, 1.0), quat.clone(rotation)); 
-  room.children.push(person);
-  
->>>>>>> 8d3d1bb84a128e25775b6eb44c9bdc5f5f34986f
     //add a stool in the corner 
     var stool = new object();
     stool.loadFromObj("stoolOBJ", "stoolMAT", "stoolTEX");

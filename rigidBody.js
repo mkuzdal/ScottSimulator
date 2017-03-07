@@ -42,7 +42,6 @@ class rigidBody {
 			var dt = dTime;
 
 			vec3.scaleAndAdd (this.P, this.P, this.force, dt);
-
 			vec3.scaleAndAdd (this.P, this.P, this.f, dt);
 			vec3.scale (this.velocity, this.P, this.inv_mass);
 			vec3.scaleAndAdd (this.object.transform.position, this.object.transform.position, this.velocity, dt);
@@ -134,12 +133,19 @@ function resolveCollision (object1, object2, manifold) {
 		} 
 
         var percent = 1.0;
-        if (object.tag == "player") {
+        if (object1.tag == "player") {
 	       percent = 4.0;
         }
 
   	    vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, percent * manifold.penetrationDistance);
 
+        if (object1.tag == "player" && vec3.equals (manifold.normal, vec3.fromValues (0.0, 1.0, 0.0))) {
+            object1.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
+            object1.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
+            object1.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
+            return;
+        } 
+        
   		var padot = object1.rigidBody.pointVelocity (manifold.collisionPoint);
   		var pbdot = object2.rigidBody.pointVelocity (manifold.collisionPoint);
   		var n = manifold.normal;
@@ -151,19 +157,13 @@ function resolveCollision (object1, object2, manifold) {
   		var vrel = vec3.create ();
   		vec3.sub (vrel, padot, pbdot);
 
-  		var vrelNormal = vec3.dot (n, vrel);
-  
-        if (object1.tag == "player" && vec3.equals (manifold.normal, vec3.fromValues (0.0, 1.0, 0.0))) {
-            object1.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
-            object1.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
-            object1.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
-        }  
+  		var vrelNormal = vec3.dot (n, vrel); 
 
   		if (vrelNormal > THRESHHOLD) {
   			return;
   		}
   		if (vrelNormal > -THRESHHOLD) {
-  			//collisionManager.collisions.push (manifold);
+  			collisionManager.collisions.push (manifold);
   			return;
   		}  
 
@@ -222,6 +222,9 @@ function resolveCollision (object1, object2, manifold) {
 		object1 = manifold.vertexBody;
 		object2 = manifold.faceBody;
 
+        if (object1.tag == "player" || object2.tag == "player")
+            return;
+        
 		var percent = 0.8; 
   		var correction = vec3.create ();
   		vec3.scale (correction, manifold.normal, manifold.penetrationDistance * percent / (object1.rigidBody.inv_mass + object2.rigidBody.inv_mass));
@@ -245,7 +248,7 @@ function resolveCollision (object1, object2, manifold) {
   			return;
   		}
   		if (vrel > -THRESHHOLD) {
-  			//collisionManager.collisions.push (manifold);
+  			collisionManager.collisions.push (manifold);
   			return;
   		}
 
