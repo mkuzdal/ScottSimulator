@@ -182,7 +182,7 @@ class animationHold {
     constructor (_object) {
         this.object = _object;
 
-        this.distance = vec3.distance (this.object.transform.position, cam.position);
+        this.distance = vec3.distance (this.object.transform.position, currentScene.playerController.player.camera.position);
         this.active = true;
         this.tag = "hold";
     }
@@ -192,7 +192,7 @@ class animationHold {
             return;
 
         var storage = mat4.create ();
-        mat4.fromQuat (storage, cam.rotation);
+        mat4.fromQuat (storage, currentScene.playerController.player.camera.rotation);
             
         var direction = vec3.fromValues (-storage[8], -storage[9], -storage[10]);
         vec3.normalize (direction, direction);
@@ -201,13 +201,12 @@ class animationHold {
         if (clickManager.clicked) {
             this.object.rigidBody.type = "dynamic";
             vec3.scale (this.object.rigidBody.P, vec3.clone (direction), 5.0);
-            animationsManager.removeAnimation (this);
+            currentScene.animationsManager.removeAnimation (this);
         }
 
-        vec3.add (direction, direction, cam.position);
+        vec3.add (direction, direction, currentScene.playerController.player.camera.position);
         this.object.transform.position = direction;
     }
 }
-
 
 

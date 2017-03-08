@@ -1,10 +1,17 @@
 
 
-class PlayerControler {
+class PlayerController {
 	constructor (_player) {
 		this.player = _player;
 
         this.jumpForce = vec3.fromValues (0.0, 5000.0, 0.0);
+
+        this.movingforward = false;
+        this.movingbackward = false;
+        this.movingleft = false;
+        this.movingright = false;
+        this.movingup = false;
+        this.movingdown = false;
 	}
 
     /** moveForward: moves the player in the forwards direction by 'speed' many units.

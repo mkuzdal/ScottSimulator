@@ -15,7 +15,7 @@ class mouseTrigger {
     }
 }
 
-class triggerHandler {
+class clickHandler {
     constructor () {
         this.clicked = false;
         this.pixel = new Uint8Array (4);
@@ -33,12 +33,11 @@ class triggerHandler {
             }
         }
         trigger.ID = vec4.fromValues (this.currentID % 256 , Math.floor (this.currentID/256) % 256, Math.floor(this.currentID/65536) % 256, 1.0)
-
         this.currentID++;
         this.triggers.push (trigger);
     }
 
-    handleMouseEvents () {        
+    handleMouseEvents () {       
         for (var i = 0; i < this.triggers.length; i++) {
             if (vec4.equals(this.pixel, this.triggers[i].ID)) { 
                 if (this.triggers[i].type == "click" && this.clicked == true) {
@@ -510,10 +509,10 @@ class Crosshair {
      * the crosshair is drawn with lines, connecting 2 vertices at a time
      */
     draw () {
-        gl.uniformMatrix4fv (projectionMatrixLoc, false, player.camera.orthoProjectionMatrix);
+        gl.uniformMatrix4fv (projectionMatrixLoc, false, currentScene.playerController.player.camera.orthoProjectionMatrix);
         gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_ORTHO); 
         gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_ORTHO); 
-        for (var i=0; i < this.Nvertices; i+=2) {
+        for (var i = 0; i < this.Nvertices; i += 2) {
             gl.drawArrays (gl.LINES, i, 2);
         }
     }

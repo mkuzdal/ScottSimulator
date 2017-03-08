@@ -1,4 +1,27 @@
-function buildSceneGraph () {
+function buildSceneGraph (SGraph) {
+
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 30.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec4.fromValues (0.4, 0.4, 0.4, 1.0),
+                              vec4.fromValues (0.8, 0.8, 0.8, 1.0),
+                              vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
+
+    SGraph.lightsManager.lightSources[0].tag = "red";
+
+    var cam = new camera ([0,-1.85,-15.8], glMatrix.toRadian(180), glMatrix.toRadian(5));
+    var player = new object (new transform (vec3.fromValues (0.0, 10.0, -15.8), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                         null, 
+                         null, 
+                         null,
+                         new boxCollider (vec3.fromValues (-0.5, -7.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "dynamic"),
+                         new rigidBody (100.0, "dynamic"));
+
+    player.camera = cam;
+    player.rigidBody.angularRigidBody = false;
+    player.tag = "player";
+
+    SGraph.root.children.push (player);
+    SGraph.playerController = new PlayerController (player);
+
 	// room
 	var room = new object ();
 	room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
@@ -100,10 +123,7 @@ function buildSceneGraph () {
 	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
 	desk.transform = new transform (vec3.fromValues (0.0, -6, -9), vec3.fromValues (1.4, 1.4, 1.4), quat.clone(rotation));
 	room.children.push (desk);
-
-	
-	var rotation = quat.create();
-	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90));
+    desk.addRigidBody (new rigidBody (50.0, "static"));
 
 	//make all the chairs!
     var chair = new object ();
@@ -111,10 +131,15 @@ function buildSceneGraph () {
     chair.transform = new transform (vec3.fromValues (0, -3.8, -1.3), vec3.fromValues (1.2, 1.2, 1.2), quat.clone(rotation));
     var seat = new object ();
 	seat.loadFromObj ("seatOBJ", "seatMAT", "seatTEX");
-	var rotation = quat.create();
-	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90));
+	var rotation = quat.create ();
+	quat.setAxisAngle (rotation, [0,1,0], glMatrix.toRadian(-90));
+    //var rotation2 = quat.create ();
+    //quat.setAxisAngle (rotation2, [1,0,0], glMatrix.toRadian (105));
+    //quat.mul (rotation, rotation, rotation2);
 	seat.transform = new transform (vec3.fromValues(0.0,0.3,0.22), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
+
 	chair.children.push (seat);
+    chair.addRigidBody (new rigidBody (10.0, "static"));
 
 	var rows_of_chairs=4;
     var chairs_per_row=8;
@@ -142,9 +167,7 @@ function buildSceneGraph () {
     	leftChair.transform.rotation = quat.clone(leftChairRotate);
     	leftChair.transform.position = vec3.fromValues(15.5, -3.8+2.8*i, -1.8+4*i-1.2);
     	room.children.push(leftChair); 
-
     }
-
 
     //add a stool in the corner 
     var stool = new object();
@@ -153,7 +176,6 @@ function buildSceneGraph () {
 	room.children.push(stool); 
     stool.addRigidBody (new rigidBody (10.0, "dynamic"));
     stool.collider.physics = "dynamic";
-
 
     var button = new object ();
     button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
