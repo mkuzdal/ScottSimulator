@@ -1,6 +1,7 @@
 function buildSceneGraph (SGraph) {
 
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 30.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                                               // WHERE THE LIGHT IS LOOKING AT GOES HERE
                                                vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                                                vec4.fromValues (0.6, 0.6, 0.6, 1.0),
                                                vec4.fromValues (0.4, 0.4, 0.4, 1.0)));
