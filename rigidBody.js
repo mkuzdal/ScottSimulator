@@ -25,8 +25,8 @@ class rigidBody {
 		this.L = vec3.create ();
 
 		this.restitution = 0.8;
-		this.frictionStatic = 0.5;
-		this.frictionDynamic = 0.2;
+		this.frictionStatic = 1.5;
+		this.frictionDynamic = 1.0;
 
 		this.inv_I = mat3.clone (this.inv_Ibody);
 		this.f = vec3.fromValues (0.0, 0.0, 0.0);

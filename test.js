@@ -350,9 +350,10 @@ window.onload = function init () {
     cubes[6].collider.collisionFunction = function (object1, object2) {
        console.log ("TRIGGER");
        //changeGravitationalCenter (vec3.fromValues (0.0, 50.0, 0.0));
-       currentScene = blackHoleScene;
+       //currentScene = blackHoleScene;
        cubes[6].collider.collisionFunction = null;
-       changeGravitationalCenter (vec3.fromValues (0.0, 5.0, 0.0));
+       swapTextures (document.getElementById ("TEXfrance"));
+       //changeGravitationalCenter (vec3.fromValues (0.0, 5.0, 0.0));
     }
 
     for (var i = 0; i < 10; i++) {
@@ -367,6 +368,8 @@ window.onload = function init () {
     } 
 
     cubes[0].addOnMouseClickTrigger (function (object) {
+        object.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
+        object.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
         mainScene.animationsManager.animations.push (new animationHold (object));
     }); 
 

@@ -852,11 +852,12 @@ class sceneCollisionManager {
 
 	  	    vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, percent * manifold.penetrationDistance);
 
-	        if (object1.tag == "player" && vec3.equals (manifold.normal, vec3.fromValues (0.0, 1.0, 0.0))) {
+	  	    if (object1.tag == "player" && vec3.equals (manifold.normal, vec3.fromValues (0.0, 1.0, 0.0))) {
 	            object1.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
 	            object1.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
 	            object1.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
-	        } 
+	            return;
+	        }   
 
 	  		var padot = object1.rigidBody.pointVelocity (manifold.collisionPoint);
 	  		var pbdot = object2.rigidBody.pointVelocity (manifold.collisionPoint);
@@ -928,7 +929,7 @@ class sceneCollisionManager {
 	    	}
 
 	    	vec3.add (object1.rigidBody.P, object1.rigidBody.P, frictionImpulse);
-	  		vec3.sub (object2.rigidBody.P, object2.rigidBody.P, frictionImpulse);   
+	  		vec3.sub (object2.rigidBody.P, object2.rigidBody.P, frictionImpulse); 
 
 		} else if (object1.rigidBody.type == "dynamic" && object2.rigidBody.type == "dynamic") {
 			object1 = manifold.vertexBody;

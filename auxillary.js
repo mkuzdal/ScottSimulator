@@ -13,3 +13,13 @@ function changeGravitationalCenter (center) {
 		}
 	}
 }
+
+function swapTextures (img) {
+	var objects = currentScene.getObjects ();
+
+	for (var i = 0; i < objects.length; i++) {
+		if (objects[i].texture) {
+			objects[i].texture = new texture (img, [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]);
+		}
+	}
+}
