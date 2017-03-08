@@ -55,7 +55,7 @@ class object {
         }
     }
 
-    setup (CTM) {
+    setup (_player) {
         if (this.material) {
             this.material.setup ();
         } if (this.texture) {
@@ -67,15 +67,14 @@ class object {
         } else {
             gl.uniform4fv (gl.getUniformLocation (program, "fTriggerID"), vec4.fromValues (0.0, 0.0, 0.0, 1.0));   
         }
+
         if (this.geometry) {
             this.geometry.setup ();
             gl.uniformMatrix4fv (modelMatrixLoc, false, this.collider.matrix);
-            gl.uniformMatrix4fv (cameraMatrixLoc, false, cam.view);
-            gl.uniformMatrix4fv (projectionMatrixLoc, false, cam.perspectiveProjectionMatrix); 
+            gl.uniformMatrix4fv (cameraMatrixLoc, false, _player.camera.view);
+            gl.uniformMatrix4fv (projectionMatrixLoc, false, _player.camera.perspectiveProjectionMatrix); 
             //gl.uniformMatrix4fv (cameraMatrixLoc, false, lightsManager.lightSources[0].view);
             //gl.uniformMatrix4fv (projectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix); 
-            gl.uniformMatrix4fv (lightProjectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix);
-            gl.uniformMatrix4fv (lightMatrixLoc, false, lightsManager.lightSources[0].view);
 
             var CTMN = mat3.create ();
             mat3.normalFromMat4 (CTMN, this.collider.matrix);
@@ -304,9 +303,16 @@ class object {
 
 
 class sceneGraph {
-	constructor () {
+	constructor (_build_function) {
 		this.root = new object ();
 		this.root.children = [];
+        this.lightsManager = new lightHandler ();
+        this.animationsManager = new animationHandler ();
+        this.collisionsManager = new sceneCollisionManager ();
+
+        this.build_function = _build_function;
+
+        this.playerController = null;
 
         this.root.tag = "root";
 	}
@@ -316,13 +322,12 @@ class sceneGraph {
         var PL = mat4.create ();
 
         if (type == DRAW_TYPE_SHADOW) {
-            mat4.mul (PC, lightsManager.lightSources[0].projectionMatrix, lightsManager.lightSources[0].view);
-            mat4.mul (PL, lightsManager.lightSources[0].projectionMatrix, lightsManager.lightSources[0].view);
+            mat4.mul (PC, this.lightsManager.lightSources[0].projectionMatrix, this.lightsManager.lightSources[0].view);
+            mat4.mul (PL, this.lightsManager.lightSources[0].projectionMatrix, this.lightsManager.lightSources[0].view);
         } else {
-            mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.view);
-            mat4.mul (PL, lightsManager.lightSources[0].projectionMatrix, lightsManager.lightSources[0].view);
+            mat4.mul (PC, this.playerController.player.camera.perspectiveProjectionMatrix, this.playerController.player.camera.view);
+            mat4.mul (PL, this.lightsManager.lightSources[0].projectionMatrix, this.lightsManager.lightSources[0].view);
         }
-        //mat4.mul (PC, cam.perspectiveProjectionMatrix, cam.view);
 
         for (var i = 0; i < this.root.children.length; i++) {
             this.__drawTree_AUX (this.root.children[i], PC, PL, type);
@@ -346,7 +351,7 @@ class sceneGraph {
 	}
 
 	drawNode (obj) {
-        obj.setup ();
+        obj.setup (this.playerController.player);
         obj.draw ();
 	}
 
@@ -403,6 +408,7 @@ class sceneGraph {
     }
 
     set () {
+        this.lightsManager.setupAll ();
         var CTM = mat4.create ();
 
         for (var i = 0; i < this.root.children.length; i++) {
@@ -421,7 +427,7 @@ class sceneGraph {
 
         if (root.collider.type != "null") {
             root.collider.setup ();
-            collisionManager.objects.push (root);
+            this.collisionsManager.objects.push (root);
         }
 
         for (var i = 0; i < root.children.length; i++) {
@@ -445,60 +451,78 @@ class sceneGraph {
             this.__update_AUX (dTime, root.children[i]);
         }
     }
+
+    render (dTime) {
+        this.animationsManager.animateAll (dTime);
+        this.set ();
+        this.collisionsManager.detectAllCollisions ();
+        this.collisionsManager.handleAllContactCollisions ();
+        this.update (dTime);
+
+        gl.viewport (0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT); 
+        gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_SHADOW); 
+        gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_SHADOW); 
+        gl.bindFramebuffer (gl.FRAMEBUFFER, shadowFramebuffer);
+        gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.disable (gl.DEPTH_TEST);
+
+        this.drawTree (DRAW_TYPE_SHADOW);
+
+        gl.enable (gl.DEPTH_TEST);
+        gl.bindFramebuffer (gl.FRAMEBUFFER, null);
+        gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        gl.viewport (0, 0, canvas.width, canvas.height); 
+
+        gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_COLOR); 
+        gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_COLOR); 
+        gl.bindFramebuffer (gl.FRAMEBUFFER, colorFramebuffer);
+        gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.disable (gl.DEPTH_TEST);
+
+        this.drawTree (DRAW_TYPE_COLOR);
+
+        gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, clickManager.pixel);
+        clickManager.handleMouseEvents ();
+
+        gl.enable (gl.DEPTH_TEST);
+        gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.bindFramebuffer (gl.FRAMEBUFFER, null);
+
+        gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_DEFAULT); 
+        gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_DEFAULT); 
+
+        gl.activeTexture (gl.TEXTURE0);
+        gl.bindTexture (gl.TEXTURE_2D, shadowFramebuffer.texture);
+        gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 0); 
+        gl.enable (gl.BLEND);
+        gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+        this.drawTree (DRAW_TYPE_DEFAULT);
+
+        gl.disable(gl.BLEND);
+        gl.activeTexture (gl.TEXTURE0);
+        gl.bindTexture (gl.TEXTURE_2D, null);
+        gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 0); 
+
+        crosshair.setup ();
+        crosshair.draw ();
+    }
+
+    updateCamera (dTime) {
+        this.playerController.player.camera.updateRotation (dTime);
+        gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), this.playerController.player.camera.position);
+
+        if (this.playerController.movingforward) this.playerController.moveForward (dTime * 12);
+        if (this.playerController.movingbackward) this.playerController.moveBackward (dTime * 12);
+        if (this.playerController.movingleft) this.playerController.moveLeft (dTime * 12);
+        if (this.playerController.movingright) this.playerController.moveRight (dTime * 12);
+        if (this.playerController.movingup) this.playerController.jump ();
+        if (this.playerController.movingdown) this.playerController.moveDown (dTime * 12);
+    }
+
+    build () {
+        this.build_function (this);
+    }
 }
-
-function drawSceneGraph (dTime) {
-    SGraph.set ();
-    lightsManager.setupAll ();
-    collisionManager.detectAllCollisions ();
-    collisionManager.handleAllContactCollisions ();
-    SGraph.update (dTime);
-
-    gl.viewport (0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT); 
-    gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_SHADOW); 
-    gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_SHADOW); 
-    gl.bindFramebuffer (gl.FRAMEBUFFER, shadowFramebuffer);
-    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.disable (gl.DEPTH_TEST);
-
-    SGraph.drawTree (DRAW_TYPE_SHADOW);
-
-    gl.enable (gl.DEPTH_TEST);
-    gl.bindFramebuffer (gl.FRAMEBUFFER, null);
-    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    gl.viewport (0, 0, canvas.width, canvas.height); 
-
-    gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_COLOR); 
-    gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_COLOR); 
-    gl.bindFramebuffer (gl.FRAMEBUFFER, colorFramebuffer);
-    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.disable (gl.DEPTH_TEST);
-
-    SGraph.drawTree (DRAW_TYPE_COLOR);
-
-    gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, clickManager.pixel);
-    clickManager.handleMouseEvents ();
-
-    gl.enable (gl.DEPTH_TEST);
-    gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.bindFramebuffer (gl.FRAMEBUFFER, null);
-
-    gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_DEFAULT); 
-    gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_DEFAULT); 
-
-    gl.activeTexture (gl.TEXTURE0);
-    gl.bindTexture (gl.TEXTURE_2D, shadowFramebuffer.texture);
-    gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 0); 
-
-    SGraph.drawTree (DRAW_TYPE_DEFAULT);
-
-    gl.activeTexture (gl.TEXTURE0);
-    gl.bindTexture (gl.TEXTURE_2D, null);
-    gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 0); 
-
-    crosshair.setup ();
-    crosshair.draw ();
-}
-
 

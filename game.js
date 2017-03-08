@@ -1,4 +1,27 @@
-function buildSceneGraph () {
+function buildSceneGraph (SGraph) {
+
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 30.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec4.fromValues (0.4, 0.4, 0.4, 1.0),
+                              vec4.fromValues (0.8, 0.8, 0.8, 1.0),
+                              vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
+
+    SGraph.lightsManager.lightSources[0].tag = "red";
+
+    var cam = new camera ([0,-1.85,-15.8], glMatrix.toRadian(180), glMatrix.toRadian(5));
+    var player = new object (new transform (vec3.fromValues (0.0, 10.0, -15.8), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                         null, 
+                         null, 
+                         null,
+                         new boxCollider (vec3.fromValues (-0.5, -7.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "dynamic"),
+                         new rigidBody (100.0, "dynamic"));
+
+    player.camera = cam;
+    player.rigidBody.angularRigidBody = false;
+    player.tag = "player";
+
+    SGraph.root.children.push (player);
+    SGraph.playerController = new PlayerController (player);
+
 	// room
 	var room = new object ();
 	room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");

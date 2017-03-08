@@ -37,6 +37,10 @@ class lightHandler {
         for (var i = 0; i < this.lightCount; i++) {
             this.lightSources[i].setup ();
         }
+        if (this.lightSources.length) {
+            gl.uniformMatrix4fv (lightProjectionMatrixLoc, false, this.lightSources[0].projectionMatrix);
+            gl.uniformMatrix4fv (lightMatrixLoc, false, this.lightSources[0].view);
+        }
     }
 
     setupByTag (tag) {
