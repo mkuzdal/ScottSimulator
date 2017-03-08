@@ -12,7 +12,7 @@ function buildSceneGraph (SGraph) {
                          null, 
                          null, 
                          null,
-                         new boxCollider (vec3.fromValues (-0.5, -7.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "dynamic"),
+                         new boxCollider (vec3.fromValues (-0.5, -10.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "dynamic"),
                          new rigidBody (100.0, "dynamic"));
 
     player.camera = cam;
