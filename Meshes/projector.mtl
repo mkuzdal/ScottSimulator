@@ -1,7 +1,7 @@
-# Blender MTL File: 'person.blend'
+# Blender MTL File: 'room2.blend'
 # Material Count: 1
 
-newmtl person_material
+newmtl projector_material
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
