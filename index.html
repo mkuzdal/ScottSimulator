@@ -7,37 +7,58 @@ attribute vec3 vNormal;
 attribute vec2 vTexCoord;
 
 uniform int vDrawType;
+uniform int lightIndex;
 
 uniform mat4 modelMatrix;
 uniform mat4 cameraMatrix;
 uniform mat4 projectionMatrix;
 uniform mat3 normalMatrix;
-uniform mat4 lightMatrix;
-uniform mat4 lightProjectionMatrix;
+
+uniform mat4 lightMatrix[5];
+uniform mat4 lightProjectionMatrix[5];
 
 varying vec3 fPos;
 varying vec3 fNormal;
 varying vec2 fTexCoord;
-varying vec4 fPositionFromLight;
+varying vec4 fPositionFromLight[5];
 
 void main ()
 {    
-    if (vDrawType == 0) {
-        fPositionFromLight = lightProjectionMatrix * lightMatrix * modelMatrix * vPosition;
-        gl_Position = fPositionFromLight;
+    if (vDrawType == 0 || vDrawType == 1) {
+        fPos = (modelMatrix * vPosition).xyz;
+        fNormal = (normalMatrix * vNormal);
+        fTexCoord = vTexCoord;
+
+        for (int i = 0; i < 1; i++) {
+            fPositionFromLight[i] = lightProjectionMatrix[i] * lightMatrix[i] * modelMatrix * vPosition;
+        }
+
+        gl_Position = projectionMatrix * cameraMatrix * modelMatrix * vPosition;
         return;
 
-    } else if (vDrawType == 3) {
+    } else if (vDrawType == 2) {
         gl_Position = projectionMatrix * vPosition;
         return;
-    }
 
-    fPos = (modelMatrix * vPosition).xyz;
-    fNormal = (normalMatrix * vNormal);
-    fTexCoord = vTexCoord;
-
-    fPositionFromLight = lightProjectionMatrix * lightMatrix * modelMatrix * vPosition;
-    gl_Position = projectionMatrix * cameraMatrix * modelMatrix * vPosition;
+    } else if (vDrawType >= 3) {
+        if (vDrawType == 3) {
+            fPositionFromLight[0] = lightProjectionMatrix[0] * lightMatrix[0] * modelMatrix * vPosition;
+            gl_Position = fPositionFromLight[0];
+        } else if (vDrawType == 4) {
+            fPositionFromLight[1] = lightProjectionMatrix[1] * lightMatrix[1] * modelMatrix * vPosition;
+            gl_Position = fPositionFromLight[1];
+        } else if (vDrawType == 5) {
+            fPositionFromLight[2] = lightProjectionMatrix[2] * lightMatrix[2] * modelMatrix * vPosition;
+            gl_Position = fPositionFromLight[2];
+        } else if (vDrawType == 6) {
+            fPositionFromLight[3] = lightProjectionMatrix[3] * lightMatrix[3] * modelMatrix * vPosition;
+            gl_Position = fPositionFromLight[3];
+        } else if (vDrawType == 7) {
+            fPositionFromLight[4] = lightProjectionMatrix[4] * lightMatrix[4] * modelMatrix * vPosition;
+            gl_Position = fPositionFromLight[4];
+        }
+        return;
+    } 
 }
 </script>
 
@@ -46,7 +67,7 @@ void main ()
 precision mediump float;
 
 uniform sampler2D texture;
-uniform sampler2D shadowMap;
+uniform sampler2D shadowMap[5];
 
 uniform int fDrawType;
 
@@ -55,7 +76,7 @@ uniform vec4 fTriggerID;
 varying vec3 fPos;
 varying vec3 fNormal;
 varying vec2 fTexCoord;
-varying vec4 fPositionFromLight;
+varying vec4 fPositionFromLight[5];
 
 uniform vec4 fAmbientMaterial, fDiffuseMaterial, fSpecularMaterial;
 uniform float fShininess;
@@ -78,7 +99,7 @@ float unpack (vec4 color) {
    return dot (color, bitShift);
 }
 
-float ShadowCalculation (vec4 fPositionFromLight) {
+float ShadowCalculation (vec4 fPositionFromLight, sampler2D shadowMap) {
     /*
     vec3 shadowCoord = (fPositionFromLight.xyz/fPositionFromLight.w)/2.0 + 0.5;
     vec4 rgbaDepth = texture2D(shadowMap, shadowCoord.xy);
@@ -93,10 +114,10 @@ float ShadowCalculation (vec4 fPositionFromLight) {
     float visibility = 0.0;
 
     vec2 poissonDisk[4];
-    poissonDisk[0] = vec2( -0.94201624, -0.39906216 );
-    poissonDisk[1] = vec2( 0.94558609, -0.76890725 );
-    poissonDisk[2] = vec2( -0.094184101, -0.92938870 );
-    poissonDisk[3] = vec2( 0.34495938, 0.29387760 );
+    poissonDisk[0] = vec2 (-0.94201624, -0.39906216);
+    poissonDisk[1] = vec2 (0.94558609, -0.76890725);
+    poissonDisk[2] = vec2 (-0.094184101, -0.92938870);
+    poissonDisk[3] = vec2 (0.34495938, 0.29387760);
 
     for (int i = 0; i < 4; i++) {
         vec4 rgbaDepth = texture2D(shadowMap, shadowCoord.xy + poissonDisk[i]/700.0);
@@ -114,17 +135,9 @@ float ShadowCalculation (vec4 fPositionFromLight) {
 
 void main () { 
     if (fDrawType == 0) {
-        gl_FragColor = pack (gl_FragCoord.z);
-        return;
-
-    } else if (fDrawType == 1) {
-        gl_FragColor = fTriggerID;
-        return;
-
-    } else if (fDrawType == 2) {
         vec4 fColor = vec4 (0.0, 0.0, 0.0, 1.0);
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 1; i++) {
             vec3 L;
             if (fLightPosition[i].w == 0.0) 
                 L = normalize (fLightPosition[i].xyz);
@@ -151,16 +164,26 @@ void main () {
             if (dot (L, N) < 0.0)
                 specular = vec4 (0.0, 0.0, 0.0, 1.0);
 
-            float shadow = ShadowCalculation (fPositionFromLight);
-            //float shadow = 0.0;
+            float shadow = ShadowCalculation (fPositionFromLight[i], shadowMap[i]);
             vec4 fLighting = (ambient + (shadow) * (diffuse + specular));
             fColor = fColor + fLighting;
         }
-
+ 
         gl_FragColor = fColor * texture2D (texture, fTexCoord);
-    } else if (fDrawType == 3) {
+        return;
+
+    } else if (fDrawType == 1) {
+        gl_FragColor = fTriggerID;
+        return;
+
+    } else if (fDrawType == 2) {
         vec4 fColor = vec4 (1.0, 1.0, 1.0, 1.0);
         gl_FragColor = fColor;
+        return;
+
+    } else if (fDrawType >= 3) {
+        gl_FragColor = pack (gl_FragCoord.z);
+        return;
     }
 }
 </script>

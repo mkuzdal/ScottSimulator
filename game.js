@@ -1,9 +1,10 @@
 function buildSceneGraph (SGraph) {
 
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 30.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
-                              vec4.fromValues (0.4, 0.4, 0.4, 1.0),
-                              vec4.fromValues (0.8, 0.8, 0.8, 1.0),
-                              vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
+                                               // WHERE THE LIGHT IS LOOKING AT GOES HERE
+                                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                                               vec4.fromValues (0.6, 0.6, 0.6, 1.0),
+                                               vec4.fromValues (0.4, 0.4, 0.4, 1.0)));
 
     SGraph.lightsManager.lightSources[0].tag = "red";
 
@@ -12,8 +13,8 @@ function buildSceneGraph (SGraph) {
                          null, 
                          null, 
                          null,
-                         new boxCollider (vec3.fromValues (-0.5, -7.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "static"),
-                         new rigidBody (100.0, "static"));
+                         new boxCollider (vec3.fromValues (-0.5, -7.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "dynamic"),
+                         new rigidBody (100.0, "dynamic"));
 
     player.camera = cam;
     player.rigidBody.angularRigidBody = false;
@@ -196,9 +197,9 @@ function buildSceneGraph (SGraph) {
 
     //add a stool in the corner 
     var stool = new object();
-    stool.loadFromObj("stoolOBJ", "stoolMAT", "stoolTEX");
-	stool.transform = new transform (vec3.fromValues(-12, -7.0, -9.5), vec3.fromValues(0.4, 0.4, 0.4), quat.create ()); 
-	room.children.push(stool); 
+    stool.loadFromObj ("stoolOBJ", "stoolMAT", "stoolTEX");
+	stool.transform = new transform (vec3.fromValues(-16, -7.0, -8.5), vec3.fromValues(0.4, 0.4, 0.4), quat.clone(rotation)); 
+	room.children.push (stool);
     stool.addRigidBody (new rigidBody (10.0, "dynamic"));
     stool.collider.physics = "dynamic";
 

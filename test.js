@@ -15,7 +15,7 @@ var mainScene;
 var blackHoleScene;
 var currentScene;
 
-var shadowFramebuffer;
+var shadowFramebuffers = [];
 var colorFramebuffer;
 
 var OFFSCREEN_WIDTH = 1024;
@@ -216,7 +216,9 @@ window.onload = function init () {
     gl.useProgram (program);
 
     colorFramebuffer = initColorFramebuffer ();
-    shadowFramebuffer = initShadowFramebuffer ();
+    for (var i = 0; i < 5; i++) {
+        shadowFramebuffers.push (initShadowFramebuffer ());
+    }
 
     // Get the local variable for each of the matrix uniforms
     modelMatrixLoc = gl.getUniformLocation (program, "modelMatrix");
@@ -262,7 +264,7 @@ window.onload = function init () {
 
     // create the transforms for each of the 6 bodies.
     transforms =        [   new transform (vec3.fromValues (-1.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
-                            new transform (vec3.fromValues (0.0, 20.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                            new transform (vec3.fromValues (0.0, 40.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                             new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
                             new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ())
                         ];
@@ -406,12 +408,45 @@ function render (current) {
 
 function buildSceneGraph (SGraph) {
 
-    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
-                              vec4.fromValues (0.4, 0.4, 0.4, 1.0),
-                              vec4.fromValues (0.8, 0.8, 0.8, 1.0),
-                              vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (50.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec3.fromValues (0.0, 0.0, 0.0),
+                              vec4.fromValues (0.1, 0.1, 0.1, 1.0),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
 
     SGraph.lightsManager.lightSources[0].tag = "red";
+
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (-50.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec3.fromValues (0.0, 0.0, 0.0),
+                              vec4.fromValues (0.1, 0.1, 0.1, 1.0),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
+
+    SGraph.lightsManager.lightSources[1].tag = "blue";
+
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, 50.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec3.fromValues (0.0, 0.0, 0.0),
+                              vec4.fromValues (0.1, 0.1, 0.1, 1.0),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
+
+    SGraph.lightsManager.lightSources[2].tag = "green";
+
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, -50.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec3.fromValues (0.0, 0.0, 0.0),
+                              vec4.fromValues (0.1, 0.1, 0.1, 1.0),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
+
+    SGraph.lightsManager.lightSources[3].tag = "white";
+
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec3.fromValues (0.0, 0.0, 0.0),
+                              vec4.fromValues (0.1, 0.1, 0.1, 1.0),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
+
+    SGraph.lightsManager.lightSources[4].tag = "black";
 
     var cam = new camera ();
     var player = new object (new transform (vec3.fromValues (0.0, 0.0, 15.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
@@ -437,6 +472,32 @@ function buildSceneGraph (SGraph) {
     SGraph.root.children.push (player);
     //SGraph.root.children[1].children.push (cubes[2]);
     //SGraph.root.children[1].children[0].children.push (cubes[3]);
+/*
+    generateSphere (5);
+    geometries.push (new geometry (pointsArray, normalsArray, textureArray));
+   
+    var sphere = new object (new transform (vec3.fromValues (55.0, 45.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                             new material (vec4.fromValues (1.0, 1.0, 1.0, 1.0), vec4.fromValues (1.0, 1.0, 1.0, 1.0), vec4.fromValues (1.0, 1.0, 1.0, 1.0), 1000.0),
+                             new geometry (pointsArray, normalsArray, textureArray),
+                             new texture (document.getElementById ("TEXblank"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]),
+                             null,
+                             null);
+
+    var sphere2 = sphere.clone ();
+    sphere2.transform = new transform (vec3.fromValues (-55.0, 45.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    var sphere3 = sphere.clone ();
+    sphere3.transform = new transform (vec3.fromValues (0.0, 45.0, 55.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    var sphere4 = sphere.clone ();
+    sphere4.transform = new transform (vec3.fromValues (0.0, 45.0, -55.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    var sphere5 = sphere.clone ();
+    sphere5.transform = new transform (vec3.fromValues (0.0, 45.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+
+    SGraph.root.children.push (sphere);
+    SGraph.root.children.push (sphere2);
+    SGraph.root.children.push (sphere3);
+    SGraph.root.children.push (sphere4);
+    SGraph.root.children.push (sphere5);
+*/
 }
 
 function buildSceneGraph2 (SGraph) {
