@@ -257,13 +257,13 @@ window.onload = function init () {
 
 	lightsManager.lightSources[0].tag = "red";
 
-	cam = new camera ([0,-1.85,-15.8], glMatrix.toRadian(180), glMatrix.toRadian(5));
+	cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
     player = new object (new transform (vec3.fromValues (0.0, 10.0, -15.8), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                          null, 
                          null, 
                          null,
-                         new boxCollider (vec3.fromValues (-0.5, -7.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "dynamic"),
-                         new rigidBody (100.0, "dynamic"));
+                         new boxCollider (vec3.fromValues (-0.5, -7.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "static"),
+                         new rigidBody (100.0, "static"));
 
     player.camera = cam;
     player.rigidBody.angularRigidBody = false;
