@@ -12,8 +12,8 @@ function buildSceneGraph (SGraph) {
                          null, 
                          null, 
                          null,
-                         new boxCollider (vec3.fromValues (-0.5, -7.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "dynamic"),
-                         new rigidBody (100.0, "dynamic"));
+                         new boxCollider (vec3.fromValues (-0.5, -7.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "static"),
+                         new rigidBody (100.0, "static"));
 
     player.camera = cam;
     player.rigidBody.angularRigidBody = false;
@@ -98,6 +98,31 @@ function buildSceneGraph (SGraph) {
 
     for (var i=0; i<roomColliders.length; i++) room.children.push (roomColliders[i]);
 
+    leavetrigger1 = new object (new transform (vec3.fromValues (0.0, 0.0, -3.5), vec3.fromValues (100.0, 100.0, 0.5), quat.create ()),
+                            null, null, null,
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "trigger"),
+                            null
+                    );
+    room.children.push (leavetrigger1);
+    leavetrigger2 = new object (new transform (vec3.fromValues (0.0, 0.0, 3.5), vec3.fromValues (100.0, 100.0, 0.5), quat.create ()),
+                            null, null, null,
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "trigger"),
+                            null
+                    );
+    room.children.push (leavetrigger2);
+    leavetrigger3 = new object (new transform (vec3.fromValues (0.0, 0.0, 12.5), vec3.fromValues (100.0, 100.0, 0.5), quat.create ()),
+                            null, null, null,
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "trigger"),
+                            null
+                    );
+    room.children.push (leavetrigger3);
+    returntrigger = new object (new transform (vec3.fromValues (0.0, 0.0, -8.0), vec3.fromValues (100.0, 100.0, 0.5), quat.create ()),
+                            null, null, null,
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "trigger"),
+                            null
+                    );
+    room.children.push (returntrigger);
+
 	var roof = new object ();
 	roof.loadFromObj ("roofOBJ", "roofMAT", "roofTEX");
 	roof.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
@@ -172,7 +197,7 @@ function buildSceneGraph (SGraph) {
     //add a stool in the corner 
     var stool = new object();
     stool.loadFromObj("stoolOBJ", "stoolMAT", "stoolTEX");
-	stool.transform = new transform (vec3.fromValues(-16, -7.0, -8.5), vec3.fromValues(0.4, 0.4, 0.4), quat.clone(rotation)); 
+	stool.transform = new transform (vec3.fromValues(-12, -7.0, -9.5), vec3.fromValues(0.4, 0.4, 0.4), quat.create ()); 
 	room.children.push(stool); 
     stool.addRigidBody (new rigidBody (10.0, "dynamic"));
     stool.collider.physics = "dynamic";
@@ -185,20 +210,28 @@ function buildSceneGraph (SGraph) {
     buttonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     buttonMount.children.push (button);
     
-    rightButtonMount = buttonMount.clone(); rightButtonMount.transform.position = vec3.fromValues (-5,0,0);
-    leftButtonMount = buttonMount.clone(); leftButtonMount.transform.position = vec3.fromValues (5,0,0);
+    rightButtonMount = buttonMount.clone(); rightButtonMount.transform.position = vec3.fromValues (-5,0,0); rightButtonMount.active = true;
+    leftButtonMount = buttonMount.clone(); leftButtonMount.transform.position = vec3.fromValues (5,0,0); leftButtonMount.active = true;
+    physicsButton = buttonMount.clone(); physicsButton.transform.position = vec3.fromValues(0,0,0); physicsButton.active = false;
 
     room.children.push (rightButtonMount);
     room.children.push (leftButtonMount);
     SGraph.root.children.push (room);
 }
 
+var leavetrigger1, leavetrigger2, leavetrigger3;
+var returntrigger;
 var rightButtonMount, leftButtonMount, physicsButton;
+
+var previousState = null; //used for when I leave a certain state into a branch but want to return. I could use something like stackframes but I'm too lazy and this is more than enough for my purposes;
 
 function buildStateMachine () {
     StateManager.addState("intro1");
     StateManager.addState("intro2");
     StateManager.addState("intro3");
+    StateManager.addState("leaving1");
+    StateManager.addState("leaving2");
+    StateManager.addState("leaving3");
     StateManager.addState("twobuttons");
     StateManager.addState("clickedRight1");
     StateManager.addState("clickedRight2");
@@ -206,12 +239,32 @@ function buildStateMachine () {
     StateManager.addState("clickedLeft");
     StateManager.addState("physicsDemo");
     StateManager.addState("saved");
-    
 
 
     var clickedStart = new Event("clickStart", new Activity(null, function(){}, function(){console.log('Scott looked down.')}));
     var introWait1 = new Event("introWait1", new Activity(null, function(){}, function(){console.log('What are you waiting for? Nothing is going to happen if you just sit around.')}));
     var introWait2 = new Event("introWait2", new Activity(null, function(){}, function(){console.log('I am serious. You are just wasting your time at this point.')}));
+    var leaving1 = new Event("leavetrigger1", new Activity(null, 
+        function() {
+            if (previousState) console.log('Something is wrong. We should never enter a different state while previous state is still set.');
+            previousState = StateManager.getCurrentState();
+        }, 
+        function() {
+            console.log('Scott... Where are you going?')
+        }
+    ));
+    var leaving2 = new Event("leavetrigger2", new Activity(null, function(){}, function(){console.log('Don\'t make me do this!')}));
+    var leaving3 = new Event("leavetrigger3", new Activity(null, function(){}, function(){console.log('Alright. That\'s the last straw. (play baby music)')}));
+    var returning = new Event("returntrigger", new Activity(null, 
+        function() {
+            StateManager.setState(previousState);
+            previousState = null;
+        }, 
+        function() {
+            console.log('Thanks for coming back')
+        }
+    ));
+
     var lookedDown = new Event("lookDown", new Activity(null, function(){}, function(){console.log('Scott clicks the left button.')}));
     var clickedRight1 = new Event("clickedRight", new Activity(document.getElementById('AUDIOBRIBED'), 
         function() {
@@ -226,6 +279,7 @@ function buildStateMachine () {
         function() {
             //player.transform.position = vec3.fromValues(0.0, 10, -15.8);
             //player.transform.rotation = vec3.fromValues(-0.07094697654247284, -0.9180688858032227, -0.19179458916187286, 0.3396040201187134);
+            rightButtonMount.transform.position = vec3.fromValues(3.0,0.75,-17.5); 
             leftButtonMount.transform.scale = vec3.fromValues(5.0, 5.0, 5.0);
         }, 
         function() {
@@ -246,9 +300,18 @@ function buildStateMachine () {
         }, 
         function() {console.log('Seriously? Again???')}
     ));
-    var clickedLeft = new Event("clickedLeft", new Activity(document.getElementById('AUDIOSONAR'), function(){}, function(){console.log('Good job')}));
-    var changePhysics = new Event("physics", new Activity(document.getElementById('AUDIOSONAR'), function(){}, function(){console.log('Change gravity')}));
-    var savedWorld = new Event("savedWorld", new Activity(document.getElementById('AUDIOSONAR'), function(){}, function(){console.log('Saved world!')}));
+    var clickedLeft = new Event("clickedLeft", new Activity(document.getElementById('AUDIOSONAR'), 
+        function() {
+            rightButtonMount.active = false;
+            leftButtonMount.active = false;
+            physicsButton.active = true;
+        }, 
+        function() {
+            console.log('Good job')
+        }
+    ));
+    var changePhysics = new Event("physics", new Activity(null, function(){}, function(){console.log('Change gravity')}));
+    var savedWorld = new Event("savedWorld", new Activity(null, function(){}, function(){console.log('Saved world!')}));
 
     StateManager.getState("root").addChild(clickedStart, StateManager.getState("intro1"));
     StateManager.getState("intro1").addChild(introWait1, StateManager.getState("intro2"));
@@ -266,14 +329,36 @@ function buildStateMachine () {
     StateManager.getState("clickedRight3").addChild(clickedLeft, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedLeft").addChild(changePhysics, StateManager.getState("physicsDemo"));
     StateManager.getState("physicsDemo").addChild(savedWorld, StateManager.getState("saved"));
+    
+    // add all the leaving triggers
+    StateManager.getState("intro1").addChild(leaving1, StateManager.getState("leaving1"));
+    StateManager.getState("intro2").addChild(leaving1, StateManager.getState("leaving1"));
+    StateManager.getState("intro3").addChild(leaving1, StateManager.getState("leaving1"));
+    StateManager.getState("twobuttons").addChild(leaving1, StateManager.getState("leaving1"));
+    StateManager.getState("clickedRight1").addChild(leaving1, StateManager.getState("leaving1"));
+    StateManager.getState("clickedRight2").addChild(leaving1, StateManager.getState("leaving1"));
+    StateManager.getState("clickedRight3").addChild(leaving1, StateManager.getState("leaving1"));
+    StateManager.getState("clickedLeft").addChild(leaving1, StateManager.getState("leaving1"));
+    StateManager.getState("physicsDemo").addChild(leaving1, StateManager.getState("leaving1"));
+    StateManager.getState("saved").addChild(leaving1, StateManager.getState("leaving1"));
+    StateManager.getState("leaving1").addChild(leaving2, StateManager.getState("leaving2"));
+    StateManager.getState("leaving2").addChild(leaving3, StateManager.getState("leaving3"));
+    StateManager.getState("leaving1").addChild(returning, StateManager.getState("root"));
+    StateManager.getState("leaving2").addChild(returning, StateManager.getState("root"));
+    StateManager.getState("leaving3").addChild(returning, StateManager.getState("root"));
+
+
+
 
     rightButtonMount.children[0].addOnMouseClickTrigger(function(object) {
         StateManager.apply("clickedRight");
     });
     leftButtonMount.children[0].addOnMouseClickTrigger(function(object) {
-        rightButtonMount.active = false;
-        leftButtonMount.active = false;
         StateManager.apply("clickedLeft");
+    }); 
+    physicsButton.children[0].addOnMouseClickTrigger(function(object) {
+        applyChangedPhysics();
+        StateManager.apply("physicsDemo");
     }); 
 
     setTimeout(function() {
@@ -283,6 +368,24 @@ function buildStateMachine () {
         StateManager.apply("introWait2");
     }, 30000);
 
+    leavetrigger1.collider.collisionFunction = function (object1, object2) {
+        StateManager.apply("leavetrigger1");
+    }
+    leavetrigger2.collider.collisionFunction = function (object1, object2) {
+        StateManager.apply("leavetrigger2");
+    }
+    leavetrigger3.collider.collisionFunction = function (object1, object2) {
+        StateManager.apply("leavetrigger3");
+    }
+    returntrigger.collider.collisionFunction = function (object1, object2) {
+        StateManager.apply("returntrigger");
+    }
+
+
     StateManager.apply("clickStart");
     StateManager.apply("lookDown");
+}
+
+function applyChangedPhysics() {
+    // changed the gravity of select objects on the scene graph
 }

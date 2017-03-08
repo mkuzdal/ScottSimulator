@@ -23,6 +23,12 @@ StateManager.addState = function(stateName) {
 StateManager.getState = function(stateName) {
 	return states[stateName];
 }
+StateManager.getCurrentState = function() {
+	return currentState;
+}
+StateManager.setState = function(state) {
+	currentState = state;
+}
 
 StateManager.apply = function(eventName) {
 	var event = currentState.getEvent(eventName);
@@ -30,11 +36,11 @@ StateManager.apply = function(eventName) {
 		if(event && currentState.getChild(event.name)) {
 			currentEvent = event;
 			event.run();
-			currentState = currentState.getChild(event.name);
+			if (currentState.getChild(event.name)) currentState = currentState.getChild(event.name);
 		} else {
-			console.log('This event is not a branch of the current state');
-			console.log(currentState);
-			console.log(event);
+			//console.log('This event is not a branch of the current state');
+			//console.log(currentState);
+			//console.log(event);
 			StateManager.finishedEvent();
 		}
 	} else {
