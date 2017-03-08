@@ -1,9 +1,10 @@
 
 var SGraph;
-var DRAW_TYPE_SHADOW = 0;
+var DRAW_TYPE_DEFAULT = 0;
 var DRAW_TYPE_COLOR = 1;
-var DRAW_TYPE_DEFAULT = 2;
-var DRAW_TYPE_ORTHO = 3;
+var DRAW_TYPE_ORTHO = 2;
+var DRAW_TYPE_SHADOW = 3;
+
 
 /** object: an abstraction for a object. Objects contain a material, geometry,
  *  and transform object to define it. Objects can also be deactivated, causing
@@ -71,10 +72,10 @@ class object {
         if (this.geometry) {
             this.geometry.setup ();
             gl.uniformMatrix4fv (modelMatrixLoc, false, this.collider.matrix);
-            gl.uniformMatrix4fv (cameraMatrixLoc, false, _player.camera.view);
-            gl.uniformMatrix4fv (projectionMatrixLoc, false, _player.camera.perspectiveProjectionMatrix); 
-            //gl.uniformMatrix4fv (cameraMatrixLoc, false, lightsManager.lightSources[0].view);
-            //gl.uniformMatrix4fv (projectionMatrixLoc, false, lightsManager.lightSources[0].projectionMatrix); 
+            gl.uniformMatrix4fv (cameraMatrixLoc, false, currentScene.playerController.player.camera.view);
+            gl.uniformMatrix4fv (projectionMatrixLoc, false, currentScene.playerController.player.camera.perspectiveProjectionMatrix); 
+            //gl.uniformMatrix4fv (cameraMatrixLoc, false, currentScene.lightsManager.lightSources[0].view);
+            //gl.uniformMatrix4fv (projectionMatrixLoc, false, currentScene.lightsManager.lightSources[0].projectionMatrix); 
 
             var CTMN = mat3.create ();
             mat3.normalFromMat4 (CTMN, this.collider.matrix);
@@ -85,9 +86,6 @@ class object {
     draw () {
         if (this.geometry) 
             gl.drawArrays (this.drawType, 0, this.geometry.Nvertices);
-        if (this.texture) {
-           // gl.bindTexture (gl.TEXTURE_2D, null);
-        }
     }
 
     loadFromObj (ObjID, MatID, TexID) {
@@ -217,16 +215,27 @@ class object {
     }
 
     clone () {
-        var newTransform = new transform (vec3.clone (this.transform.position), 
+        var newTransform = null;
+        if (this.transform) {
+            newTransform = new transform (vec3.clone (this.transform.position), 
                                           vec3.clone (this.transform.scale),
                                           quat.clone (this.transform.rotation));
+        }
 
-        var newMaterial = new material (vec4.clone (this.material.ambient),
-                                        vec4.clone (this.material.diffuse),
-                                        vec4.clone (this.material.specular),
-                                        this.material.shininess);
+        var newMaterial = null;
+        if (this.material) { 
+            var newMaterial = new material (vec4.clone (this.material.ambient),
+                                            vec4.clone (this.material.diffuse),
+                                            vec4.clone (this.material.specular),
+                                            this.material.shininess);
+        }
 
-        var newCollider;
+        var newGeometry = null;
+        if (this.geometry) {
+            newGeometry = this.geometry;
+        }
+
+        var newCollider = new nullCollider ();
         switch (this.collider.type) {
             case "box":
             {
@@ -245,8 +254,11 @@ class object {
             newRigidBody = new rigidBody (this.rigidBody.mass, this.rigidBody.type);
         }
 
-        var newGeometry = this.geometry;
-        var newTexture = new texture (this.texture.image, this.texture.options);
+        var newTexture = null;
+        if (this.texture) {
+            newTexture = new texture (this.texture.image, this.texture.options);
+        }
+
         var newObject = new object (newTransform, newMaterial, newGeometry, newTexture, newCollider, newRigidBody);
 
         newObject.drawType = this.drawType;
@@ -461,12 +473,19 @@ class sceneGraph {
 
         gl.viewport (0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT); 
         gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_SHADOW); 
-        gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_SHADOW); 
-        gl.bindFramebuffer (gl.FRAMEBUFFER, shadowFramebuffer);
-        gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.disable (gl.DEPTH_TEST);
+        gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_SHADOW);
 
-        this.drawTree (DRAW_TYPE_SHADOW);
+        for (var i = 0; i < this.lightsManager.lightSources.length; i++) {
+
+            gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_SHADOW + i); 
+            gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_SHADOW + i);
+
+            gl.bindFramebuffer (gl.FRAMEBUFFER, shadowFramebuffers[i]);
+            gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.disable (gl.DEPTH_TEST);
+
+            this.drawTree (DRAW_TYPE_SHADOW);
+        }
 
         gl.enable (gl.DEPTH_TEST);
         gl.bindFramebuffer (gl.FRAMEBUFFER, null);
@@ -492,18 +511,24 @@ class sceneGraph {
         gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_DEFAULT); 
         gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_DEFAULT); 
 
-        gl.activeTexture (gl.TEXTURE0);
-        gl.bindTexture (gl.TEXTURE_2D, shadowFramebuffer.texture);
-        gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 0); 
+        for (var i = 0; i < this.lightsManager.lightSources.length; i++) {
+            gl.activeTexture (gl.TEXTURE1 + i);
+            gl.bindTexture (gl.TEXTURE_2D, shadowFramebuffers[i].texture);
+            gl.uniform1i (gl.getUniformLocation (program, "shadowMap[" + i + "]"), 1 + i); 
+        }
+
         gl.enable (gl.BLEND);
         gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         this.drawTree (DRAW_TYPE_DEFAULT);
 
         gl.disable(gl.BLEND);
-        gl.activeTexture (gl.TEXTURE0);
-        gl.bindTexture (gl.TEXTURE_2D, null);
-        gl.uniform1i (gl.getUniformLocation (program, "shadowMap"), 0); 
+        
+        for (var i = 0; i < this.lightsManager.lightSources.length; i++) {
+            gl.activeTexture (gl.TEXTURE1 + i);
+            gl.bindTexture (gl.TEXTURE_2D, null);
+            gl.uniform1i (gl.getUniformLocation (program, "shadowMap[" + i + "]"), 1 + i); 
+        }
 
         crosshair.setup ();
         crosshair.draw ();

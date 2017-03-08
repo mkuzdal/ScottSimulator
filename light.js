@@ -111,8 +111,14 @@ class light {
      *  @param { vec4 } diffuse: the diffuse value for the light.
      *  @param { vec4 } specular: the specular value for the light.
      */
-    constructor (_transform, _ambient, _diffuse, _specular) {
+    constructor (_transform, _at, _ambient, _diffuse, _specular) {
         this.transform = _transform || new transform ();
+
+        this.at = _at || vec3.fromValues (0.0, 0.0, 0.0);
+        this.up = vec3.create ();
+        vec3.sub (this.up, this.at, this.transform.position);
+        this.up = vec3.fromValues (-this.up[1], this.up[0], this.up[2]);
+
         this.ambient = _ambient     || vec4.fromValues (0.2, 0.2, 0.2, 1.0);
         this.diffuse = _diffuse     || vec4.fromValues (0.4, 0.4, 0.4, 1.0);
         this.specular = _specular   || vec4.fromValues (0.6, 0.6, 0.6, 1.0);
@@ -142,19 +148,22 @@ class light {
 
         this.setPerspective ();
         this.setLightMatrix ();
+
+        gl.uniformMatrix4fv (gl.getUniformLocation (program, "lightProjectionMatrix[" + this.lightID + "]"), false, this.projectionMatrix);
+        gl.uniformMatrix4fv (gl.getUniformLocation (program, "lightMatrix[" + this.lightID + "]"), false, this.view);
     }
 
     /** setPerspective: sets the perspective projection matrix.
      */
     setPerspective () {
-        //mat4.ortho (this.projectionMatrix, -10.0, 10.0, -10.0, 10.0, 1.0, 60.0);
+        //mat4.ortho (this.projectionMatrix, -10.0, 10.0, -10.0, 10.0, 1.0, 256.0);
         mat4.perspective (this.projectionMatrix, Math.PI * 70.0 / 180, OFFSCREEN_WIDTH / OFFSCREEN_HEIGHT, 1.0, 256.0);
     }
 
     /** setLightMatrix: sets the light view matrix.
      */
     setLightMatrix () {
-        mat4.lookAt (this.view, this.transform.position, vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 0.0, 0.0));
+        mat4.lookAt (this.view, this.transform.position, this.at, this.up);
     }
 }
 

@@ -436,9 +436,9 @@ class texture {
 
     setup () {
         // bind textures
-        gl.activeTexture (gl.TEXTURE1);
+        gl.activeTexture (gl.TEXTURE0);
         gl.bindTexture (gl.TEXTURE_2D, this.texture);
-        gl.uniform1i (gl.getUniformLocation (program, "texture"), 1); 
+        gl.uniform1i (gl.getUniformLocation (program, "texture"), 0); 
 
         for (var i = 0; i < this.options.length; i++) {
             gl.texParameteri (gl.TEXTURE_2D, this.options[i][0], this.options[i][1]);

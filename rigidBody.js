@@ -1,4 +1,4 @@
-var gravity = 10.0;
+var gravity = 1.0;
 var THRESHHOLD = 0.1;
 
 class rigidBody {
@@ -16,6 +16,7 @@ class rigidBody {
 		} else {
 			this.force = vec3.fromValues (0.0, 0.0, 0.0);
 		}
+
 		this.torque = vec3.fromValues (0.0, 0.0, 0.0);
 
 		this.velocity = vec3.create ();
