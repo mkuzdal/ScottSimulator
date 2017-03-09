@@ -23,8 +23,7 @@ varying vec3 fNormal;
 varying vec2 fTexCoord;
 varying vec4 fPositionFromLight[5];
 
-void main ()
-{    
+void main () {    
     if (vDrawType == 0 || vDrawType == 1) {
         fPos = (modelMatrix * vPosition).xyz;
         fNormal = (normalMatrix * vNormal);
@@ -128,7 +127,7 @@ float ShadowCalculation (vec4 fPositionFromLight, sampler2D shadowMap) {
         }
     }
 
-    if(shadowCoord.z > 1.0)
+    if (shadowCoord.z > 1.0)
         visibility = 0.0;
 
     return visibility;  
