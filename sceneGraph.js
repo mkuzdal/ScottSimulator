@@ -370,8 +370,8 @@ class sceneGraph {
         var PL = mat4.create ();
 
         if (type == DRAW_TYPE_SHADOW) {
-            mat4.mul (PC, this.lightsManager.lightSources[0].projectionMatrix, this.lightsManager.lightSources[0].view);
-            mat4.mul (PL, this.lightsManager.lightSources[0].projectionMatrix, this.lightsManager.lightSources[0].view);
+            mat4.mul (PC, this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].projectionMatrix, this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].view);
+            mat4.mul (PL, this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].projectionMatrix, this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].view);
         } else {
             mat4.mul (PC, this.playerController.player.camera.perspectiveProjectionMatrix, this.playerController.player.camera.view);
             mat4.mul (PL, this.lightsManager.lightSources[0].projectionMatrix, this.lightsManager.lightSources[0].view);
@@ -510,7 +510,6 @@ class sceneGraph {
         gl.viewport (0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT); 
         gl.uniform1i (gl.getUniformLocation (program, "vDrawType"), DRAW_TYPE_SHADOW); 
         gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_SHADOW);
-        //gl.enable (gl.DEPTH_TEST);
 
         for (var i = 0; i < this.lightsManager.lightSources.length; i++) {
 
@@ -518,6 +517,7 @@ class sceneGraph {
             gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_SHADOW + i);
 
             gl.bindFramebuffer (gl.FRAMEBUFFER, shadowFramebuffers[i]);
+            gl.enable (gl.DEPTH_TEST);
             gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             this.drawTree (DRAW_TYPE_SHADOW);
@@ -532,14 +532,14 @@ class sceneGraph {
         gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_COLOR); 
         gl.bindFramebuffer (gl.FRAMEBUFFER, colorFramebuffer);
         gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        //gl.disable (gl.DEPTH_TEST);
+        gl.disable (gl.DEPTH_TEST);
 
         this.drawTree (DRAW_TYPE_COLOR);
 
         gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, this.clickManager.pixel);
         this.clickManager.handleMouseEvents ();
 
-        //gl.enable (gl.DEPTH_TEST);
+        gl.enable (gl.DEPTH_TEST);
         gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.bindFramebuffer (gl.FRAMEBUFFER, null);
 

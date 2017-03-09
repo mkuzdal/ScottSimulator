@@ -1011,7 +1011,7 @@ class sceneCollisionManager {
 	  			return;
 	  		}
 	  		if (vrel > -THRESHHOLD) {
-	  			//this.contactCollisions.push (manifold);
+	  			this.contactCollisions.push (manifold);
 	  			return;
 	  		} 
 
