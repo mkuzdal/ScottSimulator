@@ -1,3 +1,4 @@
+var player;
 function buildSceneGraph (SGraph) {
 
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 30.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
@@ -9,7 +10,7 @@ function buildSceneGraph (SGraph) {
     SGraph.lightsManager.lightSources[0].tag = "red";
 
     var cam = new camera ([0,-1.85,-15.8], glMatrix.toRadian(180), glMatrix.toRadian(5));
-    var player = new object (new transform (vec3.fromValues (0.0, 10.0, -15.8), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    player = new object (new transform (vec3.fromValues (0.0, 10.0, -15.8), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                          null, 
                          null, 
                          null,
@@ -124,6 +125,15 @@ function buildSceneGraph (SGraph) {
                     );
     room.children.push (returntrigger);
 
+    foundbugtrigger = new object (new transform (vec3.fromValues (0.0, -4.0, 10.0), vec3.fromValues (100.0, 5.0, 15.0), quat.create ()),
+                            null, null, null,
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "trigger"),
+                            null
+                    );
+    room.children.push (foundbugtrigger);
+
+
+
 	var roof = new object ();
 	roof.loadFromObj ("roofOBJ", "roofMAT", "roofTEX");
 	roof.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
@@ -222,6 +232,7 @@ function buildSceneGraph (SGraph) {
 
 var leavetrigger1, leavetrigger2, leavetrigger3;
 var returntrigger;
+var foundbugtrigger;
 var rightButtonMount, leftButtonMount, physicsButton;
 
 var previousState = null; //used for when I leave a certain state into a branch but want to return. I could use something like stackframes but I'm too lazy and this is more than enough for my purposes;
@@ -380,6 +391,11 @@ function buildStateMachine () {
     }
     returntrigger.collider.collisionFunction = function (object1, object2) {
         StateManager.apply("returntrigger");
+    }
+    foundbugtrigger.collider.collisionFunction = function (object1, object2) {
+        // play the found bug audio. if the audio is already playing (if currentTime != 0) then don't play it again.
+        console.log('Oh. Look at you. You found a bug! Congratulations. Wanna get out?... Umm. Good luck with that.');
+        foundbugtrigger.collider.collisionFunction = null;
     }
 
 
