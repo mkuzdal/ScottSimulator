@@ -11,7 +11,7 @@ var canvas;
 var gl;
 var program;
 
-var shadowFramebuffer;
+var shadowFramebuffers = [];
 var colorFramebuffer;
 
 var currentScene;
@@ -97,7 +97,9 @@ window.onload = function init () {
 	gl.useProgram (program);
 
 	colorFramebuffer = initColorFramebuffer ();
-	shadowFramebuffer = initShadowFramebuffer ();
+	for (var i = 0; i < 5; i++) {
+        shadowFramebuffers.push (initShadowFramebuffer ());
+    }
 
 	// Get the local variable for each of the matrix uniforms
 	modelMatrixLoc = gl.getUniformLocation (program, "modelMatrix");

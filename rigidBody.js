@@ -16,6 +16,7 @@ class rigidBody {
 		} else {
 			this.force = vec3.fromValues (0.0, 0.0, 0.0);
 		}
+
 		this.torque = vec3.fromValues (0.0, 0.0, 0.0);
 
 		this.velocity = vec3.create ();
