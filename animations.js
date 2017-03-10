@@ -260,7 +260,7 @@ class animationChair {
             return;
 
         var destinationRot = quat.create ();
-        var destinationPos = quat.create ();
+        var destinationPos = vec3.create ();
 
         if (this.open) {
             destinationRot = quat.clone (this.openRotation);
@@ -283,5 +283,89 @@ class animationChair {
         return newAnimation
     }
 }
+
+class animationLeftdoor {
+    constructor (_object) {
+        this.object = _object;
+
+        this.open = false;
+        this.active = true;
+        this.tag = "leftdoor";
+
+        this.closedRotation = quat.clone (this.object.transform.rotation);
+        
+        this.openRotation = quat.create ();
+        quat.setAxisAngle (this.openRotation, [0, 1, 0], glMatrix.toRadian (90));
+        quat.mul (this.openRotation, this.closedRotation, this.openRotation);
+
+        this.currentRotation = quat.clone (this.closedRotation);
+    }
+
+    animate (dTime) {
+        if (!this.active) 
+            return;
+
+        var destinationRot = quat.create ();
+
+        if (this.open) {
+            destinationRot = quat.clone (this.openRotation);
+        } else {
+            destinationRot = quat.clone (this.closedRotation);
+        }
+
+        quat.slerp (this.currentRotation, this.currentRotation, destinationRot, 4 * dTime);
+
+        this.object.transform.rotation = quat.clone (this.currentRotation); 
+    }
+
+    clone () {
+        var newAnimation = new animationLeftdoor (this.object);
+        newAnimation.active = this.active;
+        return newAnimation
+    }
+}
+
+class animationRightdoor {
+    constructor (_object) {
+        this.object = _object;
+
+        this.open = false;
+        this.active = true;
+        this.tag = "rightdoor";
+
+        this.closedRotation = quat.clone (this.object.transform.rotation);
+        
+        this.openRotation = quat.create ();
+        quat.setAxisAngle (this.openRotation, [0, 1, 0], glMatrix.toRadian (-90));
+        quat.mul (this.openRotation, this.closedRotation, this.openRotation);
+
+        this.currentRotation = quat.clone (this.closedRotation);
+    }
+
+    animate (dTime) {
+        if (!this.active) 
+            return;
+
+        var destinationRot = quat.create ();
+
+        if (this.open) {
+            destinationRot = quat.clone (this.openRotation);
+        } else {
+            destinationRot = quat.clone (this.closedRotation);
+        }
+
+        quat.slerp (this.currentRotation, this.currentRotation, destinationRot, 4 * dTime);
+
+        this.object.transform.rotation = quat.clone (this.currentRotation);
+    }
+
+    clone () {
+        var newAnimation = new animationRightdoor (this.object);
+        newAnimation.active = this.active;
+        return newAnimation
+    }
+}
+
+
 
 

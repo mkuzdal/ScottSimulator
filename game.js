@@ -160,14 +160,14 @@ function buildSceneGraph (SGraph) {
     generateCubeNormals (cubeVertices);
     generateCubeVertices (cubeVertices);
     generateCubeTexCoords (texCoords);
-
+/*
     var hallway = new object (new transform (vec3.fromValues (0.0, 10.0, 18.0 + hallway_length), vec3.fromValues (8.0, 7.0, 1.0+2*hallway_length), quat.create ()),
                             new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                             new geometry (pointsArray, normalsArray, textureArray),
                             new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                             null, null);
     room.children.push(hallway);
-
+*/
 
 	var roof = new object ();
     roof.tag = "roof";
@@ -269,6 +269,79 @@ function buildSceneGraph (SGraph) {
         object.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
         currentScene.animationsManager.addAnimation (new animationHold (object));
     });
+
+    //add all 4 doors 
+    var leftdoor = new object ();
+    leftdoor.tag = "leftdoorFront";
+    leftdoor.loadFromObj ("leftdoorOBJ", "leftdoorMAT", "doorTEX");
+    var doorRotation = quat.create ();
+    quat.setAxisAngle (doorRotation, [0, 1, 0], glMatrix.toRadian (-28.0));
+    leftdoor.transform = new transform (vec3.fromValues (8.82, -8.05, -17.62), vec3.fromValues (0.99, 1.0, 1.0), quat.clone (doorRotation)); 
+    room.children.push (leftdoor);
+    leftdoor.addRigidBody (new rigidBody (10.0, "static"));
+    leftdoor.collider.physics = "static";
+    leftdoor.addOnMouseClickTrigger (function (object) {
+        for (var i = 0; i < object.animations.length; i++) {
+            if (object.animations[i].tag == "leftdoor") {
+                if (object.animations[i].open) {
+                    object.animations[i].open = false;
+                    object.collider.physics = "static";
+                } else {
+                    object.animations[i].open = true;
+                    object.collider.physics = "trigger";
+                }
+            }
+        }
+    });
+    leftdoor.addAnimation (new animationLeftdoor (leftdoor));
+
+    var rightdoor = new object ();
+    rightdoor.tag = "rightdoorFront";
+    rightdoor.loadFromObj ("rightdoorOBJ", "rightdoorMAT", "doorTEX");
+    var doorRotation = quat.create ();
+    quat.setAxisAngle (doorRotation, [0, 1, 0], glMatrix.toRadian (-28.0));
+    rightdoor.transform = new transform (vec3.fromValues (17.62, -8.05, -12.83), vec3.fromValues (0.99, 1.0, 1.0), quat.clone (doorRotation)); 
+    room.children.push (rightdoor);
+    rightdoor.addRigidBody (new rigidBody (10.0, "static"));
+    rightdoor.collider.physics = "static";
+    rightdoor.addOnMouseClickTrigger (function (object) {
+        for (var i = 0; i < object.animations.length; i++) {
+            if (object.animations[i].tag == "rightdoor") {
+                if (object.animations[i].open) {
+                    object.animations[i].open = false;
+                    //object.collider.physics = "static";
+                } else {
+                    object.animations[i].open = true;
+                    //object.collider.physics = "trigger";
+                }
+            }
+        }
+    });
+    rightdoor.addAnimation (new animationRightdoor (rightdoor));
+
+    var leftdoor2 = leftdoor.clone ();
+    leftdoor2.tag = "leftdoorBack";
+    var doorRotation = quat.create ();
+    quat.setAxisAngle (doorRotation, [0, 1, 0], glMatrix.toRadian (180.0));
+    leftdoor2.transform = new transform (vec3.fromValues (3.89, 5.94, 17.67), vec3.fromValues (0.77, 0.77, 1.0), quat.clone (doorRotation)); 
+    leftdoor2.animations[0].closedRotation = quat.clone (doorRotation);
+    var doorRotation2 = quat.create ();
+    quat.setAxisAngle (doorRotation2, [0, 1, 0], glMatrix.toRadian (90.0));
+    quat.mul (doorRotation2, doorRotation, doorRotation2);
+    leftdoor2.animations[0].openRotation = quat.clone (doorRotation2); 
+    room.children.push (leftdoor2);
+
+    var rightdoor2 = rightdoor.clone ();
+    rightdoor2.tag = "rightdoorBack";
+    var doorRotation = quat.create ();
+    quat.setAxisAngle (doorRotation, [0, 1, 0], glMatrix.toRadian (180.0));
+    rightdoor2.transform = new transform (vec3.fromValues (-3.85, 5.94, 17.63), vec3.fromValues (0.77, 0.77, 1.0), quat.clone (doorRotation)); 
+    rightdoor2.animations[0].closedRotation = quat.clone (doorRotation);
+    var doorRotation2 = quat.create ();
+    quat.setAxisAngle (doorRotation2, [0, 1, 0], glMatrix.toRadian (-90.0));
+    quat.mul (doorRotation2, doorRotation, doorRotation2);
+    rightdoor2.animations[0].openRotation = quat.clone (doorRotation2); 
+    room.children.push (rightdoor2);
 
     var button = new object ();
     button.tag = "button";
