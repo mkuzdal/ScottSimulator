@@ -12,6 +12,8 @@ class PlayerController {
         this.movingright = false;
         this.movingup = false;
         this.movingdown = false;
+
+        this.jumping = false;
 	}
 
     /** moveForward: moves the player in the forwards direction by 'speed' many units.
@@ -22,9 +24,9 @@ class PlayerController {
             
         var direction = vec3.fromValues (-storage[8], -storage[9], -storage[10]);
         vec3.scale (direction, direction, speed);
+        direction = vec3.fromValues (direction[0], 0.0, direction[2]);
 
         vec3.add (this.player.transform.position, this.player.transform.position, direction);
-        console.log (this.player.transform.position)
     }
 
     /** moveBackward: moves the player in the backwards direction by 'speed' many units.
@@ -35,6 +37,7 @@ class PlayerController {
             
         var direction = vec3.fromValues (storage[8], storage[9], storage[10]);
         vec3.scale (direction, direction, speed);
+        direction = vec3.fromValues (direction[0], 0.0, direction[2]);
 
         vec3.add (this.player.transform.position, this.player.transform.position, direction);
     }
@@ -80,8 +83,10 @@ class PlayerController {
     }
 
     jump () {
-        this.player.rigidBody.P = vec3.fromValues (0.0, 10 * this.player.rigidBody.mass, 0.0);
-        this.player.rigidBody.F = vec3.fromValues (0.0, -this.player.rigidBody.mass * gravity, 0.0);
+        if (!this.jumping) {
+            this.player.rigidBody.P = vec3.fromValues (0.0, 10 * this.player.rigidBody.mass, 0.0);
+            this.jumping = true;
+        } 
     }
 }
 

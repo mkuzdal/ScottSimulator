@@ -1,22 +1,23 @@
 function buildSceneGraph (SGraph) {
 
-    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 10.0, 8.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 10.0, 10.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                                                vec3.fromValues (0.0, -4.0, -15.0),
                                                vec4.fromValues (0.4, 0.4, 0.4, 1.0),
                                                vec4.fromValues (0.8, 0.8, 0.8, 1.0),
                                                vec4.fromValues (0.4, 0.4, 0.4, 1.0)));
 
     SGraph.lightsManager.lightSources[0].tag = "left";
+    
+    //SGraph.lightsManager.lightSources[0].shadows = false;
 /*
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (-14.0, 10.0, 11.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
-                                               vec3.fromValues (0.0, 0.0, -15.0),
+                                               vec3.fromValues (0.0, -4.0, -15.0),
+                                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                                                vec4.fromValues (0.4, 0.4, 0.4, 1.0),
-                                               vec4.fromValues (0.8, 0.8, 0.8, 1.0),
                                                vec4.fromValues (0.4, 0.4, 0.4, 1.0)));
 
     SGraph.lightsManager.lightSources[1].tag = "right";
 */
-
     var cam = new camera ([0,-1.85,-15.8], glMatrix.toRadian(180), glMatrix.toRadian(5));
     var player = new object (new transform (vec3.fromValues (0.0, 5.0, -7.9), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                          null, 

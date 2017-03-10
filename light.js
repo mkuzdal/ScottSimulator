@@ -3,9 +3,11 @@ var MAX_LIGHT_COUNT = 5;
 
 
 class lightHandler {
-    constructor () {
+    constructor (_scene) {
         this.lightCount = 0;
         this.lightSources = [];
+
+        this.scene = _scene;
     }
 
     addSource (light) {
@@ -125,6 +127,7 @@ class light {
 
         this.tag = "light"
         this.active = true;
+        this.shadows = true;
 
         this.projectionMatrix = mat4.create ();
         this.view = mat4.create ();

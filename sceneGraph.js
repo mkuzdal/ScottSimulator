@@ -52,18 +52,22 @@ class object {
         if (this.rigidBody) {
             this.rigidBody.update (dTime);
         }
-        this.transform.update ();
-
+        
         if (this.camera) {
             this.camera.position = vec3.clone (this.transform.position);
-            this.transform.rotation = quat.clone (this.camera.rotation);
+            //this.transform.rotation = quat.clone (this.camera.rotation);
         }
+
+        this.transform.update ();
+
     }
 
     setup (_player) {
         if (this.material) {
             this.material.setup ();
-        } if (this.texture) {
+        } 
+
+        if (this.texture) {
             this.texture.setup (); 
         } 
 
@@ -351,10 +355,10 @@ class sceneGraph {
 	constructor (_build_function) {
 		this.root = new object ();
 		this.root.children = [];
-        this.lightsManager = new lightHandler ();
-        this.animationsManager = new animationHandler ();
-        this.collisionsManager = new sceneCollisionManager ();
-        this.clickManager = new clickHandler ();
+        this.lightsManager = new lightHandler (this);
+        this.animationsManager = new animationHandler (this);
+        this.collisionsManager = new sceneCollisionManager (this);
+        this.clickManager = new clickHandler (this);
 
         this.build_function = _build_function;
 
@@ -369,7 +373,10 @@ class sceneGraph {
         var PC = mat4.create ();
         var PL = mat4.create ();
 
-        if (type == DRAW_TYPE_SHADOW) {
+        if (type >= DRAW_TYPE_SHADOW) {
+            if (!this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].shadows)
+                return;
+
             mat4.mul (PC, this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].projectionMatrix, this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].view);
             mat4.mul (PL, this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].projectionMatrix, this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].view);
         } else {
@@ -386,13 +393,13 @@ class sceneGraph {
 		if (!root.active)
 			return;
 
-        if (type == DRAW_TYPE_DEFAULT || root.tag != "world") {
+    //  if (type == DRAW_TYPE_DEFAULT || root.tag != "world") {
     		if (root.collider.type == "null") {
                 this.drawNode (root);
             } else if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
                 this.drawNode (root);
             } 
-        }
+    // }
         for (var i = 0; i < root.children.length; i++) {
             this.__drawTree_AUX (root.children[i], PC, PL, type);
         }
@@ -520,7 +527,7 @@ class sceneGraph {
             gl.enable (gl.DEPTH_TEST);
             gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            this.drawTree (DRAW_TYPE_SHADOW);
+            this.drawTree (DRAW_TYPE_SHADOW + i);
         }
 
         gl.bindFramebuffer (gl.FRAMEBUFFER, null);

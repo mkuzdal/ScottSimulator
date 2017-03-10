@@ -1,7 +1,9 @@
 
 class animationHandler {
-    constructor () {
+    constructor (_scene) {
         this.animations = [];
+
+        this.scene = _scene;
     }
 
     addAnimation (_animation) {
