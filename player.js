@@ -25,7 +25,7 @@ class PlayerController {
             
         var direction = vec3.fromValues (-storage[8], -storage[9], -storage[10]);
         vec3.scale (direction, direction, speed);
-        //direction = vec3.fromValues (direction[0], 0.0, direction[2]);
+        direction = vec3.fromValues (direction[0], 0.0, direction[2]);
 
         vec3.add (this.player.transform.position, this.player.transform.position, direction);
     }
@@ -38,7 +38,7 @@ class PlayerController {
             
         var direction = vec3.fromValues (storage[8], storage[9], storage[10]);
         vec3.scale (direction, direction, speed);
-        //direction = vec3.fromValues (direction[0], 0.0, direction[2]);
+        direction = vec3.fromValues (direction[0], 0.0, direction[2]);
 
         vec3.add (this.player.transform.position, this.player.transform.position, direction);
     }

@@ -1,3 +1,4 @@
+var player; // needs to be a global variable
 function buildSceneGraph (SGraph) {
 
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 10.0, 10.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
@@ -18,8 +19,8 @@ function buildSceneGraph (SGraph) {
 
     SGraph.lightsManager.lightSources[1].tag = "right";
 */
-    var cam = new camera ([0,-1.85,-15.8], glMatrix.toRadian(180), glMatrix.toRadian(5));
-    var player = new object (new transform (vec3.fromValues (0.0, 5.0, -7.9), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
+    player = new object (new transform (vec3.fromValues (0.0, 5.0, -7.9), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.0, 0.3827, 0.0, 0.9239)),
                          null, 
                          null, 
                          null,
@@ -243,19 +244,22 @@ function buildSceneGraph (SGraph) {
     buttonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     buttonMount.children.push (button);
     
-    rightButtonMount = buttonMount.clone(); rightButtonMount.transform.position = vec3.fromValues (-5,0,0); rightButtonMount.active = true;
-    leftButtonMount = buttonMount.clone(); leftButtonMount.transform.position = vec3.fromValues (5,0,0); leftButtonMount.active = true;
-    physicsButton = buttonMount.clone(); physicsButton.transform.position = vec3.fromValues(0,0,0); physicsButton.active = false;
+    rightButtonMount = buttonMount.clone(); rightButtonMount.transform.position = vec3.fromValues (-5,0,0); rightButtonMount.active = true; room.children.push (rightButtonMount);
+    leftButtonMount = buttonMount.clone(); leftButtonMount.transform.position = vec3.fromValues (5,0,0); leftButtonMount.active = true; room.children.push (leftButtonMount);
+    physicsButton = buttonMount.clone(); physicsButton.transform.position = vec3.fromValues(0,0,0); physicsButton.active = false; room.children.push (physicsButton);
+    exitFoundBugButton = buttonMount.clone(); exitFoundBugButton.transform.position = vec3.fromValues(15,0,10); exitFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); exitFoundBugButton.active = false; room.children.push (exitFoundBugButton);
+    stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
 
-    room.children.push (rightButtonMount);
-    room.children.push (leftButtonMount);
     SGraph.push (room);
 }
 
 var leavetrigger1, leavetrigger2, leavetrigger3;
 var returntrigger;
-var foundbugtrigger;
 var rightButtonMount, leftButtonMount, physicsButton;
+
+
+var foundbugtrigger, exitedFindingBug = false;
+var exitFoundBugButton, stayFoundBugButton;
 
 var previousState = null; //used for when I leave a certain state into a branch but want to return. I could use something like stackframes but I'm too lazy and this is more than enough for my purposes;
 
@@ -416,11 +420,48 @@ function buildStateMachine () {
         // play the found bug audio. if the audio is already playing (if currentTime != 0) then don't play it again.
         console.log('Oh. Look at you. You found a bug! Congratulations. Wanna get out?... Umm. Good luck with that.');
         foundbugtrigger.collider.collisionFunction = null;
+        player.transform.position = vec3.fromValues(-7.317382554523647, -2.9981283240562004, 13.815474266186357);
+        player.camera.rotation = vec4.fromValues(-0.01889348030090332, 0.6919060349464417, -0.018118197098374367, -0.7215129137039185);
+        
+        setTimeout(function() {
+            exitFoundBugButton.active = true;
+            stayFoundBugButton.active = true;
+        }, 3000);
+        if(!previousState) {
+            previousState = StateManager.getCurrentState();
+        }
+
+        setTimeout(function() {
+            if(!exitedFindingBug) {
+                console.log('Wow. Was not expecting you to stay this long... Guess I will just put you back then.');
+                StateManager.setState(previousState);
+                previousState = null;
+                player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
+                player.camera.rotation = vec4.fromValues(0,1,0,0);
+            }
+        }, 3600000);
     }
+    exitFoundBugButton.children[0].addOnMouseClickTrigger(function(object) {
+        exitFoundBugButton.active = false;
+        stayFoundBugButton.active = false;
+        exitedFindingBug = true;
+    });
+    stayFoundBugButton.children[0].addOnMouseClickTrigger(function(object) {
+        exitFoundBugButton.active = false;
+        stayFoundBugButton.active = false;        
+    });
 
 
     StateManager.apply("clickStart");
-    StateManager.apply("lookDown");
+}
+
+
+var finishedLookDown = false;
+function gameChecks() {
+    if(!finishedLookDown && player.camera.pitch  < -0.2) {
+        finishedLookDown = true;
+        StateManager.apply("lookDown");
+    }
 }
 
 function applyChangedPhysics() {

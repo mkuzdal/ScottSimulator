@@ -258,6 +258,9 @@ function render (current) {
 	// draw
 	currentScene.render (deltaTime);
 
+    // game checks - test conditions, etc. that are run every frame and are game specific.
+    gameChecks ();
+
 	// callback
 	window.requestAnimationFrame (render);
 }
