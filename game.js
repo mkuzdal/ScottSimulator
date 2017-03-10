@@ -1,5 +1,3 @@
-var player; // needs to be a global variable
-
 function buildSceneGraph (SGraph) {
 
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 10.0, 10.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
@@ -21,7 +19,7 @@ function buildSceneGraph (SGraph) {
     SGraph.lightsManager.lightSources[1].tag = "right";
 */
     var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
-    player = new object (new transform (vec3.fromValues (0.0, 5.0, -7.9), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.0, 0.3827, 0.0, 0.9239)),
+    var player = new object (new transform (vec3.fromValues (0.0, 5.0, -7.9), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.0, 0.3827, 0.0, 0.9239)),
                          null, 
                          null, 
                          null,
@@ -43,18 +41,6 @@ function buildSceneGraph (SGraph) {
     room.collider = new nullCollider ();
 
     var roomColliders = [];
-
-    //for debugging - delete later
-    generateCubeNormals (cubeVertices);
-    generateCubeVertices (cubeVertices);
-    generateCubeTexCoords (texCoords);
-    /*
-                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
-                            new geometry (pointsArray, normalsArray, textureArray),
-                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
-
-    */
-
 
     roomColliders.push ( new object (new transform (vec3.fromValues (0.0, -9.5, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
                             null, null, null,
@@ -169,6 +155,18 @@ function buildSceneGraph (SGraph) {
                     );
     room.children.push (foundbugtrigger);
 
+
+
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
+
+    var hallway = new object (new transform (vec3.fromValues (0.0, 10.0, 18.0 + hallway_length), vec3.fromValues (8.0, 7.0, 1.0+2*hallway_length), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            null, null);
+    room.children.push(hallway);
 
 
 	var roof = new object ();
@@ -353,8 +351,8 @@ function buildStateMachine () {
     ));
     var clickedRight2 = new Event("clickedRight", new Activity(document.getElementById('AUDIOFOUNDOIL'), 
         function() {
-            //player.transform.position = vec3.fromValues(0.0, 10, -15.8);
-            //player.transform.rotation = vec3.fromValues(-0.07094697654247284, -0.9180688858032227, -0.19179458916187286, 0.3396040201187134);
+            //currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 10, -15.8);
+            //currentScene.playerController.player.transform.rotation = vec3.fromValues(-0.07094697654247284, -0.9180688858032227, -0.19179458916187286, 0.3396040201187134);
             rightButtonMount.transform.position = vec3.fromValues(3.0,0.75,-17.5); 
             leftButtonMount.transform.scale = vec3.fromValues(5.0, 5.0, 5.0);
         }, 
@@ -458,8 +456,8 @@ function buildStateMachine () {
         // play the found bug audio. if the audio is already playing (if currentTime != 0) then don't play it again.
         console.log('Oh. Look at you. You found a bug! Congratulations. Wanna get out?... Umm. Good luck with that.');
         foundbugtrigger.collider.collisionFunction = null;
-        player.transform.position = vec3.fromValues(-7.317382554523647, -2.9981283240562004, 13.815474266186357);
-        player.camera.rotation = vec4.fromValues(-0.01889348030090332, 0.6919060349464417, -0.018118197098374367, -0.7215129137039185);
+        currentScene.playerController.player.transform.position = vec3.fromValues(-7.317382554523647, -2.9981283240562004, 13.815474266186357);
+        currentScene.playerController.player.camera.rotation = vec4.fromValues(-0.01889348030090332, 0.6919060349464417, -0.018118197098374367, -0.7215129137039185);
         
         setTimeout(function() {
             exitFoundBugButton.active = true;
@@ -474,8 +472,8 @@ function buildStateMachine () {
                 console.log('Wow. Was not expecting you to stay this long... Guess I will just put you back then.');
                 StateManager.setState(previousState);
                 previousState = null;
-                player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
-                player.camera.rotation = vec4.fromValues(0,1,0,0);
+                currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
+                currentScene.playerController.player.camera.rotation = vec4.fromValues(0,1,0,0);
             }
         }, 3600000);
     }
@@ -496,7 +494,7 @@ function buildStateMachine () {
 
 var finishedLookDown = false;
 function gameChecks() {
-    if(!finishedLookDown && player.camera.pitch  < -0.2) {
+    if(!finishedLookDown && currentScene.playerController.player.camera.pitch  < -0.2) {
         finishedLookDown = true;
         StateManager.apply("lookDown");
     }
