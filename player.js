@@ -3,6 +3,7 @@
 class PlayerController {
 	constructor (_player) {
 		this.player = _player;
+        this.camera = _player.camera;
 
         this.jumpForce = vec3.fromValues (0.0, 5000.0, 0.0);
 
@@ -20,11 +21,11 @@ class PlayerController {
      */
     moveForward (speed) {
         var storage = mat4.create ();
-        mat4.fromQuat (storage, this.player.transform.rotation);
+        mat4.fromQuat (storage, this.camera.rotation);
             
         var direction = vec3.fromValues (-storage[8], -storage[9], -storage[10]);
         vec3.scale (direction, direction, speed);
-        direction = vec3.fromValues (direction[0], 0.0, direction[2]);
+        //direction = vec3.fromValues (direction[0], 0.0, direction[2]);
 
         vec3.add (this.player.transform.position, this.player.transform.position, direction);
     }
@@ -33,11 +34,11 @@ class PlayerController {
      */
     moveBackward (speed) {
         var storage = mat4.create ();
-        mat4.fromQuat (storage, this.player.transform.rotation);
+        mat4.fromQuat (storage, this.camera.rotation);
             
         var direction = vec3.fromValues (storage[8], storage[9], storage[10]);
         vec3.scale (direction, direction, speed);
-        direction = vec3.fromValues (direction[0], 0.0, direction[2]);
+        //direction = vec3.fromValues (direction[0], 0.0, direction[2]);
 
         vec3.add (this.player.transform.position, this.player.transform.position, direction);
     }
@@ -46,7 +47,7 @@ class PlayerController {
      */
     moveLeft (speed) {
         var storage = mat4.create ();
-        mat4.fromQuat (storage, this.player.transform.rotation);
+        mat4.fromQuat (storage, this.camera.rotation);
             
         var direction = vec3.fromValues (-storage[0], -storage[1], -storage[2]);
         vec3.scale (direction, direction, speed);
@@ -58,7 +59,7 @@ class PlayerController {
      */
     moveRight (speed) {
         var storage = mat4.create ();
-        mat4.fromQuat (storage, this.player.transform.rotation);
+        mat4.fromQuat (storage, this.camera.rotation);
             
         var direction = vec3.fromValues (storage[0], storage[1], storage[2]);
         vec3.scale (direction, direction, speed);

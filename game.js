@@ -1,4 +1,3 @@
-var player;
 function buildSceneGraph (SGraph) {
 
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 10.0, 10.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
@@ -48,61 +47,51 @@ function buildSceneGraph (SGraph) {
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
-    roomColliders.push ( new object (new transform (vec3.fromValues (17.5, 0.0, 0.0), vec3.fromValues (1.0, 30.0, 50.0), quat.create ()),
+    roomColliders.push ( new object (new transform (vec3.fromValues (17.5, 0.0, 0.0), vec3.fromValues (3.0, 30.0, 50.0), quat.create ()),
+                            null, null, null,                            
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+    roomColliders.push ( new object (new transform (vec3.fromValues (-17.5, 0.0, 0.0), vec3.fromValues (3.0, 30.0, 50.0), quat.create ()),
                             null, null, null,
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
-    roomColliders.push ( new object (new transform (vec3.fromValues (-17.5, 0.0, 0.0), vec3.fromValues (1.0, 30.0, 50.0), quat.create ()),
-                            null, null, null,
-                            new boxCollider (),
-                            new rigidBody (1000.0, "static"))
-                    );
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 0.0, -17.5), vec3.fromValues (50.0, 30.0, 1.0), quat.create ()),
-                            null, null, null,
-                            new boxCollider (),
-                            new rigidBody (1000.0, "static"))
-                    );
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 0.0, -17.5), vec3.fromValues (50.0, 30.0, 1.0), quat.create ()),
-                            null, null, null,
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 0.0, -17.5), vec3.fromValues (50.0, 30.0, 3.0), quat.create ()),
+                            null, null, null,                            
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
     
     for(var i=0; i < 4; i++) {
         roomColliders.push ( new object (new transform (vec3.fromValues (0.0, -6.1+2.9*i, -2.5+i*4), vec3.fromValues (50.0, 1.0, 3.0), quat.create ()),
-                            null, null, null,
+                            null, null, null,                            
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
         roomColliders.push ( new object (new transform (vec3.fromValues (-12.0, -7.55+2.9*i, -4.5+i*4), vec3.fromValues (4.0, 1.0, 3.0), quat.create ()),
-                            null, null, null,
+                            null, null, null,                            
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
         roomColliders.push ( new object (new transform (vec3.fromValues (12.0, -7.55+2.9*i, -4.5+i*4), vec3.fromValues (4.0, 1.0, 3.0), quat.create ()),
-                            null, null, null,
+                            null, null, null,                            
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
     }
     roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 5.5, 15.3), vec3.fromValues (50.0, 1.0, 5.0), quat.create ()),
-                            null, null, null,
-                            new boxCollider (),
-                            new rigidBody (1000.0, "static"))
-                    );
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 9.0, 18.0), vec3.fromValues (50.0, 30.0, 1.0), quat.create ()),
-                            null, null, null,
+                            null, null, null,                            
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
     roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 10.0, 12.0), vec3.fromValues (18.0, 8.0, 0.5), quat.create ()),
-                            null, null, null,
+                            null, null, null,                            
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
     roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 14.0, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
-                            null, null, null,
+                            null, null, null,                            
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
