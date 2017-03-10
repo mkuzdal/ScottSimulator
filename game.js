@@ -106,9 +106,7 @@ function buildSceneGraph (SGraph) {
     
     const hallway_length=20;
     roomColliders.push (new object (new transform (vec3.fromValues (0.0, -8.0, 18.0 + hallway_length ), vec3.fromValues (50.0, 27.6, 1.0+2*hallway_length), quat.create()),
-                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
-                            new geometry (pointsArray, normalsArray, textureArray),
-                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            null, null, null, 
                             new boxCollider(),
                             new rigidBody (1000.0, "static"))
                     );
