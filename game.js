@@ -79,9 +79,7 @@ function buildSceneGraph (SGraph) {
     
     for(var i=0; i < 4; i++) {
         roomColliders.push ( new object (new transform (vec3.fromValues (0.0, -6.1+2.9*i, -2.5+i*4), vec3.fromValues (50.0, 1.0, 3.0), quat.create ()),
-                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
-                            new geometry (pointsArray, normalsArray, textureArray),
-                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            null, null, null,
 
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
@@ -89,17 +87,15 @@ function buildSceneGraph (SGraph) {
     }
     for(var i=0; i < 5; i++){
         roomColliders.push ( new object (new transform (vec3.fromValues (-12.0, -7.55+2.9*i, -4.5+i*4), vec3.fromValues (4.0, 1.0, 3.0), quat.create ()),
-                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
-                            new geometry (pointsArray, normalsArray, textureArray),
-                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            null, null, null,
                             
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
         roomColliders.push ( new object (new transform (vec3.fromValues (12.0, -7.55+2.9*i, -4.5+i*4), vec3.fromValues (4.0, 1.0, 3.0), quat.create ()),
-                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
-                            new geometry (pointsArray, normalsArray, textureArray),
-                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            null, null, null,
+
+
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
@@ -111,32 +107,43 @@ function buildSceneGraph (SGraph) {
                     );
     //the next 3 panels are the components of the back wall of the classroom (the top, not where Scott lectures)
     
+    const hallway_length=20;
 
-    roomColliders.push (new object (new transform (vec3.fromValues (0.0, -8.0, 18.0), vec3.fromValues (50.0, 27.0, 1.0), quat.create()),
-                            null, null, null,
+    roomColliders.push (new object (new transform (vec3.fromValues (0.0, -8.0, 18.0 + hallway_length ), vec3.fromValues (50.0, 27.0, 1.0+2*hallway_length), quat.create()),
+
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
 
                             new boxCollider(),
                             new rigidBody (1000.0, "static"))
                     );
 
-     roomColliders.push (new object (new transform (vec3.fromValues (-12, 12.0, 18.0), vec3.fromValues (16.0, 16.0, 1.0), quat.create()),
+     roomColliders.push (new object (new transform (vec3.fromValues (-12, 12.0, 18.0 + hallway_length), vec3.fromValues (16.0, 16.0, 1.0+ 2* hallway_length), quat.create()),
                             
-                            null, null, null,
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
 
                             new boxCollider(),
                             new rigidBody (1000.0, "static"))
                     );
 
-     roomColliders.push (new object (new transform (vec3.fromValues (12, 12.0, 18.0), vec3.fromValues (16.0, 16.0, 1.0), quat.create()),
+     roomColliders.push (new object (new transform (vec3.fromValues (12, 12.0, 18.0 + hallway_length), vec3.fromValues (16.0, 16.0, 1.0+ 2*hallway_length), quat.create()),
                             
-                            null, null, null,
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
 
                             new boxCollider(),
                             new rigidBody (1000.0, "static"))
                     );
 
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 10.0, 12.0), vec3.fromValues (18.0, 8.0, 0.5), quat.create ()),
-                            null, null, null,
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 10.0, 12.4), vec3.fromValues (21.5, 8.0, 0.9), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
