@@ -105,8 +105,10 @@ function buildSceneGraph (SGraph) {
     //the next 3 panels are the components of the back wall of the classroom (the top, not where Scott lectures)
     
     const hallway_length=20;
-    roomColliders.push (new object (new transform (vec3.fromValues (0.0, -8.0, 18.0 + hallway_length ), vec3.fromValues (50.0, 27.4, 1.0+2*hallway_length), quat.create()),
-                            null, null, null,
+    roomColliders.push (new object (new transform (vec3.fromValues (0.0, -8.0, 18.0 + hallway_length ), vec3.fromValues (50.0, 27.6, 1.0+2*hallway_length), quat.create()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                             new boxCollider(),
                             new rigidBody (1000.0, "static"))
                     );
