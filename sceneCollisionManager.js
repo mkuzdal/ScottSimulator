@@ -745,38 +745,152 @@ class sceneCollisionManager {
 				collider1 = temp;
 			}
 
-        	var c1 = collider1.currentCenter;
-        	var c2 = collider2.currentCenter;
-        	var r1 = collider1.currentRadius;
-        	var r2;
-			var r = r1 + r2;
-        	var r_squared = r * r;
+			var c = collider1.currentCenter;
+        	var r = collider1.currentRadius;
 
-        	var n = vec3.create ();
-        	vec3.sub (n, c2, c1);
+        	var d, A, B, C, D;
+        	var d_min = 10000.0;
+        	var normal_min = vec3.fromValues (0.0, 0.0, 0.0);
+        	var collisionPoint_min = vec3.fromValues (0.0, 0.0, 0.0);
+	        
+	        // check right plane:
+	        // get the normal:
+	        var normal = vec3.create ();
+			vec3.sub (normal, collider2.currentVertices[7], collider2.currentVertices[3]);
+	        vec3.normalize (normal, normal);
 
-        	var d_squared = vec3.squaredLength (n);
-        	if (d_squared > r_squared) {
-        		return false;
-        	}
+	        var D = -vec3.dot (normal, collider2.currentVertices[7]);
+	        var d = vec3.dot (normal, c) + D;
+	        var dist = d - r;
 
-        	d = Math.sqrt (d2);
+	        if (dist > 0) {
+	            return false;
+	        } 
+	        dist = -dist
+	       	if (dist < d_min) {
+	        	normal_min = vec3.clone (normal);
+	        	d_min = dist;	
+	        	vec3.scaleAndAdd (collisionPoint_min, c, normal, -r);
+	        }
+
+	        // check left plane:
+	        // get the normal:
+	        var normal = vec3.create ();
+			vec3.sub (normal, collider2.currentVertices[3], collider2.currentVertices[7]);
+	        vec3.normalize (normal, normal);
+
+	        var D = -vec3.dot (normal, collider2.currentVertices[3]);
+	        var d = vec3.dot (normal, c) + D;
+	        var dist = d - r;
+
+	        if (dist > 0) {
+	            return false;
+	        } 
+	        dist = -dist
+	       	if (dist < d_min) {
+	        	normal_min = vec3.clone (normal);
+	        	d_min = dist;	
+	        	vec3.scaleAndAdd (collisionPoint_min, c, normal, -r);
+	        }
+
+	        // check top plane:
+	        // get the normal:
+	        var normal = vec3.create ();
+			vec3.sub (normal, collider2.currentVertices[7], collider2.currentVertices[5]);
+	        vec3.normalize (normal, normal);
+
+	        var D = -vec3.dot (normal, collider2.currentVertices[7]);
+	        var d = vec3.dot (normal, c) + D;
+	        var dist = d - r;
+
+	        if (dist > 0) {
+	            return false;
+	        } 
+	        dist = -dist
+	       	if (dist < d_min) {
+	        	normal_min = vec3.clone (normal);
+	        	d_min = dist;	
+	        	vec3.scaleAndAdd (collisionPoint_min, c, normal, -r);
+	        }
+
+	        // check bottom plane:
+	        // get the normal:
+	        var normal = vec3.create ();
+			vec3.sub (normal, collider2.currentVertices[5], collider2.currentVertices[7]);
+	        vec3.normalize (normal, normal);
+
+	        var D = -vec3.dot (normal, collider2.currentVertices[5]);
+	        var d = vec3.dot (normal, c) + D;
+	        var dist = d - r;
+
+	        if (dist > 0) {
+	            return false;
+	        } 
+	        dist = -dist
+	       	if (dist < d_min) {
+	        	normal_min = vec3.clone (normal);
+	        	d_min = dist;	
+	        	vec3.scaleAndAdd (collisionPoint_min, c, normal, -r);
+	        }
+
+	        // check near plane:
+	        // get the normal:
+	        var normal = vec3.create ();
+			vec3.sub (normal, collider2.currentVertices[7], collider2.currentVertices[6]);
+	        vec3.normalize (normal, normal);
+
+	        var D = -vec3.dot (normal, collider2.currentVertices[7]);
+	        var d = vec3.dot (normal, c) + D;
+	        var dist = d - r;
+
+	        if (dist > 0) {
+	            return false;
+	        } 
+	        dist = -dist
+	       	if (dist < d_min) {
+	        	normal_min = vec3.clone (normal);
+	        	d_min = dist;	
+	        	vec3.scaleAndAdd (collisionPoint_min, c, normal, -r);
+	        }
+
+	        // check far plane:
+	        // get the normal:
+	        var normal = vec3.create ();
+			vec3.sub (normal, collider2.currentVertices[6], collider2.currentVertices[7]);
+	        vec3.normalize (normal, normal);
+
+	        var D = -vec3.dot (normal, collider2.currentVertices[6]);
+	        var d = vec3.dot (normal, c) + D;
+	        var dist = d - r;
+
+	        if (dist > 0) {
+	            return false;
+	        } 
+
+	        dist = -dist
+	       	if (dist < d_min) {
+	        	normal_min = vec3.clone (normal);
+	        	d_min = dist;	
+	        	vec3.scaleAndAdd (collisionPoint_min, c, normal, -r);
+	        }
+
+
         	var manifold = new collisionManifold ();
-        	if (d != 0) {
-        		manifold.vertexBody = collider1.object;
-        		manifold.faceBody = collider2.object;
-        		manifold.penetrationDistance = r - d;
-        		manifold.normal = vec3.normalize (n, n);
-        		manifold.collisionPoint = vec3.create ();
-        		vec3.scale (manifold.collisionPoint, n, r1);
+        	if (d_min != 0) {
+        		manifold.vertexBody = collider2.object;
+        		manifold.faceBody = collider1.object;
+        		manifold.penetrationDistance = d_min;
+        		manifold.normal = vec3.clone (normal_min);
+        		manifold.collisionPoint = vec3.clone (collisionPoint_min);
         	} else {
         		manifold.vertexBody = collider1.object;
         		manifold.faceBody = collider2.object;
-        		manifold.penetrationDistance = r;
+        		manifold.penetrationDistance = d_min;
         		manifold.normal = vec3.fromValues (0.0, 1.0, 0.0);
         		manifold.collisionPoint = vec3.create ();
-        		vec3.scale (manifold.collisionPoint, n, r1);
         	}
+
+        	return manifold;
 
 		} else {
 			return false;
@@ -877,8 +991,10 @@ class sceneCollisionManager {
 	resolveCollision (object1, object2, manifold) {
 		if (object1.rigidBody == null || object2.rigidBody == null)
 			return;
+
 		if (object1.rigidBody.type == "static" && object2.rigidBody.type == "static")
 			return;
+
 		else if ((object1.rigidBody.type == "static" && object2.rigidBody.type == "dynamic") ||
 				 (object1.rigidBody.type == "dynamic" && object2.rigidBody.type == "static")) {
 		
@@ -888,15 +1004,18 @@ class sceneCollisionManager {
 				object1 = temp;
 				vec3.negate (manifold.normal, manifold.normal);
 			} 
-			
+
 	        var percent = 1.1;
 	        if (object1.tag == "player") {
 		       percent = 2.0;
 	        } 
 
+	        if (object1.tag == 2)
+	        	console.log ("HERE");
+
 	  	    vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, percent * manifold.penetrationDistance);
   
-			if ((object1.tag == "player")) {
+			if ((object1.tag == "player") && vec3.equals (manifold.normal, vec3.fromValues (0.0, 1.0, 0.0))) {
 				this.scene.playerController.jumping = false;
 	            object1.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
 	            object1.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
@@ -979,7 +1098,7 @@ class sceneCollisionManager {
 		} else if (object1.rigidBody.type == "dynamic" && object2.rigidBody.type == "dynamic") {
 			object1 = manifold.vertexBody;
 			object2 = manifold.faceBody;
-	     
+
 			var percent = 0.8; 
 	  		var correction = vec3.create ();
 	  		vec3.scale (correction, manifold.normal, manifold.penetrationDistance * percent / (object1.rigidBody.inv_mass + object2.rigidBody.inv_mass));
@@ -1017,7 +1136,7 @@ class sceneCollisionManager {
 	  			return;
 	  		}
 	  		if (vrel > -THRESHHOLD) {
-	  			this.contactCollisions.push (manifold);
+	  			//this.contactCollisions.push (manifold);
 	  			return;
 	  		} 
 

@@ -66,23 +66,26 @@ void main ()
 
 precision mediump float;
 
-uniform sampler2D texture;
-uniform sampler2D shadowMap[5];
-
-uniform int fDrawType;
-
-uniform vec4 fTriggerID;
-
 varying vec3 fPos;
 varying vec3 fNormal;
 varying vec2 fTexCoord;
 varying vec4 fPositionFromLight[5];
 
+uniform vec3 fCameraPosition;
+
+uniform vec4 fTriggerID;
+
+uniform sampler2D texture;
+
+uniform int fDrawType;
+
 uniform vec4 fAmbientMaterial, fDiffuseMaterial, fSpecularMaterial;
 uniform float fShininess;
+
 uniform vec4 fLightPosition[5];
 uniform vec4 fAmbientLight[5], fDiffuseLight[5], fSpecularLight[5];
-uniform vec3 fCameraPosition;
+uniform float flightBias[5];
+uniform sampler2D shadowMap[5];
 
 vec4 pack (const float depth) {
   const vec4 bitShift = vec4 (1.0, 255.0, 255.0 * 255.0, 255.0 * 255.0 * 255.0);
@@ -99,7 +102,7 @@ float unpack (vec4 color) {
    return dot (color, bitShift);
 }
 
-float ShadowCalculation (vec4 fPositionFromLight, sampler2D shadowMap) {
+float ShadowCalculation (vec4 fPositionFromLight, sampler2D shadowMap, float bias) {
     /*
     vec3 shadowCoord = (fPositionFromLight.xyz/fPositionFromLight.w)/2.0 + 0.5;
     vec4 rgbaDepth = texture2D(shadowMap, shadowCoord.xy);
@@ -110,7 +113,6 @@ float ShadowCalculation (vec4 fPositionFromLight, sampler2D shadowMap) {
     vec3 shadowCoord = fPositionFromLight.xyz / fPositionFromLight.w;
     shadowCoord = shadowCoord * 0.5 + 0.5; 
 
-    float bias = 0.005;
     float visibility = 0.0;
 
     vec2 poissonDisk[4];
@@ -164,13 +166,15 @@ void main () {
             if (dot (L, N) < 0.0)
                 specular = vec4 (0.0, 0.0, 0.0, 1.0);
 
-            float shadow = ShadowCalculation (fPositionFromLight[i], shadowMap[i]);
+            float shadow = ShadowCalculation (fPositionFromLight[i], shadowMap[i], flightBias[i]);
             //shadow = 0.0;
             vec4 fLighting = (ambient + (1.0 - shadow) * (diffuse + specular));
             fColor = fColor + fLighting;
         }
  
         gl_FragColor = fColor * texture2D (texture, fTexCoord);
+        fColor.a = fAmbientMaterial.a;
+        
         return;
 
     } else if (fDrawType == 1) {
@@ -206,6 +210,7 @@ void main () {
 <script type="text/javascript" src="perlinNoise.js"></script>
 <script type="text/javascript" src="StateManager.js"></script>
 <script type="text/javascript" src="auxillary.js"></script>
+<script type="text/javascript" src="physicsDemoScene.js"></script>
 
 
 <audio id="AUDIOWOOHOO" src="Audio/woohoo.wav"></audio>
@@ -215,6 +220,7 @@ void main () {
 <audio id="AUDIOGIVEUP" src="Audio/giveup.wav"></audio>
 <audio id="AUDIOSONAR" src="Audio/sonar.wav"></audio>
 <img id = "TEXfrance" src="France.png" hidden></img>
+<img id = "whiteTEX"  src="white.jpg" hidden></img>
 
 <iframe id="deskOBJ" src="Meshes/desk.txt" style="display: none;"></iframe>
 <iframe id="deskMAT" src="Meshes/desk_material.txt" style="display: none;"></iframe>
@@ -262,6 +268,23 @@ void main () {
 <iframe id="leftdoorMAT" src="Meshes/leftdoor_material.txt" style="display: none;"></iframe>
 <iframe id="rightdoorMAT" src="Meshes/rightdoor_material.txt" style="display: none;"></iframe>
 <img id=   "doorTEX" src="Meshes/door_texture.png" hidden></img>
+
+<iframe id="hallwayleftOBJ" src="Meshes/hallway_left.txt" style="display: none;"></iframe>
+<iframe id="hallwayleftMAT" src="Meshes/hallway_left_material.txt" style="display: none;"></iframe>
+<img id=   "hallwayleftTEX" src="Meshes/hallway_left_texture.png" hidden></img>
+
+<iframe id="hallwayrightOBJ" src="Meshes/hallway_right.txt" style="display: none;"></iframe>
+<iframe id="hallwayrightMAT" src="Meshes/hallway_right_material.txt" style="display: none;"></iframe>
+<img id=   "hallwayrightTEX" src="Meshes/hallway_right_texture.png" hidden></img>
+
+<iframe id="hallwaybotOBJ" src="Meshes/hallway_bot.txt" style="display: none;"></iframe>
+<iframe id="hallwaybotMAT" src="Meshes/hallway_bot_material.txt" style="display: none;"></iframe>
+<img id=   "hallwaybotTEX" src="Meshes/hallway_bot_texture.png" hidden></img>
+
+<iframe id="hallwaytopOBJ" src="Meshes/hallway_top.txt" style="display: none;"></iframe>
+<iframe id="hallwaytopMAT" src="Meshes/hallway_top_material.txt" style="display: none;"></iframe>
+<img id=   "hallwaytopTEX" src="Meshes/hallway_top_texture.png" hidden></img>
+
 
 
 

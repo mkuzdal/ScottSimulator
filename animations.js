@@ -280,7 +280,7 @@ class animationChair {
     clone () {
         var newAnimation = new animationChair (this.object);
         newAnimation.active = this.active;
-        return newAnimation
+        return newAnimation;
     }
 }
 
@@ -295,7 +295,7 @@ class animationLeftdoor {
         this.closedRotation = quat.clone (this.object.transform.rotation);
         
         this.openRotation = quat.create ();
-        quat.setAxisAngle (this.openRotation, [0, 1, 0], glMatrix.toRadian (90));
+        quat.setAxisAngle (this.openRotation, [0, 1, 0], glMatrix.toRadian (85));
         quat.mul (this.openRotation, this.closedRotation, this.openRotation);
 
         this.currentRotation = quat.clone (this.closedRotation);
@@ -321,7 +321,7 @@ class animationLeftdoor {
     clone () {
         var newAnimation = new animationLeftdoor (this.object);
         newAnimation.active = this.active;
-        return newAnimation
+        return newAnimation;
     }
 }
 
@@ -336,7 +336,7 @@ class animationRightdoor {
         this.closedRotation = quat.clone (this.object.transform.rotation);
         
         this.openRotation = quat.create ();
-        quat.setAxisAngle (this.openRotation, [0, 1, 0], glMatrix.toRadian (-90));
+        quat.setAxisAngle (this.openRotation, [0, 1, 0], glMatrix.toRadian (-85));
         quat.mul (this.openRotation, this.closedRotation, this.openRotation);
 
         this.currentRotation = quat.clone (this.closedRotation);
@@ -362,7 +362,144 @@ class animationRightdoor {
     clone () {
         var newAnimation = new animationRightdoor (this.object);
         newAnimation.active = this.active;
-        return newAnimation
+        return newAnimation;
+    }
+}
+
+class animationScaleObject {
+    constructor (_object) {
+        this.object = _object;
+        this.currentHold = null;
+
+        this.active = true;
+        this.tag = "scale";
+
+        this.distance = 5.0;
+        this.scale = 0.0;
+    }
+
+    animate (dTime) {
+        if (!this.active)
+            return;
+
+        if (currentScene.clickManager.clicked) {
+            this.currentHold = this.object.clone ();
+            currentScene.push (this.currentHold);
+            this.currentHold.collider.physics = "trigger";
+            this.currentHold.material = new material (vec4.fromValues (0.5, 0.0, 0.0, 0.1),
+                                                      vec4.fromValues (0.5, 0.0, 0.0, 0.1),
+                                                      vec4.fromValues (0.5, 0.0, 0.0, 0.1),
+                                                      80.0);
+        } 
+
+        if (this.currentHold) {
+            this.scale += 1.0 * dTime;
+            if (this.scale > 10.0)
+                this.scale = 10.0;
+
+            this.currentHold.material.ambient[0] = 0.5 + this.scale / 20.0;
+            this.currentHold.material.specular[0] = 0.5 + this.scale / 20.0;
+            this.currentHold.material.diffuse[0] = 0.5 +  this.scale / 20.0;
+
+            var storage = mat4.create ();
+            mat4.fromQuat (storage, currentScene.playerController.player.camera.rotation);
+            
+            var direction = vec3.fromValues (-storage[8], -storage[9], -storage[10]);
+            vec3.normalize (direction, direction);
+
+            var pos = vec3.create ();
+            vec3.scale (pos, direction, this.distance + this.scale);            
+
+            vec3.add (pos, pos, currentScene.playerController.player.camera.position);
+            this.currentHold.transform.position = pos;
+            this.currentHold.transform.scale = vec3.fromValues (this.scale, this.scale, this.scale);
+
+            if (currentScene.clickManager.released) {
+                this.currentHold.collider.physics = "dynamic";
+                this.currentHold.addRigidBody (new rigidBody (this.currentHold.rigidBody.mass * this.scale, "dynamic"));
+                this.currentHold.material.ambient[3] = 1.0;
+                this.currentHold.material.specular[3] = 1.0;
+                this.currentHold.material.diffuse[3] = 1.0;
+                
+
+                this.scale = 0.0;
+                this.currentHold = null;
+            }
+        }
+    }
+
+    clone () {
+        var newAnimation = new animationScaleObject (this.object);
+        newAnimation.active = this.active;
+        return newAnimation;
+    }
+}
+
+class animationLaunchObject {
+    constructor (_object) {
+        this.object = _object;
+        this.currentHold = null;
+
+        this.active = true;
+        this.tag = "launch";
+
+        this.distance = 5.0;
+        this.scale = 0.0;
+    }
+
+    animate (dTime) {
+        if (!this.active)
+            return;
+
+        if (currentScene.clickManager.clicked) {
+            this.currentHold = this.object.clone ();
+            currentScene.push (this.currentHold);
+            this.currentHold.collider.physics = "trigger";
+            this.currentHold.material = new material (vec4.fromValues (0.5, 0.0, 0.0, 0.5),
+                                                      vec4.fromValues (0.5, 0.0, 0.0, 0.5),
+                                                      vec4.fromValues (0.5, 0.0, 0.0, 0.5),
+                                                      80.0);
+        } 
+
+        if (this.currentHold) {
+            this.scale += 1.0 * dTime;
+            if (this.scale > 10.0)
+                this.scale = 10.0;
+
+            this.currentHold.material.ambient[0] += this.scale / 20.0;
+            this.currentHold.material.specular[0] += this.scale / 20.0;
+            this.currentHold.material.diffuse[0] += this.scale / 20.0;
+
+            var storage = mat4.create ();
+            mat4.fromQuat (storage, currentScene.playerController.player.camera.rotation);
+            
+            var direction = vec3.fromValues (-storage[8], -storage[9], -storage[10]);
+            vec3.normalize (direction, direction);
+
+            var pos = vec3.create ();
+            vec3.scale (pos, direction, this.distance + this.scale);            
+
+            vec3.add (pos, pos, currentScene.playerController.player.camera.position);
+            this.currentHold.transform.position = pos;
+            this.currentHold.transform.scale = vec3.fromValues (this.scale, this.scale, this.scale);
+
+            if (currentScene.clickManager.released) {
+                this.currentHold.collider.physics = "dynamic";
+                this.currentHold.material.ambient[3] = 1.0;
+                this.currentHold.material.specular[3] = 1.0;
+                this.currentHold.material.diffuse[3] = 1.0;
+                console.log (this.currentHold.material);
+
+                this.scale = 0.0;
+                this.currentHold = null;
+            }
+        }
+    }
+
+    clone () {
+        var newAnimation = new animationScaleObject (this.object);
+        newAnimation.active = this.active;
+        return newAnimation;
     }
 }
 

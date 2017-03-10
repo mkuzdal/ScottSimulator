@@ -16,6 +16,7 @@ var colorFramebuffer;
 
 var currentScene;
 var mainScene;
+var physicsDemoScene;
 
 var OFFSCREEN_WIDTH = 1024;
 var OFFSCREEN_HEIGHT = 1024;
@@ -108,6 +109,7 @@ window.onload = function init () {
 	lightProjectionMatrixLoc = gl.getUniformLocation (program, "lightProjectionMatrix");
 
 	mainScene = new sceneGraph (buildSceneGraph);
+    physicsDemoScene = new sceneGraph (buildPhysicsScene);
     currentScene = mainScene;
 
     crosshair = new Crosshair ([
@@ -118,6 +120,7 @@ window.onload = function init () {
         ]);
 
     mainScene.build ();
+    physicsDemoScene.build ();
 
 	buildStateMachine ();
 
@@ -148,6 +151,10 @@ window.onload = function init () {
 
     canvas.addEventListener ("mousedown", function (e) {
         currentScene.clickManager.clicked = true;
+    });
+
+    canvas.addEventListener ("mouseup", function (e) {
+        currentScene.clickManager.released = true;
     });
 
     // Assigning keys

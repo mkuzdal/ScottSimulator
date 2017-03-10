@@ -22,8 +22,8 @@ class rigidBody {
 		this.velocity = vec3.create ();
 		this.omega = vec3.create ();
 
-		this.P = vec3.create ();
-		this.L = vec3.create ();
+		this.P = vec3.fromValues (0.0, 0.0, 0.0);
+		this.L = vec3.fromValues (0.0, 0.0, 0.0);
 
 		this.restitution = 1.0;
 		this.frictionStatic = 1.5;
