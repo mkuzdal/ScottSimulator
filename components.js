@@ -4,8 +4,6 @@ class mouseTrigger {
         this.func = _function;
         this.object = _object;
         this.type = _type;
-
-        clickManager.addTrigger (this);
     }
 
     setup () {
@@ -16,12 +14,14 @@ class mouseTrigger {
 }
 
 class clickHandler {
-    constructor () {
+    constructor (_scene) {
         this.clicked = false;
         this.pixel = new Uint8Array (4);
         this.triggers = [];
         this.hover = [];
         this.currentID = 1;
+
+        this.scene = _scene;
     }
 
     addTrigger (trigger) {
@@ -112,6 +112,7 @@ class boxCollider {
         this.currentCenter = vec3.create ();
 
         this.collisionFunction = null;
+        this.currentVertices = [];
     }
 
     setup () {
@@ -130,7 +131,7 @@ class boxCollider {
         var p_prime = [];
         for (var i = 0; i < this.vertices.length; i++) {
             var storage = vec4.create ();
-            p_prime.push (vec4.transformMat4 (storage, this.vertices[i], PC));
+            p_prime.push (vec4.transformMat4 (storage, this.currentVertices[i], PC));
         }
 
         var toDraw = false;

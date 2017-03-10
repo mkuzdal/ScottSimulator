@@ -50,8 +50,6 @@ var rigidBodies = [];
 var clickEvents = [];
 var crosshair;
 
-var clickManager;
-
 var cubeVertices = [
 	vec4.fromValues ( -0.5, -0.5,  0.5, 1.0 ),
 	vec4.fromValues ( -0.5,  0.5,  0.5, 1.0 ),
@@ -109,9 +107,8 @@ window.onload = function init () {
 	lightMatrixLoc = gl.getUniformLocation (program, "lightMatrix");
 	lightProjectionMatrixLoc = gl.getUniformLocation (program, "lightProjectionMatrix");
 
-    clickManager = new clickHandler ();
 	mainScene = new sceneGraph (buildSceneGraph);
-    currentScene = mainScene
+    currentScene = mainScene;
 
     crosshair = new Crosshair ([
             vec4.fromValues (0.0, 0.05, 0.5, 1.0),
@@ -150,7 +147,7 @@ window.onload = function init () {
     }
 
     canvas.addEventListener ("mousedown", function (e) {
-        clickManager.clicked = true;
+        currentScene.clickManager.clicked = true;
     });
 
     // Assigning keys
@@ -260,6 +257,9 @@ function render (current) {
 
 	// draw
 	currentScene.render (deltaTime);
+
+    // game checks - test conditions, etc. that are run every frame and are game specific.
+    gameChecks ();
 
 	// callback
 	window.requestAnimationFrame (render);

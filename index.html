@@ -110,7 +110,7 @@ float ShadowCalculation (vec4 fPositionFromLight, sampler2D shadowMap) {
     vec3 shadowCoord = fPositionFromLight.xyz / fPositionFromLight.w;
     shadowCoord = shadowCoord * 0.5 + 0.5; 
 
-    float bias = 0.15;
+    float bias = 0.005;
     float visibility = 0.0;
 
     vec2 poissonDisk[4];
@@ -137,7 +137,7 @@ void main () {
     if (fDrawType == 0) {
         vec4 fColor = vec4 (0.0, 0.0, 0.0, 1.0);
 
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 5; i++) {
             vec3 L;
             if (fLightPosition[i].w == 0.0) 
                 L = normalize (fLightPosition[i].xyz);
@@ -165,7 +165,8 @@ void main () {
                 specular = vec4 (0.0, 0.0, 0.0, 1.0);
 
             float shadow = ShadowCalculation (fPositionFromLight[i], shadowMap[i]);
-            vec4 fLighting = (ambient + (shadow) * (diffuse + specular));
+            //shadow = 0.0;
+            vec4 fLighting = (ambient + (1.0 - shadow) * (diffuse + specular));
             fColor = fColor + fLighting;
         }
  

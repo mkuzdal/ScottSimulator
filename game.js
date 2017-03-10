@@ -1,34 +1,43 @@
 function buildSceneGraph (SGraph) {
 
-    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 30.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
-                                               // WHERE THE LIGHT IS LOOKING AT GOES HERE
-                                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
-                                               vec4.fromValues (0.6, 0.6, 0.6, 1.0),
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 10.0, 10.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                                               vec3.fromValues (0.0, -4.0, -15.0),
+                                               vec4.fromValues (0.4, 0.4, 0.4, 1.0),
+                                               vec4.fromValues (0.8, 0.8, 0.8, 1.0),
                                                vec4.fromValues (0.4, 0.4, 0.4, 1.0)));
 
-    SGraph.lightsManager.lightSources[0].tag = "red";
+    SGraph.lightsManager.lightSources[0].tag = "left";
+    
+    //SGraph.lightsManager.lightSources[0].shadows = false;
+/*
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (-14.0, 10.0, 11.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                                               vec3.fromValues (0.0, -4.0, -15.0),
+                                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                                               vec4.fromValues (0.4, 0.4, 0.4, 1.0),
+                                               vec4.fromValues (0.4, 0.4, 0.4, 1.0)));
 
-    var cam = new camera ([0,-1.85,-15.8], glMatrix.toRadian(180), glMatrix.toRadian(5));
-    var player = new object (new transform (vec3.fromValues (0.0, 10.0, -15.8), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    SGraph.lightsManager.lightSources[1].tag = "right";
+*/
+    var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
+    var player = new object (new transform (vec3.fromValues (0.0, 5.0, -7.9), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.0, 0.3827, 0.0, 0.9239)),
                          null, 
                          null, 
                          null,
-                         new boxCollider (vec3.fromValues (-0.5, -7.5, -0.5), vec3.fromValues (0.5, 0.0, 0.5), "dynamic"),
+                         new boxCollider (vec3.fromValues (-0.25, -5, -0.25), vec3.fromValues (0.25, 0.0, 0.25), "dynamic"),
                          new rigidBody (100.0, "dynamic"));
 
     player.camera = cam;
     player.rigidBody.angularRigidBody = false;
     player.tag = "player";
 
-    SGraph.root.children.push (player);
+    SGraph.push (player);
     SGraph.playerController = new PlayerController (player);
 
 	// room
 	var room = new object ();
+    room.tag = "world";
 	room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
-	room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ());
-	room.tag = "world";
-	SGraph.root.children.push (room);
+	room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     room.collider = new nullCollider ();
 
     var roomColliders = [];
@@ -38,22 +47,17 @@ function buildSceneGraph (SGraph) {
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
-    roomColliders.push ( new object (new transform (vec3.fromValues (17.5, 0.0, 0.0), vec3.fromValues (1.0, 30.0, 50.0), quat.create ()),
+    roomColliders.push ( new object (new transform (vec3.fromValues (17.5, 0.0, 0.0), vec3.fromValues (3.0, 30.0, 50.0), quat.create ()),
+                            null, null, null,                            
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+    roomColliders.push ( new object (new transform (vec3.fromValues (-17.5, 0.0, 0.0), vec3.fromValues (3.0, 30.0, 50.0), quat.create ()),
                             null, null, null,
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
-    roomColliders.push ( new object (new transform (vec3.fromValues (-17.5, 0.0, 0.0), vec3.fromValues (1.0, 30.0, 50.0), quat.create ()),
-                            null, null, null,
-                            new boxCollider (),
-                            new rigidBody (1000.0, "static"))
-                    );
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 0.0, -17.5), vec3.fromValues (50.0, 30.0, 1.0), quat.create ()),
-                            null, null, null,
-                            new boxCollider (),
-                            new rigidBody (1000.0, "static"))
-                    );
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 0.0, -17.5), vec3.fromValues (50.0, 30.0, 1.0), quat.create ()),
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 0.0, -17.5), vec3.fromValues (50.0, 30.0, 3.0), quat.create ()),
                             null, null, null,
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
@@ -65,6 +69,8 @@ function buildSceneGraph (SGraph) {
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
+    }
+    for(var i=0; i < 5; i++){
         roomColliders.push ( new object (new transform (vec3.fromValues (-12.0, -7.55+2.9*i, -4.5+i*4), vec3.fromValues (4.0, 1.0, 3.0), quat.create ()),
                             null, null, null,
                             new boxCollider (),
@@ -81,18 +87,36 @@ function buildSceneGraph (SGraph) {
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 9.0, 18.0), vec3.fromValues (50.0, 30.0, 1.0), quat.create ()),
-                            null, null, null,
-                            new boxCollider (),
+
+    //the next 3 panels are the components of the back wall of the classroom (the top, not where Scott lectures)
+    
+    const hallway_length=20;
+    roomColliders.push (new object (new transform (vec3.fromValues (0.0, -8.0, 18.0 + hallway_length ), vec3.fromValues (50.0, 27.6, 1.0+2*hallway_length), quat.create()),
+                            null, null, null, 
+                            new boxCollider(),
                             new rigidBody (1000.0, "static"))
                     );
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 10.0, 12.0), vec3.fromValues (18.0, 8.0, 0.5), quat.create ()),
+
+     roomColliders.push (new object (new transform (vec3.fromValues (-12, 12.0, 18.0 + hallway_length), vec3.fromValues (16.0, 16.0, 1.0+ 2* hallway_length), quat.create()),
+                            null, null, null, 
+                            new boxCollider(),
+                            new rigidBody (1000.0, "static"))
+                    );
+
+     roomColliders.push (new object (new transform (vec3.fromValues (12, 12.0, 18.0 + hallway_length), vec3.fromValues (16.0, 16.0, 1.0+ 2*hallway_length), quat.create()),
                             null, null, null,
+                            new boxCollider(),
+                            new rigidBody (1000.0, "static"))
+                    );
+
+
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 10.0, 12.4), vec3.fromValues (21.5, 8.0, 0.9), quat.create ()),
+                            null, null, null, 
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
     roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 14.0, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
-                            null, null, null,
+                            null, null, null,                            
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
@@ -124,12 +148,35 @@ function buildSceneGraph (SGraph) {
                     );
     room.children.push (returntrigger);
 
+    foundbugtrigger = new object (new transform (vec3.fromValues (0.0, -4.0, 10.0), vec3.fromValues (100.0, 5.0, 15.0), quat.create ()),
+                            null, null, null,
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "trigger"),
+                            null
+                    );
+    room.children.push (foundbugtrigger);
+
+
+
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
+
+    var hallway = new object (new transform (vec3.fromValues (0.0, 10.0, 18.0 + hallway_length), vec3.fromValues (8.0, 7.0, 1.0+2*hallway_length), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                            new geometry (pointsArray, normalsArray, textureArray),
+                            new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            null, null);
+    room.children.push(hallway);
+
+
 	var roof = new object ();
+    roof.tag = "roof";
 	roof.loadFromObj ("roofOBJ", "roofMAT", "roofTEX");
 	roof.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
 	room.children.push(roof);
 
 	var speaker = new object ();
+    speaker.tag = "speaker";
 	var rotation = quat.create();
 	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(75));
 	speaker.loadFromObj ("speakerOBJ", "speakerMAT", "speakerTEX");
@@ -137,6 +184,7 @@ function buildSceneGraph (SGraph) {
 	room.children.push(speaker);
 
 	var speaker2 = speaker.clone();
+    speaker2.tag = "speaker";
 	speaker2.transform.position = vec3.fromValues (-15, 11.3, -3);
 	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-75));
 	speaker2.transform.rotation = quat.clone (rotation);
@@ -144,6 +192,7 @@ function buildSceneGraph (SGraph) {
 
 	// desk
 	var desk = new object ();
+    desk.tag = "desk";
 	desk.loadFromObj ("deskOBJ", "deskMAT", "deskTEX");
 	var rotation = quat.create();
 	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
@@ -153,19 +202,30 @@ function buildSceneGraph (SGraph) {
 
 	//make all the chairs!
     var chair = new object ();
+    chair.tag = "chair";
     chair.loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
     chair.transform = new transform (vec3.fromValues (0, -3.8, -1.3), vec3.fromValues (1.2, 1.2, 1.2), quat.clone(rotation));
     var seat = new object ();
+    seat.tag = "seat";
 	seat.loadFromObj ("seatOBJ", "seatMAT", "seatTEX");
 	var rotation = quat.create ();
 	quat.setAxisAngle (rotation, [0,1,0], glMatrix.toRadian(-90));
-    //var rotation2 = quat.create ();
-    //quat.setAxisAngle (rotation2, [1,0,0], glMatrix.toRadian (105));
-    //quat.mul (rotation, rotation, rotation2);
+    var rotation2 = quat.create ();
+    quat.setAxisAngle (rotation2, [1, 0, 0], glMatrix.toRadian (-105));
+    quat.mul (rotation, rotation, rotation2);
 	seat.transform = new transform (vec3.fromValues(0.0,0.3,0.22), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
 
 	chair.children.push (seat);
     chair.addRigidBody (new rigidBody (10.0, "static"));
+    chair.children[0].addOnMouseClickTrigger (function (object) {
+        for (var i = 0; i < object.animations.length; i++) {
+            if (object.animations[i].tag == "chair") {
+                object.animations[i].open = !object.animations[i].open;
+            }
+        }
+    });
+
+    chair.children[0].addAnimation (new animationChair ());
 
 	var rows_of_chairs=4;
     var chairs_per_row=8;
@@ -197,32 +257,45 @@ function buildSceneGraph (SGraph) {
 
     //add a stool in the corner 
     var stool = new object();
+    stool.tag = "stool";
     stool.loadFromObj ("stoolOBJ", "stoolMAT", "stoolTEX");
 	stool.transform = new transform (vec3.fromValues(-16, -7.0, -8.5), vec3.fromValues(0.4, 0.4, 0.4), quat.clone(rotation)); 
 	room.children.push (stool);
     stool.addRigidBody (new rigidBody (10.0, "dynamic"));
     stool.collider.physics = "dynamic";
 
+    stool.addOnMouseClickTrigger (function (object) {
+        object.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
+        object.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
+        currentScene.animationsManager.addAnimation (new animationHold (object));
+    });
+
     var button = new object ();
+    button.tag = "button";
     button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
     button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     var buttonMount = new object ();
+    buttonMount.tag = "buttonMount";
     buttonMount.loadFromObj ("buttonMountOBJ", "buttonMountMAT", "buttonMountTEX");
     buttonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     buttonMount.children.push (button);
     
-    rightButtonMount = buttonMount.clone(); rightButtonMount.transform.position = vec3.fromValues (-5,0,0); rightButtonMount.active = true;
-    leftButtonMount = buttonMount.clone(); leftButtonMount.transform.position = vec3.fromValues (5,0,0); leftButtonMount.active = true;
-    physicsButton = buttonMount.clone(); physicsButton.transform.position = vec3.fromValues(0,0,0); physicsButton.active = false;
+    rightButtonMount = buttonMount.clone(); rightButtonMount.transform.position = vec3.fromValues (-5,0,0); rightButtonMount.active = true; room.children.push (rightButtonMount);
+    leftButtonMount = buttonMount.clone(); leftButtonMount.transform.position = vec3.fromValues (5,0,0); leftButtonMount.active = true; room.children.push (leftButtonMount);
+    physicsButton = buttonMount.clone(); physicsButton.transform.position = vec3.fromValues(0,0,0); physicsButton.active = false; room.children.push (physicsButton);
+    exitFoundBugButton = buttonMount.clone(); exitFoundBugButton.transform.position = vec3.fromValues(15,0,10); exitFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); exitFoundBugButton.active = false; room.children.push (exitFoundBugButton);
+    stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
 
-    room.children.push (rightButtonMount);
-    room.children.push (leftButtonMount);
-    SGraph.root.children.push (room);
+    SGraph.push (room);
 }
 
 var leavetrigger1, leavetrigger2, leavetrigger3;
 var returntrigger;
 var rightButtonMount, leftButtonMount, physicsButton;
+
+
+var foundbugtrigger, exitedFindingBug = false;
+var exitFoundBugButton, stayFoundBugButton;
 
 var previousState = null; //used for when I leave a certain state into a branch but want to return. I could use something like stackframes but I'm too lazy and this is more than enough for my purposes;
 
@@ -278,8 +351,8 @@ function buildStateMachine () {
     ));
     var clickedRight2 = new Event("clickedRight", new Activity(document.getElementById('AUDIOFOUNDOIL'), 
         function() {
-            //player.transform.position = vec3.fromValues(0.0, 10, -15.8);
-            //player.transform.rotation = vec3.fromValues(-0.07094697654247284, -0.9180688858032227, -0.19179458916187286, 0.3396040201187134);
+            //currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 10, -15.8);
+            //currentScene.playerController.player.transform.rotation = vec3.fromValues(-0.07094697654247284, -0.9180688858032227, -0.19179458916187286, 0.3396040201187134);
             rightButtonMount.transform.position = vec3.fromValues(3.0,0.75,-17.5); 
             leftButtonMount.transform.scale = vec3.fromValues(5.0, 5.0, 5.0);
         }, 
@@ -349,8 +422,6 @@ function buildStateMachine () {
     StateManager.getState("leaving3").addChild(returning, StateManager.getState("root"));
 
 
-
-
     rightButtonMount.children[0].addOnMouseClickTrigger(function(object) {
         StateManager.apply("clickedRight");
     });
@@ -381,10 +452,56 @@ function buildStateMachine () {
     returntrigger.collider.collisionFunction = function (object1, object2) {
         StateManager.apply("returntrigger");
     }
+    foundbugtrigger.collider.collisionFunction = function (object1, object2) {
+        // play the found bug audio. if the audio is already playing (if currentTime != 0) then don't play it again.
+        console.log('Oh. Look at you. You found a bug! Congratulations. Wanna get out?... Umm. Good luck with that.');
+        foundbugtrigger.collider.collisionFunction = null;
+        currentScene.playerController.player.transform.position = vec3.fromValues(-7.317382554523647, -2.9981283240562004, 13.815474266186357);
+        currentScene.playerController.player.camera.rotation = vec4.fromValues(-0.01889348030090332, 0.6919060349464417, -0.018118197098374367, -0.7215129137039185);
+        
+        setTimeout(function() {
+            exitFoundBugButton.active = true;
+            stayFoundBugButton.active = true;
+        }, 3000);
+        if(!previousState) {
+            previousState = StateManager.getCurrentState();
+        }
+
+        setTimeout(function() {
+            if(!exitedFindingBug) {
+                console.log('Wow. Was not expecting you to stay this long... Guess I will just put you back then.');
+                StateManager.setState(previousState);
+                previousState = null;
+                currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
+                currentScene.playerController.player.camera.rotation = vec4.fromValues(0,1,0,0);
+            }
+        }, 3600000);
+    }
+    exitFoundBugButton.children[0].addOnMouseClickTrigger(function(object) {
+        exitFoundBugButton.active = false;
+        stayFoundBugButton.active = false;
+        exitedFindingBug = true;
+        StateManager.setState(previousState);
+        previousState = null;
+        currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
+        currentScene.playerController.player.camera.rotation = vec4.fromValues(0,1,0,0);
+    });
+    stayFoundBugButton.children[0].addOnMouseClickTrigger(function(object) {
+        exitFoundBugButton.active = false;
+        stayFoundBugButton.active = false;        
+    });
 
 
     StateManager.apply("clickStart");
-    StateManager.apply("lookDown");
+}
+
+
+var finishedLookDown = false;
+function gameChecks() {
+    if(!finishedLookDown && currentScene.playerController.player.camera.pitch  < -0.2) {
+        finishedLookDown = true;
+        StateManager.apply("lookDown");
+    }
 }
 
 function applyChangedPhysics() {

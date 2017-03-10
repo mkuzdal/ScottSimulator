@@ -25,7 +25,7 @@ class rigidBody {
 		this.P = vec3.create ();
 		this.L = vec3.create ();
 
-		this.restitution = 0.8;
+		this.restitution = 1.0;
 		this.frictionStatic = 1.5;
 		this.frictionDynamic = 1.0;
 
@@ -81,7 +81,7 @@ class rigidBody {
             if (this.object.tag == "player") {
                 this.force = vec3.fromValues (0.0, -gravity * this.mass, 0.0);
                 this.torque = vec3.fromValues (0.0, 0.0, 0.0);
-            }
+            }  
 
             this.f = vec3.fromValues (0.0, 0.0, 0.0);
             this.t = vec3.fromValues (0.0, 0.0, 0.0);

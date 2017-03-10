@@ -18,8 +18,8 @@ var currentScene;
 var shadowFramebuffers = [];
 var colorFramebuffer;
 
-var OFFSCREEN_WIDTH = 1024;
-var OFFSCREEN_HEIGHT = 1024;
+var OFFSCREEN_WIDTH = 2048;
+var OFFSCREEN_HEIGHT = 2048;
 
 // storage for global vertices and normals
 var pointsArray = [];
@@ -54,9 +54,6 @@ var colliders = [];
 var rigidBodies = [];
 var clickEvents = [];
 var crosshair;
-
-var clickManager;
-
 
 var cubeVertices = [
     vec4.fromValues ( -0.5, -0.5,  0.5, 1.0 ),
@@ -124,7 +121,7 @@ window.onload = function init () {
     }
 
     canvas.addEventListener ("mousedown", function (e) {
-        clickManager.clicked = true;
+        currentScene.clickManager.clicked = true;
     });
 
     // Assigning keys
@@ -228,8 +225,6 @@ window.onload = function init () {
     lightMatrixLoc = gl.getUniformLocation (program, "lightMatrix");
     lightProjectionMatrixLoc = gl.getUniformLocation (program, "lightProjectionMatrix");
 
-    clickManager = new clickHandler ();
-
     mainScene = new sceneGraph (buildSceneGraph);
     blackHoleScene = new sceneGraph (buildSceneGraph2);
     currentScene = mainScene;
@@ -264,7 +259,7 @@ window.onload = function init () {
 
     // create the transforms for each of the 6 bodies.
     transforms =        [   new transform (vec3.fromValues (-1.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
-                            new transform (vec3.fromValues (0.0, 40.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                            new transform (vec3.fromValues (0.0, 20.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                             new transform (vec3.fromValues (0.0,  4.0, 0.0), vec3.fromValues (2.0, 2.0, 2.0), quat.create ()),
                             new transform (vec3.fromValues (-2.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ())
                         ];
@@ -351,7 +346,6 @@ window.onload = function init () {
 
     cubes[6].collider.collisionFunction = function (object1, object2) {
        console.log ("TRIGGER");
-       //changeGravitationalCenter (vec3.fromValues (0.0, 50.0, 0.0));
        //currentScene = blackHoleScene;
        cubes[6].collider.collisionFunction = null;
        swapTextures (document.getElementById ("TEXfrance"));
@@ -463,13 +457,13 @@ function buildSceneGraph (SGraph) {
 
     SGraph.playerController = new PlayerController (player);
 
-    SGraph.root.children.push (cubes[0]);
-    SGraph.root.children.push (cubes[1]);
-    SGraph.root.children.push (cubes[4]);
-    SGraph.root.children.push (cubes[6]);
+    SGraph.push (cubes[0]);
+    SGraph.push (cubes[1]);
+    SGraph.push (cubes[4]);
+    SGraph.push (cubes[6]);
     //SGraph.root.children.push (cubes[5]);
 
-    SGraph.root.children.push (player);
+    SGraph.push (player);
     //SGraph.root.children[1].children.push (cubes[2]);
     //SGraph.root.children[1].children[0].children.push (cubes[3]);
 /*
@@ -501,12 +495,45 @@ function buildSceneGraph (SGraph) {
 }
 
 function buildSceneGraph2 (SGraph) {
-    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
-                              vec4.fromValues (0.4, 0.4, 0.4, 1.0),
-                              vec4.fromValues (0.8, 0.8, 0.8, 1.0),
-                              vec4.fromValues (1.0, 1.0, 1.0, 1.0)));
+     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (50.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec3.fromValues (0.0, 0.0, 0.0),
+                              vec4.fromValues (0.1, 0.1, 0.1, 1.0),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
 
     SGraph.lightsManager.lightSources[0].tag = "red";
+
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (-50.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec3.fromValues (0.0, 0.0, 0.0),
+                              vec4.fromValues (0.1, 0.1, 0.1, 1.0),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
+
+    SGraph.lightsManager.lightSources[1].tag = "blue";
+
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, 50.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec3.fromValues (0.0, 0.0, 0.0),
+                              vec4.fromValues (0.1, 0.1, 0.1, 1.0),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
+
+    SGraph.lightsManager.lightSources[2].tag = "green";
+
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, -50.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec3.fromValues (0.0, 0.0, 0.0),
+                              vec4.fromValues (0.1, 0.1, 0.1, 1.0),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
+
+    SGraph.lightsManager.lightSources[3].tag = "white";
+
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec3.fromValues (0.0, 0.0, 0.0),
+                              vec4.fromValues (0.1, 0.1, 0.1, 1.0),
+                              vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                              vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
+
+    SGraph.lightsManager.lightSources[4].tag = "black";
 
     var cam = new camera ();
     var player = new object (new transform (vec3.fromValues (0.0, 0.0, 50.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
@@ -523,16 +550,16 @@ function buildSceneGraph2 (SGraph) {
 
     SGraph.playerController = new PlayerController (player);
 
-    SGraph.root.children.push (cubes[0]);
-    SGraph.root.children.push (cubes[1]);
-    SGraph.root.children.push (cubes[4]);
+    SGraph.push (cubes[0]);
+    SGraph.push (cubes[1]);
+    SGraph.push (cubes[4]);
     //SGraph.root.children.push (cubes[5]);
 /*
     for (var i = 7; i < cubes.length; i++) {
         SGraph.root.children.push (cubes[i]);
-    } */
+    }  */
 
-    SGraph.root.children.push (player);
+    SGraph.push (player);
     //SGraph.root.children[1].children.push (cubes[2]);
     //SGraph.root.children[1].children[0].children.push (cubes[3]);
 }
