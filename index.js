@@ -151,7 +151,6 @@ window.onload = function init () {
     }
 
     canvas.addEventListener ("mousedown", function (e) {
-        //currentScene.clickManager.clicked = true;
         var isRightMB;
 		    e = e || window.event;
 
@@ -168,7 +167,19 @@ window.onload = function init () {
     });
 
     canvas.addEventListener ("mouseup", function (e) {
-        currentScene.clickManager.released = true;
+        var isRightMB;
+            e = e || window.event;
+
+            if ("which" in e)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+                isRightMB = e.which == 3; 
+            else if ("button" in e)  // IE, Opera 
+                isRightMB = e.button == 2; 
+
+            if (isRightMB) {
+                currentScene.clickManager.rightreleased = true;
+            } else {
+                currentScene.clickManager.leftreleased = true;
+            }
     });
 
     // Assigning keys

@@ -2,7 +2,7 @@ function changeGravitationalCenter (center) {
 	var objects = currentScene.getObjects ();
 
 	for (var i = 0; i < objects.length; i++) {
-		if (objects[i].rigidBody && objects[i].tag != "player") {
+		if (objects[i].rigidBody && objects[i].tag == "chair") {
 			var direction = vec3.create ();
 			vec3.sub (direction, center, objects[i].transform.position);
 			vec3.normalize (direction, direction);
@@ -10,6 +10,9 @@ function changeGravitationalCenter (center) {
 			var force = vec3.create ();
 			vec3.scale (force, direction, objects[i].rigidBody.mass * gravity);
 			objects[i].rigidBody.force = vec3.clone (force);
+
+			objects[i].collider.physics = "dynamic";
+			objects[i].rigidBody.type = "dynamic";
 		}
 	}
 }

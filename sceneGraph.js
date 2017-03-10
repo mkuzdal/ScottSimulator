@@ -571,13 +571,11 @@ class sceneGraph {
         }
 
         gl.enable (gl.BLEND);
-        gl.disable (gl.DEPTH_TEST);
         gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         this.drawTree (DRAW_TYPE_DEFAULT);
 
         gl.disable(gl.BLEND);
-        gl.enable (gl.DEPTH_TEST);
         
         for (var i = 0; i < this.lightsManager.lightSources.length; i++) {
             gl.activeTexture (gl.TEXTURE1 + i);

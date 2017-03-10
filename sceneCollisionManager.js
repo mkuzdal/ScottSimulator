@@ -712,12 +712,13 @@ class sceneCollisionManager {
         	var n = vec3.create ();
         	vec3.sub (n, c2, c1);
 
+
         	var d_squared = vec3.squaredLength (n);
         	if (d_squared > r_squared) {
         		return false;
         	}
 
-        	d = Math.sqrt (d2);
+        	var d = Math.sqrt (d_squared);
         	var manifold = new collisionManifold ();
         	if (d != 0) {
         		manifold.vertexBody = collider1.object;
@@ -1136,7 +1137,7 @@ class sceneCollisionManager {
 	  			return;
 	  		}
 	  		if (vrel > -THRESHHOLD) {
-	  			//this.contactCollisions.push (manifold);
+	  			this.contactCollisions.push (manifold);
 	  			return;
 	  		} 
 

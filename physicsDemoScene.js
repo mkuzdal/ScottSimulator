@@ -103,8 +103,22 @@ function buildPhysicsScene (SGraph) {
     
     SGraph.push (cube);
 
+    generateSphere (5);
+    var sphereGeo = new geometry (pointsArray, normalsArray, textureArray);
+
+    var sphere = new object (new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (0.5, 0.5, 0.5), quat.create ()),
+                             new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                             sphereGeo,
+                             new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                             new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0, "dynamic"),
+                             new rigidBody (10.0, "dynamic"));
+
+    sphere.tag = "sphere";
+
     player.addAnimation (new animationScaleObject (cube));
     player.animations[0].object = cube;
+    player.addAnimation (new animationLaunchObject (sphere));
+    player.animations[1].object = sphere;
 
     SGraph.push (player);
 }

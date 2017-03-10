@@ -383,6 +383,8 @@ function buildSceneGraph (SGraph) {
     stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
 
     SGraph.push (room);
+
+    changeGravitationalCenter (vec3.fromValues (0.0, 1.0, 0.0));
 }
 
 var leavetrigger1, leavetrigger2, leavetrigger3;
