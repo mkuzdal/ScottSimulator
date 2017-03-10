@@ -10,10 +10,12 @@ class collisionManifold {
 }
 
 class sceneCollisionManager {
-	constructor () {
+	constructor (_scene) {
 		this.objects = [];
 		this.contactCollisions = [];
 		this.collisions = [];
+
+		this.scene = _scene;
 	}
 
 	detectCollision (collider1, collider2) {
@@ -886,14 +888,16 @@ class sceneCollisionManager {
 				object1 = temp;
 				vec3.negate (manifold.normal, manifold.normal);
 			} 
+			
 	        var percent = 1.1;
 	        if (object1.tag == "player") {
-		       percent = 1.5;
+		       percent = 2.0;
 	        } 
 
 	  	    vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, percent * manifold.penetrationDistance);
   
 			if ((object1.tag == "player")) {
+				this.scene.playerController.jumping = false;
 	            object1.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
 	            object1.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
 	            object1.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
@@ -983,11 +987,13 @@ class sceneCollisionManager {
 	  		vec3.scaleAndAdd (object2.transform.position, object2.transform.position, correction, object2.rigidBody.inv_mass);
 
 	        if (object1.tag == "player") {
+	        	this.scene.playerController.jumping = false;
 	            object1.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
 	            object1.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
 	            object1.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
 	            return;
 	        } else if (object2.tag == "player") {
+	        	this.scene.playerController.jumping = false;
 	            object2.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
 	            object2.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
 	            object2.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);

@@ -81,7 +81,7 @@ class rigidBody {
             if (this.object.tag == "player") {
                 this.force = vec3.fromValues (0.0, -gravity * this.mass, 0.0);
                 this.torque = vec3.fromValues (0.0, 0.0, 0.0);
-            }
+            }  
 
             this.f = vec3.fromValues (0.0, 0.0, 0.0);
             this.t = vec3.fromValues (0.0, 0.0, 0.0);
