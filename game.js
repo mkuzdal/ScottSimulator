@@ -103,24 +103,29 @@ function buildSceneGraph (SGraph) {
                     );
 
     //the next 3 panels are the components of the back wall of the classroom (the top, not where Scott lectures)
-    roomColliders.push (new object (new transform (vec3.fromValues (0.0, -8.0, 18.0), vec3.fromValues (50.0, 27.0, 1.0), quat.create()),
-                            null, null, null,
-                            new boxCollider(),
-                            new rigidBody (1000.0, "static"))
-                    );
-     roomColliders.push (new object (new transform (vec3.fromValues (-12, 12.0, 18.0), vec3.fromValues (16.0, 16.0, 1.0), quat.create()),
-                            null, null, null,
-                            new boxCollider(),
-                            new rigidBody (1000.0, "static"))
-                    );
-     roomColliders.push (new object (new transform (vec3.fromValues (12, 12.0, 18.0), vec3.fromValues (16.0, 16.0, 1.0), quat.create()),
+    
+    const hallway_length=20;
+    roomColliders.push (new object (new transform (vec3.fromValues (0.0, -8.0, 18.0 + hallway_length ), vec3.fromValues (50.0, 27.0, 1.0+2*hallway_length), quat.create()),
                             null, null, null,
                             new boxCollider(),
                             new rigidBody (1000.0, "static"))
                     );
 
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 10.0, 12.0), vec3.fromValues (18.0, 8.0, 0.5), quat.create ()),
-                            null, null, null,                            
+     roomColliders.push (new object (new transform (vec3.fromValues (-12, 12.0, 18.0 + hallway_length), vec3.fromValues (16.0, 16.0, 1.0+ 2* hallway_length), quat.create()),
+                            null, null, null, 
+                            new boxCollider(),
+                            new rigidBody (1000.0, "static"))
+                    );
+
+     roomColliders.push (new object (new transform (vec3.fromValues (12, 12.0, 18.0 + hallway_length), vec3.fromValues (16.0, 16.0, 1.0+ 2*hallway_length), quat.create()),
+                            null, null, null,
+                            new boxCollider(),
+                            new rigidBody (1000.0, "static"))
+                    );
+
+
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 10.0, 12.4), vec3.fromValues (21.5, 8.0, 0.9), quat.create ()),
+                            null, null, null, 
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
