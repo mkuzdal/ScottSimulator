@@ -481,6 +481,10 @@ function buildStateMachine () {
         exitFoundBugButton.active = false;
         stayFoundBugButton.active = false;
         exitedFindingBug = true;
+        StateManager.setState(previousState);
+        previousState = null;
+        currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
+        currentScene.playerController.player.camera.rotation = vec4.fromValues(0,1,0,0);
     });
     stayFoundBugButton.children[0].addOnMouseClickTrigger(function(object) {
         exitFoundBugButton.active = false;
