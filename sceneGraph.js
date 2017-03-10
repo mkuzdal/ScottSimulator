@@ -39,6 +39,10 @@ class object {
         this.active = true;
         this.tag = "default";
         this.children = [];
+
+        this.animations = [];
+
+        this.scene = null;
     }
 
     /** update: event loop function. Calls the update function for the transform component.
@@ -199,19 +203,35 @@ class object {
     }
 
     addOnMouseClickTrigger (_function) {
-        this.mouseTriggers.push (new mouseTrigger (this, _function, "click"));
+        var x = new mouseTrigger (this, _function, "click");
+        this.mouseTriggers.push (x);
+        if (this.scene) {
+            this.scene.clickManager.addTrigger (x);
+        }
     }
 
     addOnMouseHoverTrigger (_function) {
-        this.mouseTriggers.push (new mouseTrigger (this, _function, "hover"));
+        var x = new mouseTrigger (this, _function, "hover");
+        this.mouseTriggers.push (x);
+        if (this.scene) {
+            this.scene.clickManager.addTrigger (x);
+        }
     }
 
     addOnMouseEnterTrigger (_function) {
-        this.mouseTriggers.push (new mouseTrigger (this, _function, "enter"));
+        var x = new mouseTrigger (this, _function, "enter");
+        this.mouseTriggers.push (x);
+        if (this.scene) {
+            this.scene.clickManager.addTrigger (x);
+        }
     }
 
     addOnMouseExitTrigger (_function) {
-        this.mouseTriggers.push (new mouseTrigger (this, _function, "exit"));
+        var x = new mouseTrigger (this, _function, "exit");
+        this.mouseTriggers.push (x);
+        if (this.scene) {
+            this.scene.clickManager.addTrigger (x);
+        }
     }
 
     clone () {
@@ -264,6 +284,7 @@ class object {
         newObject.drawType = this.drawType;
         newObject.tag = this.tag;
         newObject.active = this.active;
+        newObject.scene = this.scene;
 
         for (var i = 0; i < this.mouseTriggers.length; i++) {
             if (this.mouseTriggers[i].type == "click") {
@@ -275,6 +296,10 @@ class object {
             } else if (this.mouseTriggers[i].type == "exit") {
                 newObject.addOnMouseExitTrigger (this.mouseTriggers[i].func);
             } 
+        }
+
+        for (var i = 0; i < this.animations.length; i++) {
+            newObject.addAnimation (this.animations[i].clone ());
         }
 
         for (var i = 0; i < this.children.length; i++) {
@@ -311,6 +336,14 @@ class object {
             }
         }
     }
+
+    addAnimation (_animation) {
+        this.animations.push (_animation);
+        _animation.object = this;
+        if (this.scene) {
+            this.scene.animationsManager.addAnimation (_animation);
+        }
+    }
 }
 
 
@@ -321,12 +354,15 @@ class sceneGraph {
         this.lightsManager = new lightHandler ();
         this.animationsManager = new animationHandler ();
         this.collisionsManager = new sceneCollisionManager ();
+        this.clickManager = new clickHandler ();
 
         this.build_function = _build_function;
 
         this.playerController = null;
 
         this.root.tag = "root";
+        this.tag = "default";
+
 	}
 
 	drawTree (type) {
@@ -334,8 +370,8 @@ class sceneGraph {
         var PL = mat4.create ();
 
         if (type == DRAW_TYPE_SHADOW) {
-            mat4.mul (PC, this.lightsManager.lightSources[0].projectionMatrix, this.lightsManager.lightSources[0].view);
-            mat4.mul (PL, this.lightsManager.lightSources[0].projectionMatrix, this.lightsManager.lightSources[0].view);
+            mat4.mul (PC, this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].projectionMatrix, this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].view);
+            mat4.mul (PL, this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].projectionMatrix, this.lightsManager.lightSources[type - DRAW_TYPE_SHADOW].view);
         } else {
             mat4.mul (PC, this.playerController.player.camera.perspectiveProjectionMatrix, this.playerController.player.camera.view);
             mat4.mul (PL, this.lightsManager.lightSources[0].projectionMatrix, this.lightsManager.lightSources[0].view);
@@ -481,13 +517,12 @@ class sceneGraph {
             gl.uniform1i (gl.getUniformLocation (program, "fDrawType"), DRAW_TYPE_SHADOW + i);
 
             gl.bindFramebuffer (gl.FRAMEBUFFER, shadowFramebuffers[i]);
+            gl.enable (gl.DEPTH_TEST);
             gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            gl.disable (gl.DEPTH_TEST);
 
             this.drawTree (DRAW_TYPE_SHADOW);
         }
 
-        gl.enable (gl.DEPTH_TEST);
         gl.bindFramebuffer (gl.FRAMEBUFFER, null);
         gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -501,8 +536,8 @@ class sceneGraph {
 
         this.drawTree (DRAW_TYPE_COLOR);
 
-        gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, clickManager.pixel);
-        clickManager.handleMouseEvents ();
+        gl.readPixels (canvas.width / 2, canvas.height / 2, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, this.clickManager.pixel);
+        this.clickManager.handleMouseEvents ();
 
         gl.enable (gl.DEPTH_TEST);
         gl.clear (gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -517,12 +552,12 @@ class sceneGraph {
             gl.uniform1i (gl.getUniformLocation (program, "shadowMap[" + i + "]"), 1 + i); 
         }
 
-        gl.enable (gl.BLEND);
-        gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        //gl.enable (gl.BLEND);
+        //gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         this.drawTree (DRAW_TYPE_DEFAULT);
 
-        gl.disable(gl.BLEND);
+        //gl.disable(gl.BLEND);
         
         for (var i = 0; i < this.lightsManager.lightSources.length; i++) {
             gl.activeTexture (gl.TEXTURE1 + i);
@@ -548,6 +583,35 @@ class sceneGraph {
 
     build () {
         this.build_function (this);
+        var objs = this.getObjects ();
+        for (var i = 0; i < objs.length; i++) {
+            var currentObject = objs[i];
+            for (var j = 0; j < currentObject.mouseTriggers.length; j++) {
+                this.clickManager.addTrigger (currentObject.mouseTriggers[j]);
+            }
+
+            for (var j = 0; j < currentObject.animations.length; j++) {
+                this.animationsManager.addAnimation (currentObject.animations[j]);
+            }
+        }
+    }
+
+
+    push (object) {
+        this.root.children.push (object);
+
+        object.scene = this;
+        for (var i = 0; i < object.children.length; i++) {
+            this.__push_AUX (object.children[i]);
+        }
+    }
+
+    __push_AUX (object) {
+        object.scene = this;
+            
+        for (var i = 0; i < object.children.length; i++) {
+            this.__push_AUX (object.children[i]);
+        }
     }
 }
 

@@ -24,6 +24,7 @@ class PlayerController {
         vec3.scale (direction, direction, speed);
 
         vec3.add (this.player.transform.position, this.player.transform.position, direction);
+        console.log (this.player.transform.position)
     }
 
     /** moveBackward: moves the player in the backwards direction by 'speed' many units.

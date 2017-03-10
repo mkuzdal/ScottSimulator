@@ -86,10 +86,13 @@ class sceneCollisionManager {
 			var vertexBody = null;
 			var faceBody = null;
 
+
 			// axis 1
+			// Any collision here has object b as the vertex body.
 			var axis = vec3.create ();
 			vec3.sub (axis, collider1.currentVertices[7], collider1.currentVertices[3]);
-
+		
+			// Project all points onto this axis
 			var projection_points1 = [];
 			for (var i = 0; i < collider1.currentVertices.length; i++) {
 				projection_points1.push (project (collider1.currentVertices[i], axis));
@@ -108,6 +111,7 @@ class sceneCollisionManager {
 			var maxPoint1 = [];
 			var maxPoint2 = [];
 
+			// get the minimum and maximum projection point from object 1
 			for (var i = 0; i < projection_points1.length; i++) {
 				if (projection_points1[i] <= min1) {
 					if (projection_points1[i] == min1) {
@@ -126,6 +130,7 @@ class sceneCollisionManager {
 					max1 = projection_points1[i];
 				}
 			}
+			// get the minimum and maximum projection point from object 2
 			for (var i = 0; i < projection_points2.length; i++) {
 				if (projection_points2[i] <= min2) {
 					if (projection_points2[i] == min2) {
@@ -145,38 +150,49 @@ class sceneCollisionManager {
 				}
 			}
 
+
 			if (min2 > max1 || max2 < min1) 
 				return false;
 
-			var v1 = max1 - min2;
-			var v2 = max2 - min1;
-			var d1 = Math.abs (v1);
-			var d2 = Math.abs (v2);
+			var v1 = max1 - min2; // from object 1 -> object 2
+			var v2 = max2 - min1; // from object 2 -> object 1
+			var d1 = Math.abs (v1); // distance from object 1 -> object 2
+			var d2 = Math.abs (v2); // distance from object 2 -> object 1
 			if (d1 < d2) {
+				// the first case is our penetration
 				if (penetrationDistance >= d1) {
 					// d1 is the new penetration distance
 					penetrationDistance = d1;
 					if (v1 > 0) {
-						vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
+						// the direction is from object1 -> object 2
+						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (minPoint2);
 					} else { 
-						vec3.normalize (penetrationNormal, vec3.clone (axis));
+						// the direction is from object2 -> object 1
+						vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
 						collisionPoint = average (maxPoint1);
 					}
+					// along this vertex the vertex body is guaranteed to be object1
+					// and the face body object 2
 					vertexBody = collider1.object;
 					faceBody = collider2.object;
 				}
 			} else {
+				// the second case if our penetration
 				if (penetrationDistance >= d2) {
 					// d2 is the new penetration distance
 					penetrationDistance = d2;
 					if (v2 < 0) {
-						vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
+						// the direction is from object1 -> object2
+						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (maxPoint2);
 					} else {
-						vec3.normalize (penetrationNormal, vec3.clone (axis));
+						// the direction is from object2 -> object1
+						vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
 						collisionPoint = average (minPoint1);
 					}
+					// along this vertex the vertex body is guaranteed to be object1
+					// and the face body object 2
 					vertexBody = collider1.object;
 					faceBody = collider2.object;
 				}
@@ -253,10 +269,10 @@ class sceneCollisionManager {
 					// d1 is the new penetration distance
 					penetrationDistance = d1;
 					if (v1 > 0) {
-						vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
+						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (minPoint2);
 					} else { 
-						vec3.normalize (penetrationNormal, vec3.clone (axis));
+						vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
 						collisionPoint = average (maxPoint1);
 					}
 					vertexBody = collider1.object;
@@ -267,10 +283,10 @@ class sceneCollisionManager {
 					// d2 is the new penetration distance
 					penetrationDistance = d2;
 					if (v2 < 0) {
-						vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
+						vec3.normalize (penetrationNormal, vec3.clone (axis));
 						collisionPoint = average (maxPoint2);
 					} else {
-						vec3.normalize (penetrationNormal, vec3.clone (axis));
+						vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
 						collisionPoint = average (minPoint1);
 					}
 					vertexBody = collider1.object;
@@ -350,10 +366,10 @@ class sceneCollisionManager {
 					// d1 is the new penetration distance
 					penetrationDistance = d1;
 					if (v1 > 0) {
-						vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
+						vec3.normalize (penetrationNormal, vec3.clone (axis));						
 						collisionPoint = average (minPoint2);
 					} else { 
-						vec3.normalize (penetrationNormal, vec3.clone (axis));
+						vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
 						collisionPoint = average (maxPoint1);
 					}
 					vertexBody = collider1.object;
@@ -364,10 +380,10 @@ class sceneCollisionManager {
 					// d2 is the new penetration distance
 					penetrationDistance = d2;
 					if (v2 < 0) {
-						vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));
+						vec3.normalize (penetrationNormal, vec3.clone (axis));						
 						collisionPoint = average (maxPoint2);
 					} else {
-						vec3.normalize (penetrationNormal, vec3.clone (axis));
+						vec3.normalize (penetrationNormal, vec3.clone (vec3.negate (axis, axis)));						
 						collisionPoint = average (minPoint1);
 					}
 					vertexBody = collider1.object;
@@ -684,30 +700,39 @@ class sceneCollisionManager {
 			return manifold; 
 			
 		} else if (collider1.type == "sphere" && collider2.type == "sphere") {
-			var c1 = vec3.create ();
-        	vec3.transformMat4 (c1, collider1.center, collider1.matrix);
-        	var c2 = vec3.create ();
-        	vec3.transformMat4 (c2, collider2.center, collider2.matrix);
+			var c1 = collider1.currentCenter;
+        	var c2 = collider2.currentCenter;
+			var r1 = collider1.currentRadius;
+        	var r2 = collider2.currentRadius;
+        	var r = r1 + r2;
+        	var r_squared = r * r;
 
         	var n = vec3.create ();
-        	vec3.sub (n, c1, c2);
-        	var r = (collider1.radius * collider1.scaling + collider2.radius * collider2.scaling);
-        	r *= r;
+        	vec3.sub (n, c2, c1);
 
-        	var d = vec3.squaredLength (n);
-        	if (d > r) {
+        	var d_squared = vec3.squaredLength (n);
+        	if (d_squared > r_squared) {
         		return false;
         	}
 
-        	d = Math.sqrt (d);
+        	d = Math.sqrt (d2);
         	var manifold = new collisionManifold ();
         	if (d != 0) {
+        		manifold.vertexBody = collider1.object;
+        		manifold.faceBody = collider2.object;
         		manifold.penetrationDistance = r - d;
-        		manifold.normal = n / d;
+        		manifold.normal = vec3.normalize (n, n);
+        		manifold.collisionPoint = vec3.create ();
+        		vec3.scale (manifold.collisionPoint, n, r1);
         	} else {
-        		manifold.penetrationDistance = 0.0;
+        		manifold.vertexBody = collider1.object;
+        		manifold.faceBody = collider2.object;
+        		manifold.penetrationDistance = r;
         		manifold.normal = vec3.fromValues (0.0, 1.0, 0.0);
+        		manifold.collisionPoint = vec3.create ();
+        		vec3.scale (manifold.collisionPoint, n, r1);
         	}
+
         	return manifold;
 
 		} else if (collider1.type == "sphere" && collider2.type == "box" ||
@@ -718,23 +743,39 @@ class sceneCollisionManager {
 				collider1 = temp;
 			}
 
-			var storage = vec4.create ();
-        	var c = vec3.transformMat4 (storage, collider1.center, collider1.matrix);
-        	var r = collider1.radius * collider1.scaling;
+        	var c1 = collider1.currentCenter;
+        	var c2 = collider2.currentCenter;
+        	var r1 = collider1.currentRadius;
+        	var r2;
+			var r = r1 + r2;
+        	var r_squared = r * r;
 
-			var max = vec4.transformMat4 (storage, collider2.max, collider2.matrix);
-			var min = vec4.transformMat4 (storage, collider2.min, collider2.matrix);
+        	var n = vec3.create ();
+        	vec3.sub (n, c2, c1);
 
-			var x = Math.max (min[0], Math.min (c[0], max[0]));
-  			var y = Math.max (min[1], Math.min (c[1], max[1]));
-  			var z = Math.max (min[2], Math.min (c[2], max[2]));
-  			var d2 = (x - c[0]) * (x - c[0]) +
-  					 (y - c[1]) * (y - c[1]) +
-                     (z - c[2]) * (z - c[2]);
+        	var d_squared = vec3.squaredLength (n);
+        	if (d_squared > r_squared) {
+        		return false;
+        	}
 
-  			if (r * r < d2)
-  				return true;
-  			else return false;
+        	d = Math.sqrt (d2);
+        	var manifold = new collisionManifold ();
+        	if (d != 0) {
+        		manifold.vertexBody = collider1.object;
+        		manifold.faceBody = collider2.object;
+        		manifold.penetrationDistance = r - d;
+        		manifold.normal = vec3.normalize (n, n);
+        		manifold.collisionPoint = vec3.create ();
+        		vec3.scale (manifold.collisionPoint, n, r1);
+        	} else {
+        		manifold.vertexBody = collider1.object;
+        		manifold.faceBody = collider2.object;
+        		manifold.penetrationDistance = r;
+        		manifold.normal = vec3.fromValues (0.0, 1.0, 0.0);
+        		manifold.collisionPoint = vec3.create ();
+        		vec3.scale (manifold.collisionPoint, n, r1);
+        	}
+
 		} else {
 			return false;
 		}
@@ -838,26 +879,26 @@ class sceneCollisionManager {
 			return;
 		else if ((object1.rigidBody.type == "static" && object2.rigidBody.type == "dynamic") ||
 				 (object1.rigidBody.type == "dynamic" && object2.rigidBody.type == "static")) {
+		
 			if (object1.rigidBody.type == "static") {
 				var temp = object2;
 				object2 = object1;
 				object1 = temp;
 				vec3.negate (manifold.normal, manifold.normal);
 			} 
-
-	        var percent = 1.0;
+	        var percent = 1.1;
 	        if (object1.tag == "player") {
-		       percent = 1.0;
-	        }
+		       percent = 1.5;
+	        } 
 
 	  	    vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, percent * manifold.penetrationDistance);
-
-	  	    if (object1.tag == "player" && vec3.equals (manifold.normal, vec3.fromValues (0.0, 1.0, 0.0))) {
+  
+			if ((object1.tag == "player")) {
 	            object1.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
 	            object1.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
 	            object1.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
 	            return;
-	        }   
+	        } 
 
 	  		var padot = object1.rigidBody.pointVelocity (manifold.collisionPoint);
 	  		var pbdot = object2.rigidBody.pointVelocity (manifold.collisionPoint);
@@ -934,24 +975,24 @@ class sceneCollisionManager {
 		} else if (object1.rigidBody.type == "dynamic" && object2.rigidBody.type == "dynamic") {
 			object1 = manifold.vertexBody;
 			object2 = manifold.faceBody;
-	        
+	     
 			var percent = 0.8; 
 	  		var correction = vec3.create ();
 	  		vec3.scale (correction, manifold.normal, manifold.penetrationDistance * percent / (object1.rigidBody.inv_mass + object2.rigidBody.inv_mass));
-	  		vec3.scaleAndAdd (object1.transform.position, object1.transform.position, correction, object1.rigidBody.inv_mass);
-	  		vec3.scaleAndAdd (object2.transform.position, object2.transform.position, correction, -object2.rigidBody.inv_mass);
+	  		vec3.scaleAndAdd (object1.transform.position, object1.transform.position, correction, -object1.rigidBody.inv_mass);
+	  		vec3.scaleAndAdd (object2.transform.position, object2.transform.position, correction, object2.rigidBody.inv_mass);
 
-	        if (object1.tag == "player" && vec3.equals (manifold.normal, vec3.fromValues (0.0, 1.0, 0.0))) {
+	        if (object1.tag == "player") {
 	            object1.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
 	            object1.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
 	            object1.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
 	            return;
-	        } else if (object2.tag == "player" && vec3.equals (manifold.normal, vec3.fromValues (0.0, 1.0, 0.0))) {
+	        } else if (object2.tag == "player") {
 	            object2.rigidBody.force = vec3.fromValues (0.0, 0.0, 0.0);
 	            object2.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
 	            object2.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
 	            return;
-	        } 
+	        }  
 
 	  		var padot = object1.rigidBody.pointVelocity (manifold.collisionPoint);
 	  		var pbdot = object2.rigidBody.pointVelocity (manifold.collisionPoint);
@@ -970,9 +1011,9 @@ class sceneCollisionManager {
 	  			return;
 	  		}
 	  		if (vrel > -THRESHHOLD) {
-	  			//this.contactCollisions.push (manifold);
+	  			this.contactCollisions.push (manifold);
 	  			return;
-	  		}
+	  		} 
 
 	  		var epsilon = Math.min (object1.rigidBody.restitution, object2.rigidBody.restitution);
 	  		var numerator = -(1 + epsilon) * vrelNormal;

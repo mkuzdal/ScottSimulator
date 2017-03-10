@@ -4,8 +4,6 @@ class mouseTrigger {
         this.func = _function;
         this.object = _object;
         this.type = _type;
-
-        clickManager.addTrigger (this);
     }
 
     setup () {
