@@ -216,7 +216,7 @@ class animationHold {
         vec3.normalize (direction, direction);
         vec3.scale (direction, direction, this.distance);
 
-        if (this.object.scene.clickManager.clicked) {
+        if (this.object.scene.clickManager.leftclicked) {
             this.object.rigidBody.type = "dynamic";
             vec3.scale (this.object.rigidBody.P, vec3.clone (direction), 5.0);
             this.object.scene.animationsManager.removeAnimation (this);
@@ -382,7 +382,7 @@ class animationScaleObject {
         if (!this.active)
             return;
 
-        if (currentScene.clickManager.clicked) {
+        if (currentScene.clickManager.rightclicked) {
             this.currentHold = this.object.clone ();
             currentScene.push (this.currentHold);
             this.currentHold.collider.physics = "trigger";
@@ -414,7 +414,7 @@ class animationScaleObject {
             this.currentHold.transform.position = pos;
             this.currentHold.transform.scale = vec3.fromValues (this.scale, this.scale, this.scale);
 
-            if (currentScene.clickManager.released) {
+            if (currentScene.clickManager.rightreleased) {
                 this.currentHold.collider.physics = "dynamic";
                 this.currentHold.addRigidBody (new rigidBody (this.currentHold.rigidBody.mass * this.scale, "dynamic"));
                 this.currentHold.material.ambient[3] = 1.0;
@@ -451,7 +451,7 @@ class animationLaunchObject {
         if (!this.active)
             return;
 
-        if (currentScene.clickManager.clicked) {
+        if (currentScene.clickManager.leftclicked) {
             this.currentHold = this.object.clone ();
             currentScene.push (this.currentHold);
             this.currentHold.collider.physics = "trigger";

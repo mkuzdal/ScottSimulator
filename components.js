@@ -15,8 +15,10 @@ class mouseTrigger {
 
 class clickHandler {
     constructor (_scene) {
-        this.clicked = false;
-        this.released = false;
+        this.leftreleased = false;
+        this.rightreleased = false;
+        this.leftclicked = false;
+        this.rightclicked = false;
         this.pixel = new Uint8Array (4);
         this.triggers = [];
         this.hover = [];
@@ -41,7 +43,7 @@ class clickHandler {
     handleMouseEvents () {       
         for (var i = 0; i < this.triggers.length; i++) {
             if (vec4.equals(this.pixel, this.triggers[i].ID)) { 
-                if (this.triggers[i].type == "click" && this.clicked == true) {
+                if (this.triggers[i].type == "click" && this.leftclicked == true) {
                     this.triggers[i].func (this.triggers[i].object);
                 } else if (this.triggers[i].type == "hover") {
                     this.triggers[i].func (this.triggers[i].object);
@@ -71,8 +73,10 @@ class clickHandler {
                 }
             }
         } 
-        this.clicked = false;  
-        this.released = false;  
+        this.leftreleased = false;
+        this.rightreleased = false;  
+        this.leftclicked = false;    
+        this.rightclicked = false;
     }
 }
 
