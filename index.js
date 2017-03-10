@@ -81,6 +81,7 @@ window.onload = function init () {
 
 	// Get the canvas variable and set it up
 	canvas = document.getElementById ("gl-canvas");
+
 	gl = WebGLUtils.setupWebGL (canvas, {antialias: true});
 	if (!gl) { alert ("WebGL isn't available"); }
 
@@ -147,7 +148,20 @@ window.onload = function init () {
     }
 
     canvas.addEventListener ("mousedown", function (e) {
-        currentScene.clickManager.clicked = true;
+        //currentScene.clickManager.clicked = true;
+        var isRightMB;
+		    e = e || window.event;
+
+		    if ("which" in e)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+		        isRightMB = e.which == 3; 
+		    else if ("button" in e)  // IE, Opera 
+		        isRightMB = e.button == 2; 
+
+		    if (isRightMB) {
+		    	currentScene.clickManager.rightclicked = true;
+		    } else {
+		    	currentScene.clickManager.leftclicked = true;
+		    }
     });
 
     // Assigning keys
