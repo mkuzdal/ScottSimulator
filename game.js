@@ -1,12 +1,20 @@
 function buildSceneGraph (SGraph) {
 
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, -45.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                                               vec3.fromValues (0.0, -4.0, 10.0),
+                                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                                               vec4.fromValues (0.4, 0.4, 0.4, 1.0),
+                                               vec4.fromValues (0.2, 0.2, 0.2, 1.0)));
+
+    SGraph.lightsManager.lightSources[0].tag = "front";
+/*
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 10.0, 10.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                                                vec3.fromValues (0.0, -4.0, -15.0),
+                                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                                                vec4.fromValues (0.4, 0.4, 0.4, 1.0),
-                                               vec4.fromValues (0.8, 0.8, 0.8, 1.0),
-                                               vec4.fromValues (0.4, 0.4, 0.4, 1.0)));
+                                               vec4.fromValues (0.2, 0.2, 0.2, 1.0)));
 
-    SGraph.lightsManager.lightSources[0].tag = "left";
+    SGraph.lightsManager.lightSources[1].tag = "back";*/
 
     var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
     var player = new object (new transform (vec3.fromValues (0.0, 5.0, -7.9), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.0, 0.3827, 0.0, 0.9239)),
@@ -31,6 +39,45 @@ function buildSceneGraph (SGraph) {
     room.collider = new nullCollider ();
 
     var roomColliders = [];
+
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
+
+    // Wall imbetween chairs and back door
+    var rotation = quat.create ();
+    quat.setAxisAngle (rotation, [1.0, 0.0, 0.0], glMatrix.toRadian (90));
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 10.0, 12.5), vec3.fromValues (21.0, 1.0, 10.0), rotation),
+                            null, null, null, 
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+    
+    // roof
+    var rotation = quat.create ();
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 15.0, 0.0), vec3.fromValues (100.0, 5.0, 100.0), quat.create ()),
+                            null, null, null,
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    ); 
+
+    // back wall right
+    var rotation = quat.create ();
+    quat.setAxisAngle (rotation, [1.0, 0.0, 0.0], glMatrix.toRadian (90));
+    roomColliders.push ( new object (new transform (vec3.fromValues (-14.5, 10.0, 22.5), vec3.fromValues (21.0, 10.0, 100.0), rotation),
+                            null, null, null, 
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
+
+    // back wall left
+    var rotation = quat.create ();
+    quat.setAxisAngle (rotation, [1.0, 0.0, 0.0], glMatrix.toRadian (90));
+    roomColliders.push ( new object (new transform (vec3.fromValues (14.5, 10.0, 22.5), vec3.fromValues (21.0, 10.0, 100.0), rotation),
+                            null, null, null, 
+                            new boxCollider (),
+                            new rigidBody (1000.0, "static"))
+                    );
 
     roomColliders.push ( new object (new transform (vec3.fromValues (0.0, -9.5, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
                             null, null, null,
@@ -122,42 +169,114 @@ function buildSceneGraph (SGraph) {
                             null, null);
     room.children.push(hallway);
 */
-    var hallwayLength = 60;
+/*
+    var hallwayLength = 60.0;
     var hallwayScale = hallwayLength;
-    var hallwayShift = hallwayScale * 3.884192943572998 + 2.0;
+    var hallwayShift = hallwayScale * 3.7401809692382812;
 
+    var hallway = new object (new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()));
     var hallwayleft = new object ();
     hallwayleft.tag = "hallwayleft";
     hallwayleft.loadFromObj ("hallwayleftOBJ", "hallwayleftMAT", "hallwayleftTEX");
-    hallwayleft.transform = new transform (vec3.fromValues (3.8, 9.6, 21.6 + hallwayShift), vec3.fromValues (1.0, 1.0, hallwayScale), quat.create ());
-    room.children.push (hallwayleft);
+    hallwayleft.transform = new transform (vec3.fromValues (3.8, 9.6, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    hallway.children.push (hallwayleft);
     hallwayleft.addRigidBody (new rigidBody (10.0, "static"));
     hallwayleft.collider.physics = "static";
 
     var hallwayright = new object ();
     hallwayright.tag = "hallwayright";
     hallwayright.loadFromObj ("hallwayrightOBJ", "hallwayrightMAT", "hallwayrightTEX");
-    hallwayright.transform = new transform (vec3.fromValues (-3.8, 9.6, 21.6 + hallwayShift), vec3.fromValues (1.0, 1.0, hallwayScale), quat.create ());
-    room.children.push (hallwayright);
+    hallwayright.transform = new transform (vec3.fromValues (-3.8, 9.6, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    hallway.children.push (hallwayright);
     hallwayright.addRigidBody (new rigidBody (10.0, "static"));
     hallwayright.collider.physics = "static";
 
     var hallwaybot = new object ();
     hallwaybot.tag = "hallwaybot";
     hallwaybot.loadFromObj ("hallwaybotOBJ", "hallwaybotMAT", "hallwaybotTEX");
-    hallwaybot.transform = new transform (vec3.fromValues (0.0, 5.9, 21.6 + hallwayShift), vec3.fromValues (1.0, 1.0, hallwayScale), quat.create ());
-    room.children.push (hallwaybot);
+    hallwaybot.transform = new transform (vec3.fromValues (0.0, 5.9, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    hallway.children.push (hallwaybot);
     hallwaybot.addRigidBody (new rigidBody (10.0, "static"));
     hallwaybot.collider.physics = "static";
 
     var hallwaytop = new object ();
     hallwaytop.tag = "hallwaytop";
     hallwaytop.loadFromObj ("hallwaytopOBJ", "hallwaytopMAT", "hallwaytopTEX");
-    hallwaytop.transform = new transform (vec3.fromValues (0.0, 13.2, 21.6 + hallwayShift), vec3.fromValues (1.0, 1.0, hallwayScale), quat.create ());
-    room.children.push (hallwaytop);
+    hallwaytop.transform = new transform (vec3.fromValues (0.0, 13.2, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    hallway.children.push (hallwaytop);
     hallwaytop.addRigidBody (new rigidBody (10.0, "static"));
     hallwaytop.collider.physics = "static";
 
+    var hallwayT = new object ();
+    hallwayT.tag = "hallwayT";
+    var hallwayX = new object ();
+    hallwayX.tag = "hallwayX";
+
+    var hall1 = hallway.clone ();
+    var hall2 = hallway.clone ();
+    var hall3 = hallway.clone ();
+    var hall4 = hallway.clone ();
+
+    var floorT = hallwaybot.clone ();
+    var roofT = hallwaytop.clone ();
+
+    var backT = hallwayleft.clone ();
+
+    var rot1 = quat.create ();
+    var rot2 = quat.create ();
+    var rot3 = quat.create ();
+    var rot4 = quat.create ();
+    var rotF = quat.create ();
+    var rotT = quat.create ();
+    var rotB = quat.create ();
+
+    quat.setAxisAngle (rot2, [0, 1, 0], glMatrix.toRadian (90.0));
+    quat.setAxisAngle (rot3, [0, 1, 0], glMatrix.toRadian (-90.0));
+    quat.setAxisAngle (rotB, [0, 1, 0], glMatrix.toRadian (-90.0));
+
+    hall1.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), rot1);
+    hall2.transform = new transform (vec3.fromValues (2 * -3.7401809692382812, 0.0, 2 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), rot2);
+    hall3.transform = new transform (vec3.fromValues (2 * 3.7401809692382812, 0.0,  2 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), rot3);
+    hall4.transform = new transform (vec3.fromValues (0.0, 0.0, 4 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), rot4);
+    
+    floorT.transform = new transform (vec3.fromValues (0, 5.9,  2 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), rotF);
+    roofT.transform = new transform (vec3.fromValues (0, 13.2,  2 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), rotT);
+    
+    backT.transform = new transform (vec3.fromValues (0.0, 9.6,  3 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), rotB);
+
+    hallwayT.children.push (hall1);
+    hallwayT.children.push (hall2);
+    hallwayT.children.push (hall3);
+    hallwayT.children.push (floorT);
+    hallwayT.children.push (roofT);
+    hallwayT.children.push (backT);
+
+    hallwayX.children.push (hall1);
+    hallwayX.children.push (hall2);
+    hallwayX.children.push (hall3);
+    hallwayX.children.push (hall4);
+    hallwayX.children.push (floorT);
+    hallwayX.children.push (roofT);
+    
+    var longHallOffset = 17.9 + 3.7401809692382812;
+    var longHall = new object ();
+    longHall.tag = "longHall";
+    for (var i = 0; i < 40; i++) {
+        var currHall = hallway.clone ();
+        currHall.tag = "longHall";
+        currHall.transform = new transform (vec3.fromValues (0.0, 0.0, i * 2 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+        longHall.children.push (currHall);
+    }
+
+    longHall.transform = new transform (vec3.fromValues (0.0, 0.0, longHallOffset), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    room.children.push (longHall);
+
+    var hallEndOffset = 0.0;
+    var hallwayEnd = hallwayT.clone ();
+    hallwayEndtag = "hallwayEnd";
+    hallwayEnd.transform = new transform (vec3.fromValues (0.0, 0.0, 2 * 40 + longHallOffset), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    room.children.push (hallwayEnd);
+*/
     for (var i=0; i<roomColliders.length; i++) room.children.push (roomColliders[i]);
 
     leavetrigger1 = new object (new transform (vec3.fromValues (0.0, 0.0, -3.5), vec3.fromValues (100.0, 100.0, 0.5), quat.create ()),
@@ -196,7 +315,7 @@ function buildSceneGraph (SGraph) {
     roof.tag = "roof";
 	roof.loadFromObj ("roofOBJ", "roofMAT", "roofTEX");
 	roof.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
-	room.children.push(roof);
+    room.children.push(roof);
 
 	var speaker = new object ();
     speaker.tag = "speaker";
@@ -242,6 +361,10 @@ function buildSceneGraph (SGraph) {
     chair.addRigidBody (new rigidBody (10.0, "static"));
     chair.children[0].addOnMouseClickTrigger (function (object) {
         for (var i = 0; i < object.animations.length; i++) {
+            var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
+            if (dist > 100.0)
+                return;
+
             if (object.animations[i].tag == "chair") {
                 object.animations[i].open = !object.animations[i].open;
             }
@@ -305,6 +428,10 @@ function buildSceneGraph (SGraph) {
     leftdoor.collider.physics = "static";
     leftdoor.addOnMouseClickTrigger (function (object) {
         for (var i = 0; i < object.animations.length; i++) {
+            var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
+            if (dist > 100.0)
+                return;
+
             if (object.animations[i].tag == "leftdoor") {
                 if (object.animations[i].open) {
                     object.animations[i].open = false;
@@ -329,6 +456,10 @@ function buildSceneGraph (SGraph) {
     rightdoor.collider.physics = "static";
     rightdoor.addOnMouseClickTrigger (function (object) {
         for (var i = 0; i < object.animations.length; i++) {
+            var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
+            if (dist > 100.0)
+                return;
+
             if (object.animations[i].tag == "rightdoor") {
                 if (object.animations[i].open) {
                     object.animations[i].open = false;
@@ -349,7 +480,7 @@ function buildSceneGraph (SGraph) {
     leftdoor2.transform = new transform (vec3.fromValues (3.89, 5.94, 17.67), vec3.fromValues (0.77, 0.77, 1.0), quat.clone (doorRotation)); 
     leftdoor2.animations[0].closedRotation = quat.clone (doorRotation);
     var doorRotation2 = quat.create ();
-    quat.setAxisAngle (doorRotation2, [0, 1, 0], glMatrix.toRadian (80.0));
+    quat.setAxisAngle (doorRotation2, [0, 1, 0], glMatrix.toRadian (75.0));
     quat.mul (doorRotation2, doorRotation, doorRotation2);
     leftdoor2.animations[0].openRotation = quat.clone (doorRotation2); 
     room.children.push (leftdoor2);
@@ -361,7 +492,7 @@ function buildSceneGraph (SGraph) {
     rightdoor2.transform = new transform (vec3.fromValues (-3.85, 5.94, 17.63), vec3.fromValues (0.77, 0.77, 1.0), quat.clone (doorRotation)); 
     rightdoor2.animations[0].closedRotation = quat.clone (doorRotation);
     var doorRotation2 = quat.create ();
-    quat.setAxisAngle (doorRotation2, [0, 1, 0], glMatrix.toRadian (-80.0));
+    quat.setAxisAngle (doorRotation2, [0, 1, 0], glMatrix.toRadian (-75.0));
     quat.mul (doorRotation2, doorRotation, doorRotation2);
     rightdoor2.animations[0].openRotation = quat.clone (doorRotation2); 
     room.children.push (rightdoor2);
@@ -383,8 +514,6 @@ function buildSceneGraph (SGraph) {
     stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
 
     SGraph.push (room);
-
-    changeGravitationalCenter (vec3.fromValues (0.0, 1.0, 0.0));
 }
 
 var leavetrigger1, leavetrigger2, leavetrigger3;
@@ -556,8 +685,7 @@ function buildStateMachine () {
         foundbugtrigger.collider.collisionFunction = null;
         currentScene.playerController.player.transform.position = vec3.fromValues(-7.317382554523647, -2.9981283240562004, 13.815474266186357);
         currentScene.playerController.player.camera.rotation = vec4.fromValues(-0.01889348030090332, 0.6919060349464417, -0.018118197098374367, -0.7215129137039185);
-        currentScene = physicsDemoScene;
-        /*
+        
         setTimeout(function() {
             exitFoundBugButton.active = true;
             stayFoundBugButton.active = true;
@@ -574,7 +702,7 @@ function buildStateMachine () {
                 currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
                 currentScene.playerController.player.camera.rotation = vec4.fromValues(0,1,0,0);
             }
-        }, 3600000); */
+        }, 3600000); 
     }
     exitFoundBugButton.children[0].addOnMouseClickTrigger(function(object) {
         exitFoundBugButton.active = false;

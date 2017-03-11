@@ -570,12 +570,12 @@ class sceneGraph {
             gl.uniform1i (gl.getUniformLocation (program, "shadowMap[" + i + "]"), 1 + i); 
         }
 
-        gl.enable (gl.BLEND);
-        gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        //gl.enable (gl.BLEND);
+        //gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         this.drawTree (DRAW_TYPE_DEFAULT);
 
-        gl.disable(gl.BLEND);
+        //gl.disable(gl.BLEND);
         
         for (var i = 0; i < this.lightsManager.lightSources.length; i++) {
             gl.activeTexture (gl.TEXTURE1 + i);
