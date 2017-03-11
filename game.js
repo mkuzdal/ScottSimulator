@@ -2,19 +2,20 @@ function buildSceneGraph (SGraph) {
 
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, -45.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                                                vec3.fromValues (0.0, -4.0, 10.0),
-                                               vec4.fromValues (0.4, 0.4, 0.4, 1.0),
-                                               vec4.fromValues (0.8, 0.8, 0.8, 1.0),
-                                               vec4.fromValues (0.4, 0.4, 0.4, 1.0)));
+                                               vec4.fromValues (0.1, 0.1, 0.1, 1.0),
+                                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
+                                               vec4.fromValues (0.2, 0.2, 0.2, 1.0)));
 
     SGraph.lightsManager.lightSources[0].tag = "front";
-/*
-    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 10.0, 10.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
-                                               vec3.fromValues (0.0, -4.0, -15.0),
+
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 12.0, 172.34034729003906), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                                               vec3.fromValues (0.0, 0.0, 172.34034729003906),
                                                vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                                                vec4.fromValues (0.4, 0.4, 0.4, 1.0),
                                                vec4.fromValues (0.2, 0.2, 0.2, 1.0)));
 
-    SGraph.lightsManager.lightSources[1].tag = "back";*/
+    SGraph.lightsManager.lightSources[1].tag = "hallway";
+    SGraph.lightsManager.lightSources[1].shadows = false;
 
     var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
     var player = new object (new transform (vec3.fromValues (0.0, 5.0, -7.9), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.0, 0.3827, 0.0, 0.9239)),
@@ -39,10 +40,6 @@ function buildSceneGraph (SGraph) {
     room.collider = new nullCollider ();
 
     var roomColliders = [];
-
-    generateCubeNormals (cubeVertices);
-    generateCubeVertices (cubeVertices);
-    generateCubeTexCoords (texCoords);
 
     // Wall imbetween chairs and back door
     var rotation = quat.create ();
@@ -169,32 +166,66 @@ function buildSceneGraph (SGraph) {
                             null, null);
     room.children.push(hallway);
 */
-/*
-    var hallwayLength = 60.0;
-    var hallwayScale = hallwayLength;
-    var hallwayShift = hallwayScale * 3.7401809692382812;
+    // Hallway:
+    var hallway = new object ();
+    hallway.tag = "world"
 
-    var hallway = new object (new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()));
     var hallwayleft = new object ();
     hallwayleft.tag = "hallwayleft";
     hallwayleft.loadFromObj ("hallwayleftOBJ", "hallwayleftMAT", "hallwayleftTEX");
-    hallwayleft.transform = new transform (vec3.fromValues (3.8, 9.6, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    hallwayleft.transform = new transform (vec3.fromValues (0.5, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     hallway.children.push (hallwayleft);
     hallwayleft.addRigidBody (new rigidBody (10.0, "static"));
     hallwayleft.collider.physics = "static";
 
+    var hallwayleft2 = hallwayleft.clone ();
+    var rotation2 = quat.create ();
+    quat.setAxisAngle (rotation2, [0, 1, 0], glMatrix.toRadian (90.0));
+    hallwayleft2.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), rotation2);
+    hallway.children.push (hallwayleft2);
+
+    var hallwayleft3 = hallwayleft.clone ();
+    var rotation3 = quat.create ();
+    quat.setAxisAngle (rotation3, [0, 1, 0], glMatrix.toRadian (180.0));
+    hallwayleft3.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), rotation3);
+    hallway.children.push (hallwayleft3);
+
+    var hallwayleft4 = hallwayleft.clone ();
+    var rotation4 = quat.create ();
+    quat.setAxisAngle (rotation4, [0, 1, 0], glMatrix.toRadian (270.0));
+    hallwayleft4.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), rotation4);
+    hallway.children.push (hallwayleft4);
+
     var hallwayright = new object ();
     hallwayright.tag = "hallwayright";
     hallwayright.loadFromObj ("hallwayrightOBJ", "hallwayrightMAT", "hallwayrightTEX");
-    hallwayright.transform = new transform (vec3.fromValues (-3.8, 9.6, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    hallwayright.transform = new transform (vec3.fromValues (-0.5, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     hallway.children.push (hallwayright);
     hallwayright.addRigidBody (new rigidBody (10.0, "static"));
     hallwayright.collider.physics = "static";
 
+    var hallwayright2 = hallwayright.clone ();
+    var rotation2 = quat.create ();
+    quat.setAxisAngle (rotation2, [0, 1, 0], glMatrix.toRadian (90.0));
+    hallwayright2.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), rotation2);
+    hallway.children.push (hallwayright2);
+
+    var hallwayright3 = hallwayright.clone ();
+    var rotation3 = quat.create ();
+    quat.setAxisAngle (rotation3, [0, 1, 0], glMatrix.toRadian (180.0));
+    hallwayright3.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), rotation3);
+    hallway.children.push (hallwayright3);
+
+    var hallwayright4 = hallwayright.clone ();
+    var rotation4 = quat.create ();
+    quat.setAxisAngle (rotation4, [0, 1, 0], glMatrix.toRadian (270.0));
+    hallwayright4.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), rotation4);
+    hallway.children.push (hallwayright4);
+
     var hallwaybot = new object ();
     hallwaybot.tag = "hallwaybot";
     hallwaybot.loadFromObj ("hallwaybotOBJ", "hallwaybotMAT", "hallwaybotTEX");
-    hallwaybot.transform = new transform (vec3.fromValues (0.0, 5.9, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    hallwaybot.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     hallway.children.push (hallwaybot);
     hallwaybot.addRigidBody (new rigidBody (10.0, "static"));
     hallwaybot.collider.physics = "static";
@@ -202,81 +233,42 @@ function buildSceneGraph (SGraph) {
     var hallwaytop = new object ();
     hallwaytop.tag = "hallwaytop";
     hallwaytop.loadFromObj ("hallwaytopOBJ", "hallwaytopMAT", "hallwaytopTEX");
-    hallwaytop.transform = new transform (vec3.fromValues (0.0, 13.2, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    hallwaytop.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     hallway.children.push (hallwaytop);
     hallwaytop.addRigidBody (new rigidBody (10.0, "static"));
     hallwaytop.collider.physics = "static";
 
-    var hallwayT = new object ();
-    hallwayT.tag = "hallwayT";
-    var hallwayX = new object ();
-    hallwayX.tag = "hallwayX";
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
 
-    var hall1 = hallway.clone ();
-    var hall2 = hallway.clone ();
-    var hall3 = hallway.clone ();
-    var hall4 = hallway.clone ();
+    var hallwayCapLeft = new object (new transform (vec3.fromValues (155.0, 0.0, 0.0), vec3.fromValues (5.0, 20.0, 20.0), quat.create ()),
+                                 new material (vec4.fromValues (0.05, 0.05, 0.05, 1.0), vec4.fromValues (0.05, 0.05, 0.05, 1.0), vec4.fromValues (0.05, 0.05, 0.05, 1.0), 40.0),
+                                 new geometry (pointsArray, normalsArray, textureArray),
+                                 new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                                 new boxCollider (),
+                                 new rigidBody (1000.0, "static"));
+    hallwayCapLeft.tag = "hallwaycapL";
+    hallway.children.push (hallwayCapLeft);
+    hallwayCapLeft.collider.physics = "static";
 
-    var floorT = hallwaybot.clone ();
-    var roofT = hallwaytop.clone ();
+    var hallwayCapRight = hallwayCapLeft.clone ();
+    hallwayCapRight.transform = new transform (vec3.fromValues (-155.0, 0.0, 0.0), vec3.fromValues (5.0, 20.0, 20.0), quat.create ());
+    hallwayCapRight.tag = "hallwaycapR";
+    hallway.children.push (hallwayCapRight);
+    hallwayCapRight.collider.physics = "static";
 
-    var backT = hallwayleft.clone ();
+    var hallwayCapEnd = hallwayCapLeft.clone ();
+    hallwayCapEnd.transform = new transform (vec3.fromValues (0.0, 0.0, 155.0), vec3.fromValues (20.0, 20.0, 5.0), quat.create ());
+    hallwayCapEnd.tag = "hallwaycapEnd";
+    hallway.children.push (hallwayCapEnd);
+    hallwayCapEnd.collider.physics = "static";
 
-    var rot1 = quat.create ();
-    var rot2 = quat.create ();
-    var rot3 = quat.create ();
-    var rot4 = quat.create ();
-    var rotF = quat.create ();
-    var rotT = quat.create ();
-    var rotB = quat.create ();
+    room.children.push(hallway);
 
-    quat.setAxisAngle (rot2, [0, 1, 0], glMatrix.toRadian (90.0));
-    quat.setAxisAngle (rot3, [0, 1, 0], glMatrix.toRadian (-90.0));
-    quat.setAxisAngle (rotB, [0, 1, 0], glMatrix.toRadian (-90.0));
+    hallway.transform = new transform (vec3.fromValues (0.0, 9.4, 171.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    room.children.push (hallway);
 
-    hall1.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), rot1);
-    hall2.transform = new transform (vec3.fromValues (2 * -3.7401809692382812, 0.0, 2 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), rot2);
-    hall3.transform = new transform (vec3.fromValues (2 * 3.7401809692382812, 0.0,  2 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), rot3);
-    hall4.transform = new transform (vec3.fromValues (0.0, 0.0, 4 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), rot4);
-    
-    floorT.transform = new transform (vec3.fromValues (0, 5.9,  2 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), rotF);
-    roofT.transform = new transform (vec3.fromValues (0, 13.2,  2 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), rotT);
-    
-    backT.transform = new transform (vec3.fromValues (0.0, 9.6,  3 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), rotB);
-
-    hallwayT.children.push (hall1);
-    hallwayT.children.push (hall2);
-    hallwayT.children.push (hall3);
-    hallwayT.children.push (floorT);
-    hallwayT.children.push (roofT);
-    hallwayT.children.push (backT);
-
-    hallwayX.children.push (hall1);
-    hallwayX.children.push (hall2);
-    hallwayX.children.push (hall3);
-    hallwayX.children.push (hall4);
-    hallwayX.children.push (floorT);
-    hallwayX.children.push (roofT);
-    
-    var longHallOffset = 17.9 + 3.7401809692382812;
-    var longHall = new object ();
-    longHall.tag = "longHall";
-    for (var i = 0; i < 40; i++) {
-        var currHall = hallway.clone ();
-        currHall.tag = "longHall";
-        currHall.transform = new transform (vec3.fromValues (0.0, 0.0, i * 2 * 3.7401809692382812), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
-        longHall.children.push (currHall);
-    }
-
-    longHall.transform = new transform (vec3.fromValues (0.0, 0.0, longHallOffset), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
-    room.children.push (longHall);
-
-    var hallEndOffset = 0.0;
-    var hallwayEnd = hallwayT.clone ();
-    hallwayEndtag = "hallwayEnd";
-    hallwayEnd.transform = new transform (vec3.fromValues (0.0, 0.0, 2 * 40 + longHallOffset), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
-    room.children.push (hallwayEnd);
-*/
     for (var i=0; i<roomColliders.length; i++) room.children.push (roomColliders[i]);
 
     leavetrigger1 = new object (new transform (vec3.fromValues (0.0, 0.0, -3.5), vec3.fromValues (100.0, 100.0, 0.5), quat.create ()),
@@ -480,7 +472,7 @@ function buildSceneGraph (SGraph) {
     leftdoor2.transform = new transform (vec3.fromValues (3.89, 5.94, 17.67), vec3.fromValues (0.77, 0.77, 1.0), quat.clone (doorRotation)); 
     leftdoor2.animations[0].closedRotation = quat.clone (doorRotation);
     var doorRotation2 = quat.create ();
-    quat.setAxisAngle (doorRotation2, [0, 1, 0], glMatrix.toRadian (75.0));
+    quat.setAxisAngle (doorRotation2, [0, 1, 0], glMatrix.toRadian (65.0));
     quat.mul (doorRotation2, doorRotation, doorRotation2);
     leftdoor2.animations[0].openRotation = quat.clone (doorRotation2); 
     room.children.push (leftdoor2);
@@ -492,7 +484,7 @@ function buildSceneGraph (SGraph) {
     rightdoor2.transform = new transform (vec3.fromValues (-3.85, 5.94, 17.63), vec3.fromValues (0.77, 0.77, 1.0), quat.clone (doorRotation)); 
     rightdoor2.animations[0].closedRotation = quat.clone (doorRotation);
     var doorRotation2 = quat.create ();
-    quat.setAxisAngle (doorRotation2, [0, 1, 0], glMatrix.toRadian (-75.0));
+    quat.setAxisAngle (doorRotation2, [0, 1, 0], glMatrix.toRadian (-65.0));
     quat.mul (doorRotation2, doorRotation, doorRotation2);
     rightdoor2.animations[0].openRotation = quat.clone (doorRotation2); 
     room.children.push (rightdoor2);
