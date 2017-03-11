@@ -160,9 +160,8 @@ class animationRotation {
      *  @param { float } omega: the angular frequency of rotation for the object.
      *  @param { vec3 } axis: the axis to rotate around.
      */
-    constructor (_object, _theta, _omega, _axis) {
+    constructor (_object, _omega, _axis) {
         this.object = _object;
-        this.theta = _theta;
         this.omega = _omega;
         this.axis = _axis;
         this.active = true;
@@ -176,15 +175,14 @@ class animationRotation {
         if (!this.active)
             return;
 
-        this.theta += this.omega * dTime;
         var to_rot = quat.create ();
-        quat.setAxisAngle (to_rot, this.axis, this.theta * Math.PI / 180);
-        quat.slerp (this.object.transform.rotation, this.object.transform.rotation, to_rot, 1.0);
+        quat.setAxisAngle (to_rot, this.axis, glMatrix.toRadian (this.omega * dTime));
+        quat.mul (this.object.transform.rotation, this.object.transform.rotation, to_rot);
         quat.normalize (this.object.transform.rotation, this.object.transform.rotation);
     }
 
     clone () {
-        var newAnimation = new animationRotation (this.object, this.theta, this.omega, this.axis);
+        var newAnimation = new animationRotation (this.object, this.omega, this.axis);
         newAnimation.active = this.active;
         return newAnimation;
     }

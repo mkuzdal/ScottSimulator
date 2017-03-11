@@ -251,18 +251,27 @@ function buildSceneGraph (SGraph) {
     hallwayCapLeft.tag = "hallwaycapL";
     hallway.children.push (hallwayCapLeft);
     hallwayCapLeft.collider.physics = "static";
+    hallwayCapLeft.collider.collisionFunction = function (object1, object2) {
+        currentScene = physicsDemoScene;
+    }
 
     var hallwayCapRight = hallwayCapLeft.clone ();
     hallwayCapRight.transform = new transform (vec3.fromValues (-155.0, 0.0, 0.0), vec3.fromValues (5.0, 20.0, 20.0), quat.create ());
     hallwayCapRight.tag = "hallwaycapR";
     hallway.children.push (hallwayCapRight);
     hallwayCapRight.collider.physics = "static";
+    hallwayCapRight.collider.collisionFunction = function (object1, object2) {
+        currentScene = project1Scene;
+    }
 
     var hallwayCapEnd = hallwayCapLeft.clone ();
     hallwayCapEnd.transform = new transform (vec3.fromValues (0.0, 0.0, 155.0), vec3.fromValues (20.0, 20.0, 5.0), quat.create ());
     hallwayCapEnd.tag = "hallwaycapEnd";
     hallway.children.push (hallwayCapEnd);
     hallwayCapEnd.collider.physics = "static";
+    hallwayCapEnd.collider.collisionFunction = function (object1, object2) {
+        currentScene = mainScene;
+    }
 
     room.children.push(hallway);
 
@@ -331,19 +340,19 @@ function buildSceneGraph (SGraph) {
     projector.loadFromObj ("projectorOBJ", "projectorMAT", "projectorTEX");
     var rotation = quat.create ();
     quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (0.0));
-    projector.transform = new transform (vec3.fromValues (0.1, 0.1, 0.1), vec3.fromValues (1.0, 1.0, 010), quat.clone(rotation));
+    projector.transform = new transform (vec3.fromValues (0.0, 7.2, -17.5), vec3.fromValues (0.8, 0.8, 0.8), quat.clone(rotation));
     room.children.push (projector);
 
     var projector2 = projector.clone ();
     var rotation = quat.create ();
-    quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (28.0));
-    projector2.transform = new transform (vec3.fromValues (0.1, 0.1, 0.1), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
+    quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (30.0));
+    projector2.transform = new transform (vec3.fromValues (-13.6, 7.2, -14.9), vec3.fromValues (0.8, 0.8, 0.8), quat.clone(rotation));
     room.children.push (projector2);
 
     var projector3 = projector.clone ();
     var rotation = quat.create ();
-    quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (-28.0));
-    projector3.transform = new transform (vec3.fromValues (0.1, 0.1, 0.1), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
+    quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (-30.0));
+    projector3.transform = new transform (vec3.fromValues (13.6, 7.2, -14.9), vec3.fromValues (0.8, 0.8, 0.8), quat.clone(rotation));
     room.children.push (projector3);
 
 	// desk
@@ -351,7 +360,7 @@ function buildSceneGraph (SGraph) {
     desk.tag = "desk";
 	desk.loadFromObj ("deskOBJ", "deskMAT", "deskTEX");
 	var rotation = quat.create();
-	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90));
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian (-90));
 	desk.transform = new transform (vec3.fromValues (0.0, -6, -9), vec3.fromValues (1.4, 1.4, 1.4), quat.clone(rotation));
 	room.children.push (desk);
     desk.addRigidBody (new rigidBody (50.0, "static"));
@@ -376,7 +385,7 @@ function buildSceneGraph (SGraph) {
     chair.children[0].addOnMouseClickTrigger (function (object) {
         for (var i = 0; i < object.animations.length; i++) {
             var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
-            if (dist > 100.0)
+            if (dist > 225.0)
                 return;
 
             if (object.animations[i].tag == "chair") {
@@ -443,7 +452,7 @@ function buildSceneGraph (SGraph) {
     leftdoor.addOnMouseClickTrigger (function (object) {
         for (var i = 0; i < object.animations.length; i++) {
             var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
-            if (dist > 100.0)
+            if (dist > 225.0)
                 return;
 
             if (object.animations[i].tag == "leftdoor") {
@@ -471,7 +480,7 @@ function buildSceneGraph (SGraph) {
     rightdoor.addOnMouseClickTrigger (function (object) {
         for (var i = 0; i < object.animations.length; i++) {
             var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
-            if (dist > 100.0)
+            if (dist > 225.0)
                 return;
 
             if (object.animations[i].tag == "rightdoor") {
@@ -533,7 +542,6 @@ function buildSceneGraph (SGraph) {
 var leavetrigger1, leavetrigger2, leavetrigger3;
 var returntrigger;
 var rightButtonMount, leftButtonMount, physicsButton;
-
 
 var foundbugtrigger, exitedFindingBug = false;
 var exitFoundBugButton, stayFoundBugButton;

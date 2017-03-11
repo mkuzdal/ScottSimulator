@@ -17,6 +17,7 @@ var colorFramebuffer;
 var currentScene;
 var mainScene;
 var physicsDemoScene;
+var project1Scene;
 
 var OFFSCREEN_WIDTH = 2048;
 var OFFSCREEN_HEIGHT = 2048;
@@ -111,6 +112,7 @@ window.onload = function init () {
 
 	mainScene = new sceneGraph (buildSceneGraph);
     physicsDemoScene = new sceneGraph (buildPhysicsScene);
+    project1Scene = new sceneGraph (buildProject1Scene);
     currentScene = mainScene;
 
     crosshair = new Crosshair ([
@@ -122,6 +124,7 @@ window.onload = function init () {
 
     mainScene.build ();
     physicsDemoScene.build ();
+    project1Scene.build ();
 
 	buildStateMachine ();
 

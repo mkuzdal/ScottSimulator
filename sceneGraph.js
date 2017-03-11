@@ -591,12 +591,13 @@ class sceneGraph {
         this.playerController.player.camera.updateRotation (dTime);
         gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), this.playerController.player.camera.position);
 
-        if (this.playerController.movingforward) this.playerController.moveForward (dTime * 24);
-        if (this.playerController.movingbackward) this.playerController.moveBackward (dTime * 24);
-        if (this.playerController.movingleft) this.playerController.moveLeft (dTime * 24);
-        if (this.playerController.movingright) this.playerController.moveRight (dTime * 24);
-        if (this.playerController.movingup) this.playerController.jump ();
-        if (this.playerController.movingdown) this.playerController.moveDown (dTime * 24);
+        var rate = 12;
+        if (this.playerController.movingforward) this.playerController.moveForward (dTime * rate);
+        if (this.playerController.movingbackward) this.playerController.moveBackward (dTime * rate);
+        if (this.playerController.movingleft) this.playerController.moveLeft (dTime * rate);
+        if (this.playerController.movingright) this.playerController.moveRight (dTime * rate);
+        if (this.playerController.movingup) this.playerController.jump (dTime * rate);
+        if (this.playerController.movingdown) this.playerController.moveDown (dTime * rate);
     }
 
     build () {
