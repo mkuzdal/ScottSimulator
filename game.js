@@ -537,6 +537,8 @@ function buildStateMachine () {
     StateManager.addState("intro1");
     StateManager.addState("intro2");
     StateManager.addState("intro3");
+    StateManager.addState("intro4");
+    StateManager.addState("intro5");
     StateManager.addState("leaving1");
     StateManager.addState("leaving2");
     StateManager.addState("leaving3");
@@ -549,9 +551,11 @@ function buildStateMachine () {
     StateManager.addState("saved");
 
 
-    var clickedStart = new Event("clickStart", new Activity(null, function(){}, function(){console.log('Scott looked down.')}));
-    var introWait1 = new Event("introWait1", new Activity(null, function(){}, function(){console.log('What are you waiting for? Nothing is going to happen if you just sit around.')}));
-    var introWait2 = new Event("introWait2", new Activity(null, function(){}, function(){console.log('I am serious. You are just wasting your time at this point.')}));
+    var clickedStart = new Event("clickStart", new Activity('A_intro1', null, null));
+    var introWait1 = new Event("introWait1", new Activity('A_intro2', null, null));
+    var introWait2 = new Event("introWait2", new Activity('A_intro3', null, null));
+    var introWait3 = new Event("introWait3", new Activity('A_intro4', null, function() {alert('YOU\'RE MUTED. TURN UP YOUR VOLUME!')}));
+    var introWait4 = new Event("introWait4", new Activity('A_intro5', null, null));
     var leaving1 = new Event("leavetrigger1", new Activity(null, 
         function() {
             if (previousState) console.log('Something is wrong. We should never enter a different state while previous state is still set.');
@@ -573,8 +577,9 @@ function buildStateMachine () {
         }
     ));
 
-    var lookedDown = new Event("lookDown", new Activity(null, function(){}, function(){console.log('Scott clicks the left button.')}));
-    var clickedRight1 = new Event("clickedRight", new Activity(null, 
+    var lookedDown = new Event("lookDown", new Activity('A_lookdown', function(){}, function(){console.log('Scott clicks the left button.')}));
+    
+    var clickedRight1 = new Event("clickedRight", new Activity('A_rightbutton1', 
         function() {
             rightButtonMount.transform.position = vec3.fromValues(0.0,0.75,-17.5); 
             rightButtonMount.transform.rotation = vec4.fromValues(0.7071, 0.0, 0.0, 0.7071);
@@ -583,7 +588,7 @@ function buildStateMachine () {
             console.log('You might not have heard me. I said the left button')
         }
     ));
-    var clickedRight2 = new Event("clickedRight", new Activity(null, 
+    var clickedRight2 = new Event("clickedRight", new Activity('A_rightbutton2', 
         function() {
             //currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 10, -15.8);
             //currentScene.playerController.player.transform.rotation = vec3.fromValues(-0.07094697654247284, -0.9180688858032227, -0.19179458916187286, 0.3396040201187134);
@@ -594,7 +599,7 @@ function buildStateMachine () {
             console.log('LEFT. As in your left');
         }
     ));
-    var clickedRight3 = new Event("clickedRight", new Activity(null, 
+    var clickedRight3 = new Event("clickedRight", new Activity('A_rightbutton3', 
         function() {
             rightButtonMount.children[0].texture = new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]);
         }, 
@@ -602,13 +607,13 @@ function buildStateMachine () {
             console.log('You have done it now Scott...');
         }
     ));
-    var clickedRight4 = new Event("clickedRight", new Activity(null, 
+    var clickedRight4 = new Event("clickedRight", new Activity('A_rightbutton4', 
         function() {
             rightButtonMount.active = false;
         }, 
         function() {console.log('Seriously? Again???')}
     ));
-    var clickedLeft = new Event("clickedLeft", new Activity(null, 
+    var clickedLeft = new Event("clickedLeft", new Activity('A_leftbutton', 
         function() {
             rightButtonMount.active = false;
             leftButtonMount.active = false;
@@ -620,7 +625,7 @@ function buildStateMachine () {
             console.log('Good job');
         }
     ));
-    var changeGravity = new Event("changeGravity", new Activity(null, 
+    var changeGravity = new Event("changeGravity", new Activity('A_physics', 
         function() {
             changeGravitationalCenter (vec3.fromValues (0.0, 1.0, 0.0));
         }, 
@@ -628,7 +633,7 @@ function buildStateMachine () {
             console.log('Change gravity');
         }
     ));
-    var clickMe = new Event("clickMe", new Activity(null, 
+    var clickMe = new Event("clickMe", new Activity('A_spawnchair', 
         function() {
             // do nothing when clicked correctly.
         }, 
@@ -655,9 +660,13 @@ function buildStateMachine () {
     StateManager.getState("root").addChild(clickedStart, StateManager.getState("intro1"));
     StateManager.getState("intro1").addChild(introWait1, StateManager.getState("intro2"));
     StateManager.getState("intro2").addChild(introWait2, StateManager.getState("intro3"));
+    StateManager.getState("intro3").addChild(introWait3, StateManager.getState("intro4"));
+    StateManager.getState("intro4").addChild(introWait4, StateManager.getState("intro5"));
     StateManager.getState("intro1").addChild(lookedDown, StateManager.getState("twobuttons"));
     StateManager.getState("intro2").addChild(lookedDown, StateManager.getState("twobuttons"));
     StateManager.getState("intro3").addChild(lookedDown, StateManager.getState("twobuttons"));
+    StateManager.getState("intro4").addChild(lookedDown, StateManager.getState("twobuttons"));
+    StateManager.getState("intro5").addChild(lookedDown, StateManager.getState("twobuttons"));
     StateManager.getState("twobuttons").addChild(clickedRight1, StateManager.getState("clickedRight1"));
     StateManager.getState("clickedRight1").addChild(clickedRight2, StateManager.getState("clickedRight2"));
     StateManager.getState("clickedRight2").addChild(clickedRight3, StateManager.getState("clickedRight3"));
@@ -711,10 +720,16 @@ function buildStateMachine () {
 
     setTimeout(function() {
         StateManager.apply("introWait1");
-    }, 10000);
+    }, 20000);
     setTimeout(function() {
         StateManager.apply("introWait2");
     }, 30000);
+    setTimeout(function() {
+        StateManager.apply("introWait3");
+    }, 45000);
+    setTimeout(function() {
+        StateManager.apply("introWait4");
+    }, 60000);
 
     leavetrigger1.collider.collisionFunction = function (object1, object2) {
         StateManager.apply("leavetrigger1");
@@ -729,23 +744,33 @@ function buildStateMachine () {
         StateManager.apply("returntrigger");
     }
     foundbugtrigger.collider.collisionFunction = function (object1, object2) {
+        var A_bug1 = document.getElementById('A_bug1');
+        if(A_bug1.currentTime == 0) {
+            A_bug1.play();
+            A_bug1.addEventListener("ended", function() {
+                setTimeout(function() {
+                    currentScene.playerController.player.transform.position = vec3.fromValues(-7.317382554523647, -2.9981283240562004, 13.815474266186357);
+                    currentScene.playerController.player.camera.rotation = vec4.fromValues(-0.01889348030090332, 0.6919060349464417, -0.018118197098374367, -0.7215129137039185);
+                    var A_bug2 = document.getElementById('A_bug2');
+                    A_bug2.play();
+                    setTimeout(function() {
+                        exitFoundBugButton.active = true;
+                        stayFoundBugButton.active = true;
+                    }, 2000);
+                }, 5000);
+            });
+        }
+
         // play the found bug audio. if the audio is already playing (if currentTime != 0) then don't play it again.
         console.log('Oh. Look at you. You found a bug! Congratulations. Wanna get out?... Umm. Good luck with that.');
         foundbugtrigger.collider.collisionFunction = null;
-        currentScene.playerController.player.transform.position = vec3.fromValues(-7.317382554523647, -2.9981283240562004, 13.815474266186357);
-        currentScene.playerController.player.camera.rotation = vec4.fromValues(-0.01889348030090332, 0.6919060349464417, -0.018118197098374367, -0.7215129137039185);
-        
-        setTimeout(function() {
-            exitFoundBugButton.active = true;
-            stayFoundBugButton.active = true;
-        }, 3000);
         if(!previousState) {
             previousState = StateManager.getCurrentState();
         }
 
         setTimeout(function() {
             if(!exitedFindingBug) {
-                console.log('Wow. Was not expecting you to stay this long... Guess I will just put you back then.');
+                document.getElementById('A_bugstay2').play();
                 StateManager.setState(previousState);
                 previousState = null;
                 currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
@@ -763,6 +788,12 @@ function buildStateMachine () {
         currentScene.playerController.player.camera.rotation = vec4.fromValues(0,1,0,0);
     });
     stayFoundBugButton.children[0].addOnMouseClickTrigger(function(object) {
+        var A_bug2 = document.getElementById('A_bug2');
+        if(!A_bug2.paused) {
+            A_bug2.addEventListener('ended', function() {document.getElementById('A_bugstay1').play();}); 
+        } else {
+            document.getElementById('A_bugstay1').play();
+        }
         exitFoundBugButton.active = false;
         stayFoundBugButton.active = false;        
     });
@@ -778,8 +809,4 @@ function gameChecks() {
         finishedLookDown = true;
         StateManager.apply("lookDown");
     }
-}
-
-function applyChangedPhysics() {
-    // changed the gravity of select objects on the scene graph
 }
