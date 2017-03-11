@@ -1,3 +1,107 @@
+function buildMenuSceneGraph(SGraph) {
+
+    SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 35.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
+                              vec3.fromValues (0.0, 0.0, 0.0),
+                              vec4.fromValues (0.4, 0.4, 0.4, 1.0),
+                              vec4.fromValues (0.6, 0.6, 0.6, 1.0),
+                              vec4.fromValues (0.7, 0.7, 0.7, 1.0),
+                              0.0045));
+
+    SGraph.lightsManager.lightSources[0].tag = "light";
+
+    var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
+    var player = new object (new transform (vec3.fromValues (0.0, 5.0, -15.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+                         null, 
+                         null, 
+                         null,
+                         new boxCollider (vec3.fromValues (-0.25, -5, -0.25), vec3.fromValues (0.25, 0.0, 0.25), "dynamic"),
+                         new rigidBody (100.0, "dynamic"));
+
+    player.camera = cam;
+    player.rigidBody.angularRigidBody = false;
+    player.tag = "player";
+
+    SGraph.playerController = new PlayerController (player);
+    SGraph.push (player);
+
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
+
+    var prismGeo = new geometry (pointsArray, normalsArray, textureArray);
+
+    // floor
+    var floor = new object (new transform (vec3.fromValues (0.0, -4.0, 0.0), vec3.fromValues (1000.0, 3.0, 1000.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), 40.0),
+                            prismGeo,
+                            new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
+                            new rigidBody (1000.0, "static"));
+    floor.tag = "world";
+    SGraph.push (floor);
+
+    var roof = new object  (new transform (vec3.fromValues (0.0, 40.0, 0.0), vec3.fromValues (1000.0, 3.0, 1000.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), 40.0),
+                            prismGeo,
+                            new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
+                            new rigidBody (1000.0, "static"));
+    roof.tag = "world";
+    SGraph.push (roof);
+
+    var left = new object  (new transform (vec3.fromValues (-30.0, 0.0, 0.0), vec3.fromValues (3.0, 1000.0, 1000.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), 40.0),
+                            prismGeo,
+                            new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
+                            new rigidBody (1000.0, "static"));
+    left.tag = "world";
+    SGraph.push (left);
+
+    var right = new object (new transform (vec3.fromValues (30.0, 0.0, 0.0), vec3.fromValues (3.0, 1000.0, 1000.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), 40.0),
+                            prismGeo,
+                            new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
+                            new rigidBody (1000.0, "static"));
+    right.tag = "world";
+    SGraph.push (right);
+
+    var front = new object (new transform (vec3.fromValues (0.0, 0.0, 30.0), vec3.fromValues (1000.0, 1000.0, 3.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), 40.0),
+                            prismGeo,
+                            new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
+                            new rigidBody (1000.0, "static"));
+    front.tag = "world";
+    SGraph.push (front);
+
+    var back = new object  (new transform (vec3.fromValues (0.0, 0.0, -30.0), vec3.fromValues (1000.0, 1000.0, 3.0), quat.create ()),
+                            new material (vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), 40.0),
+                            prismGeo,
+                            new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
+                            new rigidBody (1000.0, "static"));
+    back.tag = "world";
+    SGraph.push (back);
+
+    var startButton = new object ();
+    startButton.tag = "startButton";
+    startButton.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
+    startButton.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    var startButtonMount = new object ();
+    startButtonMount.tag = "startButtonMount";
+    startButtonMount.loadFromObj ("buttonMountOBJ", "buttonMountMAT", "buttonMountTEX");
+    startButtonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    startButtonMount.children.push (startButton);
+
+    startButtonMount.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("clickStart");
+    });
+
+    SGraph.push(startButtonMount);
+}
+
 function buildSceneGraph (SGraph) {
 
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, -45.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
@@ -551,7 +655,7 @@ function buildStateMachine () {
     StateManager.addState("saved");
 
 
-    var clickedStart = new Event("clickStart", new Activity('A_intro1', null, null));
+    var clickedStart = new Event("clickStart", new Activity('A_intro1', function() {currentScene = mainScene; }, null));
     var introWait1 = new Event("introWait1", new Activity('A_intro2', null, null));
     var introWait2 = new Event("introWait2", new Activity('A_intro3', null, null));
     var introWait3 = new Event("introWait3", new Activity('A_intro4', null, function() {alert('YOU\'RE MUTED. TURN UP YOUR VOLUME!')}));
@@ -798,8 +902,6 @@ function buildStateMachine () {
         stayFoundBugButton.active = false;        
     });
 
-
-    StateManager.apply("clickStart");
 }
 
 
