@@ -1,4 +1,4 @@
-# Blender MTL File: 'hallway.blend'
+# Blender MTL File: 'fullhallway.blend'
 # Material Count: 1
 
 newmtl hallway_left_material
