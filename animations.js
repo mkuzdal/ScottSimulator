@@ -295,7 +295,7 @@ class animationLeftdoor {
         this.closedRotation = quat.clone (this.object.transform.rotation);
         
         this.openRotation = quat.create ();
-        quat.setAxisAngle (this.openRotation, [0, 1, 0], glMatrix.toRadian (85));
+        quat.setAxisAngle (this.openRotation, [0, 1, 0], glMatrix.toRadian (75));
         quat.mul (this.openRotation, this.closedRotation, this.openRotation);
 
         this.currentRotation = quat.clone (this.closedRotation);
@@ -336,7 +336,7 @@ class animationRightdoor {
         this.closedRotation = quat.clone (this.object.transform.rotation);
         
         this.openRotation = quat.create ();
-        quat.setAxisAngle (this.openRotation, [0, 1, 0], glMatrix.toRadian (-85));
+        quat.setAxisAngle (this.openRotation, [0, 1, 0], glMatrix.toRadian (-75));
         quat.mul (this.openRotation, this.closedRotation, this.openRotation);
 
         this.currentRotation = quat.clone (this.closedRotation);

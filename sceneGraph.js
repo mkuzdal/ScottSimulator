@@ -570,12 +570,12 @@ class sceneGraph {
             gl.uniform1i (gl.getUniformLocation (program, "shadowMap[" + i + "]"), 1 + i); 
         }
 
-        gl.enable (gl.BLEND);
-        gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        //gl.enable (gl.BLEND);
+        //gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         this.drawTree (DRAW_TYPE_DEFAULT);
 
-        gl.disable(gl.BLEND);
+        //gl.disable(gl.BLEND);
         
         for (var i = 0; i < this.lightsManager.lightSources.length; i++) {
             gl.activeTexture (gl.TEXTURE1 + i);
@@ -591,12 +591,12 @@ class sceneGraph {
         this.playerController.player.camera.updateRotation (dTime);
         gl.uniform3fv (gl.getUniformLocation (program, "fCameraPosition"), this.playerController.player.camera.position);
 
-        if (this.playerController.movingforward) this.playerController.moveForward (dTime * 12);
-        if (this.playerController.movingbackward) this.playerController.moveBackward (dTime * 12);
-        if (this.playerController.movingleft) this.playerController.moveLeft (dTime * 12);
-        if (this.playerController.movingright) this.playerController.moveRight (dTime * 12);
+        if (this.playerController.movingforward) this.playerController.moveForward (dTime * 24);
+        if (this.playerController.movingbackward) this.playerController.moveBackward (dTime * 24);
+        if (this.playerController.movingleft) this.playerController.moveLeft (dTime * 24);
+        if (this.playerController.movingright) this.playerController.moveRight (dTime * 24);
         if (this.playerController.movingup) this.playerController.jump ();
-        if (this.playerController.movingdown) this.playerController.moveDown (dTime * 12);
+        if (this.playerController.movingdown) this.playerController.moveDown (dTime * 24);
     }
 
     build () {

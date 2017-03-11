@@ -18,8 +18,8 @@ var currentScene;
 var mainScene;
 var physicsDemoScene;
 
-var OFFSCREEN_WIDTH = 1024;
-var OFFSCREEN_HEIGHT = 1024;
+var OFFSCREEN_WIDTH = 2048;
+var OFFSCREEN_HEIGHT = 2048;
 
 // storage for global vertices and normals
 var pointsArray = [];
