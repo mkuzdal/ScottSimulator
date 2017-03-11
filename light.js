@@ -113,7 +113,7 @@ class light {
      *  @param { vec4 } diffuse: the diffuse value for the light.
      *  @param { vec4 } specular: the specular value for the light.
      */
-    constructor (_transform, _at, _ambient, _diffuse, _specular) {
+    constructor (_transform, _at, _ambient, _diffuse, _specular, _bias) {
         this.transform = _transform || new transform ();
 
         this.at = _at || vec3.fromValues (0.0, 0.0, 0.0);
@@ -128,6 +128,8 @@ class light {
         this.tag = "light"
         this.active = true;
         this.shadows = true;
+
+        this.bias = _bias || 0.0005;
 
         this.projectionMatrix = mat4.create ();
         this.view = mat4.create ();
@@ -154,6 +156,7 @@ class light {
 
         gl.uniformMatrix4fv (gl.getUniformLocation (program, "lightProjectionMatrix[" + this.lightID + "]"), false, this.projectionMatrix);
         gl.uniformMatrix4fv (gl.getUniformLocation (program, "lightMatrix[" + this.lightID + "]"), false, this.view);
+        gl.uniform1f  (gl.getUniformLocation (program, "flightBias[" + this.lightID + "]"), this.bias);
     }
 
     /** setPerspective: sets the perspective projection matrix.

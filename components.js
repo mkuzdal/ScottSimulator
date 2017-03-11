@@ -15,6 +15,8 @@ class mouseTrigger {
 
 class clickHandler {
     constructor (_scene) {
+        this.leftreleased = false;
+        this.rightreleased = false;
         this.leftclicked = false;
         this.rightclicked = false;
         this.pixel = new Uint8Array (4);
@@ -71,6 +73,8 @@ class clickHandler {
                 }
             }
         } 
+        this.leftreleased = false;
+        this.rightreleased = false;  
         this.leftclicked = false;    
         this.rightclicked = false;
     }
@@ -218,7 +222,7 @@ class sphereCollider {
         this.center = _center;
         this.radius = _radius;
         this.type = "sphere"
-        this.phyiscs = _physics;
+        this.physics = _physics;
 
         this.matrix = mat4.create ();
         this.scaling = 1.0;

@@ -335,7 +335,18 @@ class object {
                     mat3.invert (inv_I_body, I_body);
                     this.rigidBody.inv_Ibody = inv_I_body;
                 } else if (this.collider.type == "sphere") {
+                    var R = this.rigidBody.mass * this.collider.radius * this.collider.radius * (2 / 5);
 
+                    var I_body = mat3.fromValues (R,   0.0, 0.0, 
+                                                  0.0, R,   0.0,   
+                                                  0.0, 0.0, R   );
+
+                    this.rigidBody.Ibody = I_body;
+                    this.rigidBody.CoM = this.collider.center;
+
+                    var inv_I_body = mat3.create ();
+                    mat3.invert (inv_I_body, I_body);
+                    this.rigidBody.inv_Ibody = inv_I_body;
                 }
             }
         }
@@ -344,6 +355,7 @@ class object {
     addAnimation (_animation) {
         this.animations.push (_animation);
         _animation.object = this;
+
         if (this.scene) {
             this.scene.animationsManager.addAnimation (_animation);
         }
@@ -366,7 +378,6 @@ class sceneGraph {
 
         this.root.tag = "root";
         this.tag = "default";
-
 	}
 
 	drawTree (type) {
@@ -559,12 +570,12 @@ class sceneGraph {
             gl.uniform1i (gl.getUniformLocation (program, "shadowMap[" + i + "]"), 1 + i); 
         }
 
-        //gl.enable (gl.BLEND);
-        //gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.enable (gl.BLEND);
+        gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         this.drawTree (DRAW_TYPE_DEFAULT);
 
-        //gl.disable(gl.BLEND);
+        gl.disable(gl.BLEND);
         
         for (var i = 0; i < this.lightsManager.lightSources.length; i++) {
             gl.activeTexture (gl.TEXTURE1 + i);
@@ -619,6 +630,20 @@ class sceneGraph {
         for (var i = 0; i < object.children.length; i++) {
             this.__push_AUX (object.children[i]);
         }
+    }
+
+    resetScene () {
+        this.root = new object ();
+        this.root.children = [];
+        this.lightsManager = new lightHandler (this);
+        this.animationsManager = new animationHandler (this);
+        this.collisionsManager = new sceneCollisionManager (this);
+        this.clickManager = new clickHandler (this);
+
+        this.playerController = null;
+        this.root.tag = "root";
+
+        this.build ();
     }
 }
 
