@@ -395,9 +395,9 @@ class animationScaleObject {
             if (this.scale > 10.0)
                 this.scale = 10.0;
 
-            this.currentHold.material.ambient[0] = 0.3 + this.scale / 20.0;
-            this.currentHold.material.specular[0] = 0.3 + this.scale / 20.0;
-            this.currentHold.material.diffuse[0] = 0.3 +  this.scale / 20.0;
+            this.currentHold.material.ambient[0] = 0.3 + this.scale / 5.0;
+            this.currentHold.material.specular[0] = 0.3 + this.scale / 5.0;
+            this.currentHold.material.diffuse[0] = 0.3 +  this.scale / 5.0;
 
             var storage = mat4.create ();
             mat4.fromQuat (storage, currentScene.playerController.player.camera.rotation);
@@ -464,9 +464,9 @@ class animationLaunchObject {
             if (this.scale > 10.0)
                 this.scale = 10.0;
 
-            this.currentHold.material.ambient[1] = 0.3 + this.scale / 20.0;
-            this.currentHold.material.specular[1] = 0.3 + this.scale / 20.0;
-            this.currentHold.material.diffuse[1] = 0.3 + this.scale / 20.0;
+            this.currentHold.material.ambient[1] = 0.3 + this.scale / 5.0;
+            this.currentHold.material.specular[1] = 0.3 + this.scale / 5.0;
+            this.currentHold.material.diffuse[1] = 0.3 + this.scale / 5.0;
 
             var storage = mat4.create ();
             mat4.fromQuat (storage, currentScene.playerController.player.camera.rotation);

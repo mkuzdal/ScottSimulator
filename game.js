@@ -532,7 +532,21 @@ function buildSceneGraph (SGraph) {
     
     rightButtonMount = buttonMount.clone(); rightButtonMount.transform.position = vec3.fromValues (-5,0,0); rightButtonMount.active = true; room.children.push (rightButtonMount);
     leftButtonMount = buttonMount.clone(); leftButtonMount.transform.position = vec3.fromValues (5,0,0); leftButtonMount.active = true; room.children.push (leftButtonMount);
-    physicsButton = buttonMount.clone(); physicsButton.transform.position = vec3.fromValues(0,0,0); physicsButton.active = false; room.children.push (physicsButton);
+    
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
+    changeGravityCautionBox = new object(new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (3.0, 1.0, 3.0), quat.create ()),
+                                new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
+                                new geometry (pointsArray, normalsArray, textureArray),
+                                new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                                new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
+                                new rigidBody (50.0, "static")); changeGravityCautionBox.active = false;
+    room.children.push(changeGravityCautionBox);
+    changeGravityButton = buttonMount.clone(); changeGravityButton.transform.position = vec3.fromValues(0,0,0); changeGravityButton.active = false; room.children.push (changeGravityButton);
+    clickMeButton = buttonMount.clone(); clickMeButton.transform.position = vec3.fromValues(-5,0,0); clickMeButton.active = false; room.children.push (clickMeButton);
+    dontClickMeButton = buttonMount.clone(); dontClickMeButton.transform.position = vec3.fromValues(5,0,0); dontClickMeButton.active = false; room.children.push (dontClickMeButton);
+    
     exitFoundBugButton = buttonMount.clone(); exitFoundBugButton.transform.position = vec3.fromValues(15,0,10); exitFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); exitFoundBugButton.active = false; room.children.push (exitFoundBugButton);
     stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
 
@@ -541,7 +555,8 @@ function buildSceneGraph (SGraph) {
 
 var leavetrigger1, leavetrigger2, leavetrigger3;
 var returntrigger;
-var rightButtonMount, leftButtonMount, physicsButton;
+var rightButtonMount, leftButtonMount;
+var changeGravityCautionBox, changeGravityButton, clickMeButton, dontClickMeButton, numIncorrectClicks = 0;
 
 var foundbugtrigger, exitedFindingBug = false;
 var exitFoundBugButton, stayFoundBugButton;
@@ -560,7 +575,7 @@ function buildStateMachine () {
     StateManager.addState("clickedRight2");
     StateManager.addState("clickedRight3");
     StateManager.addState("clickedLeft");
-    StateManager.addState("physicsDemo");
+    StateManager.addState("changeGravity");
     StateManager.addState("saved");
 
 
@@ -589,7 +604,7 @@ function buildStateMachine () {
     ));
 
     var lookedDown = new Event("lookDown", new Activity(null, function(){}, function(){console.log('Scott clicks the left button.')}));
-    var clickedRight1 = new Event("clickedRight", new Activity(document.getElementById('AUDIOBRIBED'), 
+    var clickedRight1 = new Event("clickedRight", new Activity(null, 
         function() {
             rightButtonMount.transform.position = vec3.fromValues(0.0,0.75,-17.5); 
             rightButtonMount.transform.rotation = vec4.fromValues(0.7071, 0.0, 0.0, 0.7071);
@@ -598,7 +613,7 @@ function buildStateMachine () {
             console.log('You might not have heard me. I said the left button')
         }
     ));
-    var clickedRight2 = new Event("clickedRight", new Activity(document.getElementById('AUDIOFOUNDOIL'), 
+    var clickedRight2 = new Event("clickedRight", new Activity(null, 
         function() {
             //currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 10, -15.8);
             //currentScene.playerController.player.transform.rotation = vec3.fromValues(-0.07094697654247284, -0.9180688858032227, -0.19179458916187286, 0.3396040201187134);
@@ -609,7 +624,7 @@ function buildStateMachine () {
             console.log('LEFT. As in your left');
         }
     ));
-    var clickedRight3 = new Event("clickedRight", new Activity(document.getElementById('AUDIODIE'), 
+    var clickedRight3 = new Event("clickedRight", new Activity(null, 
         function() {
             rightButtonMount.children[0].texture = new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]);
         }, 
@@ -617,23 +632,54 @@ function buildStateMachine () {
             console.log('You have done it now Scott...');
         }
     ));
-    var clickedRight4 = new Event("clickedRight", new Activity(document.getElementById('AUDIOGIVEUP'), 
+    var clickedRight4 = new Event("clickedRight", new Activity(null, 
         function() {
             rightButtonMount.active = false;
         }, 
         function() {console.log('Seriously? Again???')}
     ));
-    var clickedLeft = new Event("clickedLeft", new Activity(document.getElementById('AUDIOSONAR'), 
+    var clickedLeft = new Event("clickedLeft", new Activity(null, 
         function() {
             rightButtonMount.active = false;
             leftButtonMount.active = false;
-            physicsButton.active = true;
+            clickMeButton.active = true;
+            dontClickMeButton.active = true;
+            changeGravityCautionBox.active = true;
         }, 
         function() {
-            console.log('Good job')
+            console.log('Good job');
         }
     ));
-    var changePhysics = new Event("physics", new Activity(null, function(){}, function(){console.log('Change gravity')}));
+    var changeGravity = new Event("changeGravity", new Activity(null, 
+        function() {
+            changeGravitationalCenter (vec3.fromValues (0.0, 1.0, 0.0));
+        }, 
+        function() {
+            console.log('Change gravity');
+        }
+    ));
+    var clickMe = new Event("clickMe", new Activity(null, 
+        function() {
+            // do nothing when clicked correctly.
+        }, 
+        function() {
+            console.log('Clicked me!');
+        }
+    ));
+
+    var dontClickMe = new Event("dontClickMe", new Activity(null, 
+        function() {
+            // swap position with click me button
+            var temp = vec3.clone(dontClickMeButton.transform.position);
+            dontClickMeButton.transform.position = vec3.clone(clickMeButton.transform.position);
+            clickMeButton.transform.position = temp;
+            numIncorrectClicks++;
+            //add a switch case to play audio depending on how many times you've clicked it (make short because there's a possibility that they get 2 audios overlapping here)
+        }, 
+        function() {
+            console.log('Don\'t clicked me!');
+        }
+    ));
     var savedWorld = new Event("savedWorld", new Activity(null, function(){}, function(){console.log('Saved world!')}));
 
     StateManager.getState("root").addChild(clickedStart, StateManager.getState("intro1"));
@@ -650,8 +696,10 @@ function buildStateMachine () {
     StateManager.getState("clickedRight1").addChild(clickedLeft, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedRight2").addChild(clickedLeft, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedRight3").addChild(clickedLeft, StateManager.getState("clickedLeft"));
-    StateManager.getState("clickedLeft").addChild(changePhysics, StateManager.getState("physicsDemo"));
-    StateManager.getState("physicsDemo").addChild(savedWorld, StateManager.getState("saved"));
+    StateManager.getState("clickedLeft").addChild(changeGravity, StateManager.getState("clickedLeft"));
+    StateManager.getState("clickedLeft").addChild(clickMe, StateManager.getState("clickedLeft"));
+    StateManager.getState("clickedLeft").addChild(dontClickMe, StateManager.getState("clickedLeft"));
+    StateManager.getState("changeGravity").addChild(savedWorld, StateManager.getState("saved"));
     
     // add all the leaving triggers
     StateManager.getState("intro1").addChild(leaving1, StateManager.getState("leaving1"));
@@ -662,7 +710,7 @@ function buildStateMachine () {
     StateManager.getState("clickedRight2").addChild(leaving1, StateManager.getState("leaving1"));
     StateManager.getState("clickedRight3").addChild(leaving1, StateManager.getState("leaving1"));
     StateManager.getState("clickedLeft").addChild(leaving1, StateManager.getState("leaving1"));
-    StateManager.getState("physicsDemo").addChild(leaving1, StateManager.getState("leaving1"));
+    StateManager.getState("changeGravity").addChild(leaving1, StateManager.getState("leaving1"));
     StateManager.getState("saved").addChild(leaving1, StateManager.getState("leaving1"));
     StateManager.getState("leaving1").addChild(leaving2, StateManager.getState("leaving2"));
     StateManager.getState("leaving2").addChild(leaving3, StateManager.getState("leaving3"));
@@ -677,9 +725,18 @@ function buildStateMachine () {
     leftButtonMount.children[0].addOnMouseClickTrigger(function(object) {
         StateManager.apply("clickedLeft");
     }); 
-    physicsButton.children[0].addOnMouseClickTrigger(function(object) {
-        applyChangedPhysics();
-        StateManager.apply("physicsDemo");
+    changeGravityCautionBox.addOnMouseClickTrigger(function(object) {
+        changeGravityCautionBox.active = false;
+        changeGravityButton.active = true;
+    });
+    changeGravityButton.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("changeGravity");
+    }); 
+    clickMeButton.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("clickMe");
+    }); 
+    dontClickMeButton.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("dontClickMe");
     }); 
 
     setTimeout(function() {
@@ -724,7 +781,7 @@ function buildStateMachine () {
                 currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
                 currentScene.playerController.player.camera.rotation = vec4.fromValues(0,1,0,0);
             }
-        }, 3600000); 
+        }, 3600000);
     }
     exitFoundBugButton.children[0].addOnMouseClickTrigger(function(object) {
         exitFoundBugButton.active = false;
