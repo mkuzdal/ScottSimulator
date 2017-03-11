@@ -2,9 +2,9 @@ function buildSceneGraph (SGraph) {
 
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, -45.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                                                vec3.fromValues (0.0, -4.0, 10.0),
-                                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                                                vec4.fromValues (0.4, 0.4, 0.4, 1.0),
-                                               vec4.fromValues (0.2, 0.2, 0.2, 1.0)));
+                                               vec4.fromValues (0.8, 0.8, 0.8, 1.0),
+                                               vec4.fromValues (0.4, 0.4, 0.4, 1.0)));
 
     SGraph.lightsManager.lightSources[0].tag = "front";
 /*
