@@ -309,32 +309,54 @@ function buildSceneGraph (SGraph) {
 	roof.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     room.children.push(roof);
 
+    // speakers
 	var speaker = new object ();
     speaker.tag = "speaker";
 	var rotation = quat.create();
-	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(75));
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian (75));
 	speaker.loadFromObj ("speakerOBJ", "speakerMAT", "speakerTEX");
 	speaker.transform = new transform (vec3.fromValues (15, 11.3, -3), vec3.fromValues (2.0, 2.0, 2.0), quat.clone (rotation));
-	room.children.push(speaker);
+	room.children.push (speaker);
 
 	var speaker2 = speaker.clone();
     speaker2.tag = "speaker";
 	speaker2.transform.position = vec3.fromValues (-15, 11.3, -3);
-	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-75));
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian (-75));
 	speaker2.transform.rotation = quat.clone (rotation);
-	room.children.push(speaker2);
+	room.children.push (speaker2);
+
+    // projector
+    var projector = new object ();
+    projector.tag = "projector";
+    projector.loadFromObj ("projectorOBJ", "projectorMAT", "projectorTEX");
+    var rotation = quat.create ();
+    quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (0.0));
+    projector.transform = new transform (vec3.fromValues (0.1, 0.1, 0.1), vec3.fromValues (1.0, 1.0, 010), quat.clone(rotation));
+    room.children.push (projector);
+
+    var projector2 = projector.clone ();
+    var rotation = quat.create ();
+    quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (28.0));
+    projector2.transform = new transform (vec3.fromValues (0.1, 0.1, 0.1), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
+    room.children.push (projector2);
+
+    var projector3 = projector.clone ();
+    var rotation = quat.create ();
+    quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (-28.0));
+    projector3.transform = new transform (vec3.fromValues (0.1, 0.1, 0.1), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
+    room.children.push (projector3);
 
 	// desk
 	var desk = new object ();
     desk.tag = "desk";
 	desk.loadFromObj ("deskOBJ", "deskMAT", "deskTEX");
 	var rotation = quat.create();
-	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90))
+	quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90));
 	desk.transform = new transform (vec3.fromValues (0.0, -6, -9), vec3.fromValues (1.4, 1.4, 1.4), quat.clone(rotation));
 	room.children.push (desk);
     desk.addRigidBody (new rigidBody (50.0, "static"));
 
-	//make all the chairs!
+	// make all the chairs!
     var chair = new object ();
     chair.tag = "chair";
     chair.loadFromObj ("chairOBJ", "chairMAT", "chairTEX");
