@@ -20,6 +20,7 @@ var mainScene;
 var physicsDemoScene;
 var project1Scene;
 var survivalScene;
+var eggertRoomScene;
 
 var OFFSCREEN_WIDTH = 2048;
 var OFFSCREEN_HEIGHT = 2048;
@@ -116,11 +117,13 @@ window.onload = function init () {
 	mainScene = new sceneGraph (buildSceneGraph);
     physicsDemoScene = new sceneGraph (buildPhysicsScene);
     project1Scene = new sceneGraph (buildProject1Scene);
+    eggertRoomScene = new sceneGraph (buildEggertRoomSceneGraph);
     currentScene = startMenuScene;
 
     startMenuScene.build ();
     physicsDemoScene.build ();
     project1Scene.build ();
+    eggertRoomScene.build ();
 
 	buildStateMachine ();
 
