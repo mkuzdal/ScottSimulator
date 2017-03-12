@@ -408,7 +408,57 @@ function buildSceneGraph (SGraph) {
         currentScene = mainScene;
     }
 
-    room.children.push(hallway);
+    var dangerDoorLeft = new object ();
+    dangerDoorLeft.tag = "dangerDoorLeft";
+    dangerDoorLeft.loadFromObj ("dangerDoorLeftOBJ", "dangerDoorLeftMAT", "dangerDoorLeftTEX");
+    dangerDoorLeft.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    hallway.children.push (dangerDoorLeft);
+    dangerDoorLeft.addRigidBody (new rigidBody (10.0, "static"));
+    dangerDoorLeft.collider.physics = "static";
+    dangerDoorLeft.addOnMouseClickTrigger (function (object) {
+        for (var i = 0; i < object.animations.length; i++) {
+            var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
+            if (dist > 225.0)
+                return;
+
+            if (object.animations[i].tag == "dangerDoorLeft") {
+                if (object.animations[i].open) {
+                    object.animations[i].open = false;
+                    object.collider.physics = "static";
+                } else {
+                    object.animations[i].open = true;
+                    object.collider.physics = "trigger";
+                }
+            }
+        }
+    });
+    dangerDoorLeft.addAnimation (new animationDangerDoorLeft (dangerDoorLeft));
+
+    var dangerDoorRight = new object ();
+    dangerDoorRight.tag = "dangerDoorRight";
+    dangerDoorRight.loadFromObj ("dangerDoorRightOBJ", "dangerDoorRightMAT", "dangerDoorRightTEX");
+    dangerDoorRight.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    hallway.children.push (dangerDoorRight);
+    dangerDoorRight.addRigidBody (new rigidBody (10.0, "static"));
+    dangerDoorRight.collider.physics = "static";
+    dangerDoorRight.addOnMouseClickTrigger (function (object) {
+        for (var i = 0; i < object.animations.length; i++) {
+            var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
+            if (dist > 225.0)
+                return;
+
+            if (object.animations[i].tag == "dangerDoorRight") {
+                if (object.animations[i].open) {
+                    object.animations[i].open = false;
+                    object.collider.physics = "static";
+                } else {
+                    object.animations[i].open = true;
+                    object.collider.physics = "trigger";
+                }
+            }
+        }
+    });
+    dangerDoorRight.addAnimation (new animationDangerDoorRight (dangerDoorRight));
 
     hallway.transform = new transform (vec3.fromValues (0.0, 9.4, 171.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     room.children.push (hallway);
