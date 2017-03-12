@@ -273,6 +273,11 @@ window.onload = function init () {
 	prev = performance.now();
 	prev *= 0.001;
 
+	//Get rid of the loading screen
+	loader = document.getElementById("loader");
+	loader.style.display="none"; 
+
+
 	window.requestAnimationFrame (render);
 }
 
