@@ -394,12 +394,12 @@ class animationScaleObject {
 
         if (this.currentHold) {
             this.scale += 1.0 * dTime;
-            if (this.scale > 10.0)
-                this.scale = 10.0;
+            if (this.scale > 5.0)
+                this.scale = 5.0;
 
-            this.currentHold.material.ambient[0] = 0.3 + this.scale / 5.0;
-            this.currentHold.material.specular[0] = 0.3 + this.scale / 5.0;
-            this.currentHold.material.diffuse[0] = 0.3 +  this.scale / 5.0;
+            this.currentHold.material.ambient[0] = 0.3 + this.scale / 2.5;
+            this.currentHold.material.specular[0] = 0.3 + this.scale / 2.5;
+            this.currentHold.material.diffuse[0] = 0.3 +  this.scale / 2.5;
 
             var storage = mat4.create ();
             mat4.fromQuat (storage, currentScene.playerController.player.camera.rotation);
@@ -466,12 +466,12 @@ class animationLaunchObject {
 
         if (this.currentHold) {
             this.scale += 1.0 * dTime;
-            if (this.scale > 10.0)
-                this.scale = 10.0;
+            if (this.scale > 5.0)
+                this.scale = 5.0;
 
-            this.currentHold.material.ambient[1] = 0.3 + this.scale / 5.0;
-            this.currentHold.material.specular[1] = 0.3 + this.scale / 5.0;
-            this.currentHold.material.diffuse[1] = 0.3 + this.scale / 5.0;
+            this.currentHold.material.ambient[1] = 0.3 + this.scale / 2.5;
+            this.currentHold.material.specular[1] = 0.3 + this.scale / 2.5;
+            this.currentHold.material.diffuse[1] = 0.3 + this.scale / 2.5;
 
             var storage = mat4.create ();
             mat4.fromQuat (storage, currentScene.playerController.player.camera.rotation);
@@ -492,6 +492,7 @@ class animationLaunchObject {
                 this.currentHold.material.diffuse[3] = 1.0;
 
                 vec3.scale (this.currentHold.rigidBody.P, direction, this.scale * this.currentHold.rigidBody.mass * 40.0);                
+                this.currentHold.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
 
                 this.currentHold.addAnimation (new animationLifetime (this.currentHold, 20.0));
                 this.scale = 0.0;

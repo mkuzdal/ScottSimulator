@@ -25,7 +25,7 @@ class rigidBody {
 		this.P = vec3.fromValues (0.0, 0.0, 0.0);
 		this.L = vec3.fromValues (0.0, 0.0, 0.0);
 
-		this.restitution = 1.0;
+		this.restitution = 1.1;
 		this.frictionStatic = 1.0;
 		this.frictionDynamic = 0.5;
 
@@ -46,7 +46,7 @@ class rigidBody {
             vec3.scaleAndAdd (this.P, this.P, this.f, dt);
 			vec3.scale (this.velocity, this.P, this.inv_mass);
 			vec3.scaleAndAdd (this.object.transform.position, this.object.transform.position, this.velocity, dt);
-			
+
 			var R = mat3.create ();
 			var RT = mat3.create ();
 			mat3.fromQuat (R, this.object.transform.rotation);

@@ -123,7 +123,7 @@ function buildSurvivalScene (SGraph) {
                              sphereGeo,
                              new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                              new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0, "dynamic"),
-                             new rigidBody (10.0, "dynamic"));
+                             new rigidBody (5.0, "dynamic"));
     sphere.tag = "sphere";
 
     player.addAnimation (new animationLaunchObject (player, sphere));

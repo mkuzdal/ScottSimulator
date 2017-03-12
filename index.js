@@ -15,6 +15,7 @@ var shadowFramebuffers = [];
 var colorFramebuffer;
 
 var currentScene;
+var startMenuScene;
 var mainScene;
 var physicsDemoScene;
 var project1Scene;
@@ -111,11 +112,18 @@ window.onload = function init () {
 	lightMatrixLoc = gl.getUniformLocation (program, "lightMatrix");
 	lightProjectionMatrixLoc = gl.getUniformLocation (program, "lightProjectionMatrix");
 
+    startMenuScene = new sceneGraph (buildMenuSceneGraph);
 	mainScene = new sceneGraph (buildSceneGraph);
     physicsDemoScene = new sceneGraph (buildPhysicsScene);
     project1Scene = new sceneGraph (buildProject1Scene);
-    survivalScene = new sceneGraph (buildSurvivalScene);
-    currentScene = mainScene;
+    currentScene = startMenuScene;
+
+    startMenuScene.build ();
+    mainScene.build ();
+    physicsDemoScene.build ();
+    project1Scene.build ();
+
+	buildStateMachine ();
 
     crosshair = new Crosshair ([
             vec4.fromValues (0.0, 0.05, 0.5, 1.0),
@@ -123,13 +131,6 @@ window.onload = function init () {
             vec4.fromValues (0.05, 0.0, 0.5, 1.0),
             vec4.fromValues (-0.05, 0.0, 0.5, 1.0)
         ]);
-
-    mainScene.build ();
-    physicsDemoScene.build ();
-    project1Scene.build ();
-    survivalScene.build ();
-
-	buildStateMachine ();
 
     // Setting up pointerlock
     canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;

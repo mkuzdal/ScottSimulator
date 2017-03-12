@@ -1008,7 +1008,7 @@ class sceneCollisionManager {
 
 	        var percent = 1.5;
 	        if (object1.tag == "player") {
-		       percent = 1.1;
+		       percent = 1.3;
 	        } 
 
 	  	    vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, percent * manifold.penetrationDistance);
@@ -1134,9 +1134,9 @@ class sceneCollisionManager {
 	  			return;
 	  		}
 	  		if (vrel > -THRESHHOLD) {
-	  			this.contactCollisions.push (manifold);
+	  			//this.contactCollisions.push (manifold);
 	  			return;
-	  		} 
+	  		}  
 
 	  		var epsilon = Math.min (object1.rigidBody.restitution, object2.rigidBody.restitution);
 	  		var numerator = -(1 + epsilon) * vrelNormal;
