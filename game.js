@@ -310,8 +310,8 @@ function buildSceneGraph (SGraph) {
     hallwayleft.loadFromObj ("hallwayleftOBJ", "hallwayleftMAT", "hallwayleftTEX");
     hallwayleft.transform = new transform (vec3.fromValues (0.5, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     hallway.children.push (hallwayleft);
+    hallwayleft.collider = new boxCollider (vec3.clone (hallwayleft.collider.min), vec3.fromValues (hallwayleft.collider.max[0] + 100.0, hallwayleft.collider.max[1], hallwayleft.collider.max[2]), "static");    
     hallwayleft.addRigidBody (new rigidBody (10.0, "static"));
-    hallwayleft.collider.physics = "static";
 
     var hallwayleft2 = hallwayleft.clone ();
     var rotation2 = quat.create ();
@@ -336,8 +336,8 @@ function buildSceneGraph (SGraph) {
     hallwayright.loadFromObj ("hallwayrightOBJ", "hallwayrightMAT", "hallwayrightTEX");
     hallwayright.transform = new transform (vec3.fromValues (-0.5, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     hallway.children.push (hallwayright);
+    hallwayright.collider = new boxCollider (vec3.fromValues (hallwayright.collider.min[0] - 100.0, hallwayright.collider.min[1], hallwayright.collider.min[2]), vec3.clone (hallwayright.collider.max), "static");    
     hallwayright.addRigidBody (new rigidBody (10.0, "static"));
-    hallwayright.collider.physics = "static";
 
     var hallwayright2 = hallwayright.clone ();
     var rotation2 = quat.create ();
@@ -362,8 +362,8 @@ function buildSceneGraph (SGraph) {
     hallwaybot.loadFromObj ("hallwaybotOBJ", "hallwaybotMAT", "hallwaybotTEX");
     hallwaybot.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     hallway.children.push (hallwaybot);
+    hallwaybot.collider = new boxCollider (vec3.fromValues (hallwaybot.collider.min[0], hallwaybot.collider.min[1] - 100.0, hallwaybot.collider.min[2]), vec3.clone (hallwaybot.collider.max), "static");    
     hallwaybot.addRigidBody (new rigidBody (10.0, "static"));
-    hallwaybot.collider.physics = "static";
 
     var hallwaytop = new object ();
     hallwaytop.tag = "hallwaytop";
@@ -413,7 +413,7 @@ function buildSceneGraph (SGraph) {
     quat.setAxisAngle (doorRotation, [0, 1, 0], glMatrix.toRadian (180.0));
     dangerDoorLeft.tag = "dangerDoorLeft";
     dangerDoorLeft.loadFromObj ("dangerDoorLeftOBJ", "dangerDoorLeftMAT", "dangerDoorLeftTEX");
-    dangerDoorLeft.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), doorRotation);
+    dangerDoorLeft.transform = new transform (vec3.fromValues (0.0, 0.0, 145.0), vec3.fromValues (1.0, 1.0, 1.0), doorRotation);
     hallway.children.push (dangerDoorLeft);
     dangerDoorLeft.addRigidBody (new rigidBody (10.0, "static"));
     dangerDoorLeft.collider.physics = "static";
@@ -456,11 +456,11 @@ function buildSceneGraph (SGraph) {
     var dangerDoorRight = new object ();
     dangerDoorRight.tag = "dangerDoorRight";
     dangerDoorRight.loadFromObj ("dangerDoorRightOBJ", "dangerDoorRightMAT", "dangerDoorRightTEX");
-    dangerDoorRight.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), doorRotation);
+    dangerDoorRight.transform = new transform (vec3.fromValues (0.0, 0.0, 145.0), vec3.fromValues (1.0, 1.0, 1.0), doorRotation);
     hallway.children.push (dangerDoorRight);
     dangerDoorRight.addRigidBody (new rigidBody (10.0, "static"));
     dangerDoorRight.collider.physics = "static";
-    dangerDoorRight.addOnMouseClickTrigger (function (object) {
+    dangerDoorRight.addOnMouseClickTrigger (function (object) {        
         for (var i = 0; i < object.animations.length; i++) {
             var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
             if (dist > 225.0)
@@ -474,8 +474,25 @@ function buildSceneGraph (SGraph) {
                     object.animations[i].open = true;
                     object.collider.physics = "trigger";
                 }
-            }
+            } 
         }
+        var otherDoor = currentScene.getObjectsByTag ("dangerDoorLeft")[0];
+        for (var i = 0; i < otherDoor.animations.length; i++) {
+            var dist = vec3.squaredDistance (otherDoor.collider.currentCenter, currentScene.playerController.player.transform.position);
+            if (dist > 225.0)
+                return;
+
+            if (otherDoor.animations[i].tag == "dangerDoorLeft") {
+                if (otherDoor.animations[i].open) {
+                    otherDoor.animations[i].open = false;
+                    otherDoor.collider.physics = "static";
+                } else {
+                    otherDoor.animations[i].open = true;
+                    otherDoor.collider.physics = "trigger";
+                }
+            } 
+        }
+
     });
     dangerDoorRight.addAnimation (new animationDangerDoorRight (dangerDoorRight));
 
