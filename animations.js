@@ -602,3 +602,83 @@ class animationEnemySpawner {
     }
 }
 
+class animationDangerDoorRight {
+    constructor (_object) {
+        this.object = _object;
+
+        this.open = false;
+        this.active = true;
+        this.tag = "dangerDoorRight";
+
+        this.closedPosition = vec3.clone (this.object.transform.position);
+        
+        this.openPosition = vec3.clone (this.closedPosition);
+        this.openPosition[0] -= 5.0;
+
+        this.currentPosition = vec3.clone (this.closedPosition);
+    }
+
+    animate (dTime) {
+        if (!this.active) 
+            return;
+
+        var destinationPos = vec3.create ();
+
+        if (this.open) {
+            destinationPos = vec3.clone (this.openPosition);
+        } else {
+            destinationPos = vec3.clone (this.closedPosition);
+        }
+
+        vec3.lerp (this.currentPosition, this.currentPosition, destinationPos, 1.0 * dTime);
+
+        this.object.transform.position = vec3.clone (this.currentPosition); 
+    }
+
+    clone () {
+        var newAnimation = new animationDangerDoorRight (this.object);
+        newAnimation.active = this.active;
+        return newAnimation;
+    }
+}
+
+class animationDangerDoorLeft {
+    constructor (_object) {
+        this.object = _object;
+
+        this.open = false;
+        this.active = true;
+        this.tag = "dangerDoorLeft";
+
+        this.closedPosition = vec3.clone (this.object.transform.position);
+        
+        this.openPosition = vec3.clone (this.closedPosition);
+        this.openPosition[0] += 5.0;
+        
+        this.currentPosition = vec3.clone (this.closedPosition);
+    }
+
+    animate (dTime) {
+        if (!this.active) 
+            return;
+
+        var destinationPos = vec3.create ();
+
+        if (this.open) {
+            destinationPos = vec3.clone (this.openPosition);
+        } else {
+            destinationPos = vec3.clone (this.closedPosition);
+        }
+
+        vec3.lerp (this.currentPosition, this.currentPosition, destinationPos, 1.0 * dTime);
+
+        this.object.transform.position = vec3.clone (this.currentPosition); 
+    }
+
+    clone () {
+        var newAnimation = new animationDangerDoorLeft (this.object);
+        newAnimation.active = this.active;
+        return newAnimation;
+    }
+}
+
