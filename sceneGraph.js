@@ -647,7 +647,6 @@ class sceneGraph {
         }
     }
 
-
     push (object) {
         this.root.children.push (object);
 

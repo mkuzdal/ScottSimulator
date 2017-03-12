@@ -118,10 +118,12 @@ class Activity {
 	}
 
 	run() {
-		if(this.audio) this.audio.currentTime = 0;
-		if(this.initfunc) this.initfunc();
-		if(this.audio) this.audio.play();
-		else this.endfunc();
+		if (this.audio) {
+			this.audio.currentTime = 0; 
+			this.audio.play();
+		}
+		if (this.initfunc) this.initfunc();
+		if (!this.audio) this.endfunc();
 	}
 
 	stop() {

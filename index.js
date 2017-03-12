@@ -119,7 +119,6 @@ window.onload = function init () {
     currentScene = startMenuScene;
 
     startMenuScene.build ();
-    mainScene.build ();
     physicsDemoScene.build ();
     project1Scene.build ();
 
