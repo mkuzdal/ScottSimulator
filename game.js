@@ -578,18 +578,21 @@ function buildSceneGraph (SGraph) {
     var rotation = quat.create ();
     quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (0.0));
     projector.transform = new transform (vec3.fromValues (0.0, 7.2, -17.5), vec3.fromValues (0.8, 0.8, 0.8), quat.clone(rotation));
+    projector.active = false;
     room.children.push (projector);
 
     var projector2 = projector.clone ();
     var rotation = quat.create ();
     quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (30.0));
     projector2.transform = new transform (vec3.fromValues (-13.6, 7.2, -14.9), vec3.fromValues (0.8, 0.8, 0.8), quat.clone(rotation));
+    projector2.active = false;
     room.children.push (projector2);
 
     var projector3 = projector.clone ();
     var rotation = quat.create ();
     quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (-30.0));
     projector3.transform = new transform (vec3.fromValues (13.6, 7.2, -14.9), vec3.fromValues (0.8, 0.8, 0.8), quat.clone(rotation));
+    projector3.active = false;
     room.children.push (projector3);
 
 	// desk
@@ -780,7 +783,9 @@ function buildSceneGraph (SGraph) {
     changeGravityButton = buttonMount.clone(); changeGravityButton.transform.position = vec3.fromValues(0,0,0); changeGravityButton.active = false; room.children.push (changeGravityButton);
     clickMeButton = buttonMount.clone(); clickMeButton.transform.position = vec3.fromValues(-5,0,0); clickMeButton.active = false; room.children.push (clickMeButton);
     dontClickMeButton = buttonMount.clone(); dontClickMeButton.transform.position = vec3.fromValues(5,0,0); dontClickMeButton.active = false; room.children.push (dontClickMeButton);
+    swapTexturesButton = buttonMount.clone(); swapTexturesButton.transform.position = vec3.fromValues(10,0,0); swapTexturesButton.active = false; room.children.push (swapTexturesButton);
     
+
     exitFoundBugButton = buttonMount.clone(); exitFoundBugButton.transform.position = vec3.fromValues(15,0,10); exitFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); exitFoundBugButton.active = false; room.children.push (exitFoundBugButton);
     stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
 
@@ -804,6 +809,9 @@ function buildSceneGraph (SGraph) {
     dontClickMeButton.children[0].addOnMouseClickTrigger(function(object) {
         StateManager.apply("dontClickMe");
     }); 
+    swapTexturesButton.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("swapTextures");
+    });
 
     leavetrigger1.collider.collisionFunction = function (object1, object2) {
         StateManager.apply("leavetrigger1");
@@ -913,7 +921,7 @@ var room;
 var leavetrigger1, leavetrigger2, leavetrigger3;
 var returntrigger;
 var rightButtonMount, leftButtonMount;
-var changeGravityCautionBox, changeGravityButton, clickMeButton, dontClickMeButton, numIncorrectClicks = 0;
+var changeGravityCautionBox, changeGravityButton, swapTexturesButton, clickMeButton, dontClickMeButton, numIncorrectClicks = 0;
 
 var foundbugtrigger, exitedFindingBug = false;
 var exitFoundBugButton, stayFoundBugButton;
@@ -955,12 +963,19 @@ function buildStateMachine () {
         }
     ));
     var leaving2 = new Event("leavetrigger2", new Activity('A_leaving2', function(){}, function(){console.log('Don\'t make me do this!')}));
-    var leaving3 = new Event("leavetrigger3", new Activity('A_leaving3', function(){}, function(){console.log('Alright. That\'s the last straw. (play baby music)')}));
+    var leaving3 = new Event("leavetrigger3", new Activity('A_leaving3', 
+        function() {
+            var projectors = currentScene.getObjectsByTag('projector');
+            for (var i=0; i<projectors.length; i++) projectors[i].active = true;
+        }, 
+        function() {
+            console.log('Alright. That\'s the last straw. (play baby music)')
+        }
+    ));
     var leaving4 = new Event("leavetrigger4", new Activity(null, function(){}, function(){console.log('Ok. Seriously though. You really do not want to go here.')}));
     var leaving5 = new Event("leavetrigger5", new Activity(null, function(){}, function(){console.log('I guess if you\'ve come this far you are really persistent. <insert shrimp facts>')}));
     var returning = new Event("returntrigger", new Activity(null, 
         function() {
-            returntrigger.collider.collisionFunction = null;
             StateManager.setState(previousState);
             previousState = null;
         }, 
@@ -1012,6 +1027,7 @@ function buildStateMachine () {
             clickMeButton.active = true;
             dontClickMeButton.active = true;
             changeGravityCautionBox.active = true;
+            swapTexturesButton.active = true;
         }, 
         function() {
             console.log('Good job');
@@ -1042,7 +1058,6 @@ function buildStateMachine () {
             console.log('Clicked me!');
         }
     ));
-
     var dontClickMe = new Event("dontClickMe", new Activity(null, 
         function() {
             // swap position with click me button
@@ -1056,6 +1071,17 @@ function buildStateMachine () {
             console.log('Don\'t clicked me!');
         }
     ));
+
+    var swapTexturesEvent = new Event("swapTextures", new Activity(null, 
+        function() {
+            swapTextures(document.getElementById('projectorTEX'));
+        }, 
+        function() {
+            console.log('NO NONONOONONO! Scott... Well. This is awkward.');
+        }
+    ));
+
+
     var savedWorld = new Event("savedWorld", new Activity(null, function(){}, function(){console.log('Saved world!')}));
 
     StateManager.getState("root").addChild(clickedStart, StateManager.getState("intro1"));
@@ -1079,6 +1105,7 @@ function buildStateMachine () {
     StateManager.getState("clickedLeft").addChild(changeGravity, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedLeft").addChild(clickMe, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedLeft").addChild(dontClickMe, StateManager.getState("clickedLeft"));
+    StateManager.getState("clickedLeft").addChild(swapTexturesEvent, StateManager.getState("clickedLeft"));
     StateManager.getState("changeGravity").addChild(savedWorld, StateManager.getState("saved"));
     
     // add all the leaving triggers
