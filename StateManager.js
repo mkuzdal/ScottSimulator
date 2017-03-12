@@ -108,20 +108,22 @@ class Event {
 
 class Activity {
 	constructor(_audio, _initfunc, _endfunc) {
-		this.audio = _audio;
+		this.audio = document.getElementById(_audio);
 		this.initfunc = _initfunc;
 		this.endfunc = function() {
-				_endfunc();
+				if(_endfunc) _endfunc();
 				StateManager.finishedEvent();
 			}
 		if(this.audio) this.audio.addEventListener("ended", this.endfunc);
 	}
 
 	run() {
-		if(this.audio) this.audio.currentTime = 0;
-		this.initfunc();
-		if(this.audio) this.audio.play();
-		else this.endfunc();
+		if (this.audio) {
+			this.audio.currentTime = 0; 
+			this.audio.play();
+		}
+		if (this.initfunc) this.initfunc();
+		if (!this.audio) this.endfunc();
 	}
 
 	stop() {
