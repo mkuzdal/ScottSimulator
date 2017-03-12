@@ -137,7 +137,7 @@ function buildSceneGraph (SGraph) {
     SGraph.playerController = new PlayerController (player);
 
 	// room
-	var room = new object ();
+	room = new object ();
     room.tag = "world";
 	room.loadFromObj ("roomOBJ", "roomMAT", "roomTEX");
 	room.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
@@ -624,8 +624,111 @@ function buildSceneGraph (SGraph) {
     stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
 
     SGraph.push (room);
+
+
+    rightButtonMount.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("clickedRight");
+    });
+    leftButtonMount.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("clickedLeft");
+    }); 
+    changeGravityCautionBox.addOnMouseClickTrigger(function(object) {
+        changeGravityCautionBox.active = false;
+        changeGravityButton.active = true;
+    });
+    changeGravityButton.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("changeGravity");
+    }); 
+    clickMeButton.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("clickMe");
+    }); 
+    dontClickMeButton.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("dontClickMe");
+    }); 
+
+    leavetrigger1.collider.collisionFunction = function (object1, object2) {
+        StateManager.apply("leavetrigger1");
+    }
+    leavetrigger2.collider.collisionFunction = function (object1, object2) {
+        StateManager.apply("leavetrigger2");
+    }
+    leavetrigger3.collider.collisionFunction = function (object1, object2) {
+        StateManager.apply("leavetrigger3");
+    }
+    returntrigger.collider.collisionFunction = function (object1, object2) {
+        var currentStateName = StateManager.getCurrentState().name;
+        if(name == 'leaving1' || name == 'leaving2' || name == 'leaving3') StateManager.apply("returntrigger");
+    }
+    foundbugtrigger.collider.collisionFunction = function (object1, object2) {
+        var A_bug1 = document.getElementById('A_bug1');
+        if(A_bug1.currentTime == 0) {
+            A_bug1.play();
+            A_bug1.addEventListener("ended", function() {
+                setTimeout(function() {
+                    currentScene.playerController.player.transform.position = vec3.fromValues(-7.317382554523647, -2.9981283240562004, 13.815474266186357);
+                    currentScene.playerController.player.camera.rotation = vec4.fromValues(-0.01889348030090332, 0.6919060349464417, -0.018118197098374367, -0.7215129137039185);
+                    var A_bug2 = document.getElementById('A_bug2');
+                    A_bug2.play();
+                    setTimeout(function() {
+                        exitFoundBugButton.active = true;
+                        stayFoundBugButton.active = true;
+                    }, 2000);
+                }, 5000);
+            });
+        }
+
+        // play the found bug audio. if the audio is already playing (if currentTime != 0) then don't play it again.
+        console.log('Oh. Look at you. You found a bug! Congratulations. Wanna get out?... Umm. Good luck with that.');
+        foundbugtrigger.collider.collisionFunction = null;
+        if(!previousState) {
+            previousState = StateManager.getCurrentState();
+        }
+
+        setTimeout(function() {
+            if(!exitedFindingBug) {
+                document.getElementById('A_bugstay2').play();
+                StateManager.setState(previousState);
+                previousState = null;
+                currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
+                currentScene.playerController.player.camera.rotation = vec4.fromValues(0,1,0,0);
+            }
+        }, 3600000);
+    }
+    exitFoundBugButton.children[0].addOnMouseClickTrigger(function(object) {
+        exitFoundBugButton.active = false;
+        stayFoundBugButton.active = false;
+        exitedFindingBug = true;
+        StateManager.setState(previousState);
+        previousState = null;
+        currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
+        currentScene.playerController.player.camera.rotation = vec4.fromValues(0,1,0,0);
+    });
+    stayFoundBugButton.children[0].addOnMouseClickTrigger(function(object) {
+        var A_bug2 = document.getElementById('A_bug2');
+        if(!A_bug2.paused) {
+            A_bug2.addEventListener('ended', function() {document.getElementById('A_bugstay1').play();}); 
+        } else {
+            document.getElementById('A_bugstay1').play();
+        }
+        exitFoundBugButton.active = false;
+        stayFoundBugButton.active = false;        
+    });
+
+    setTimeout(function() {
+        StateManager.apply("introWait1");
+    }, 20000);
+    setTimeout(function() {
+        StateManager.apply("introWait2");
+    }, 30000);
+    setTimeout(function() {
+        StateManager.apply("introWait3");
+    }, 45000);
+    setTimeout(function() {
+        StateManager.apply("introWait4");
+    }, 60000);
 }
 
+var room;
 var leavetrigger1, leavetrigger2, leavetrigger3;
 var returntrigger;
 var rightButtonMount, leftButtonMount;
@@ -655,13 +758,14 @@ function buildStateMachine () {
     StateManager.addState("saved");
 
 
-    var clickedStart = new Event("clickStart", new Activity('A_intro1', function() {currentScene = mainScene; }, null));
+    var clickedStart = new Event("clickStart", new Activity('A_intro1', function() { mainScene.resetScene(); currentScene = mainScene; }, null));
     var introWait1 = new Event("introWait1", new Activity('A_intro2', null, null));
     var introWait2 = new Event("introWait2", new Activity('A_intro3', null, null));
     var introWait3 = new Event("introWait3", new Activity('A_intro4', null, function() {alert('YOU\'RE MUTED. TURN UP YOUR VOLUME!')}));
     var introWait4 = new Event("introWait4", new Activity('A_intro5', null, null));
     var leaving1 = new Event("leavetrigger1", new Activity(null, 
         function() {
+            leavetrigger1.collider.collisionFunction = null;
             if (previousState) console.log('Something is wrong. We should never enter a different state while previous state is still set.');
             previousState = StateManager.getCurrentState();
         }, 
@@ -669,10 +773,11 @@ function buildStateMachine () {
             console.log('Scott... Where are you going?')
         }
     ));
-    var leaving2 = new Event("leavetrigger2", new Activity(null, function(){}, function(){console.log('Don\'t make me do this!')}));
-    var leaving3 = new Event("leavetrigger3", new Activity(null, function(){}, function(){console.log('Alright. That\'s the last straw. (play baby music)')}));
+    var leaving2 = new Event("leavetrigger2", new Activity(null, function(){leavetrigger2.collider.collisionFunction = null;}, function(){console.log('Don\'t make me do this!')}));
+    var leaving3 = new Event("leavetrigger3", new Activity(null, function(){leavetrigger3.collider.collisionFunction = null;}, function(){console.log('Alright. That\'s the last straw. (play baby music)')}));
     var returning = new Event("returntrigger", new Activity(null, 
         function() {
+            returntrigger.collider.collisionFunction = null;
             StateManager.setState(previousState);
             previousState = null;
         }, 
@@ -734,12 +839,27 @@ function buildStateMachine () {
             changeGravitationalCenter (vec3.fromValues (0.0, 1.0, 0.0));
         }, 
         function() {
-            console.log('Change gravity');
+            currentScene = startMenuScene;
+            StateManager.setState(StateManager.getState('root'));
+            console.log('Changed gravity');
         }
     ));
     var clickMe = new Event("clickMe", new Activity('A_spawnchair', 
         function() {
-            // do nothing when clicked correctly.
+            // spawn a chair
+            var stool = new object();
+            stool.tag = "stool";
+            stool.loadFromObj ("stoolOBJ", "stoolMAT", "stoolTEX");
+            stool.transform = new transform (vec3.fromValues(0.0, 5.0, 0.0), vec3.fromValues(0.4, 0.4, 0.4), quat.create ()); 
+            room.children.push (stool);
+            stool.addRigidBody (new rigidBody (10.0, "dynamic"));
+            stool.collider.physics = "dynamic";
+
+            /*stool.addOnMouseClickTrigger (function (object) {
+                object.rigidBody.P = vec3.fromValues (0.0, 0.0, 0.0);
+                object.rigidBody.velocity = vec3.fromValues (0.0, 0.0, 0.0);
+                currentScene.animationsManager.addAnimation (new animationHold (object));
+            });*/
         }, 
         function() {
             console.log('Clicked me!');
@@ -800,114 +920,12 @@ function buildStateMachine () {
     StateManager.getState("leaving1").addChild(returning, StateManager.getState("root"));
     StateManager.getState("leaving2").addChild(returning, StateManager.getState("root"));
     StateManager.getState("leaving3").addChild(returning, StateManager.getState("root"));
-
-
-    rightButtonMount.children[0].addOnMouseClickTrigger(function(object) {
-        StateManager.apply("clickedRight");
-    });
-    leftButtonMount.children[0].addOnMouseClickTrigger(function(object) {
-        StateManager.apply("clickedLeft");
-    }); 
-    changeGravityCautionBox.addOnMouseClickTrigger(function(object) {
-        changeGravityCautionBox.active = false;
-        changeGravityButton.active = true;
-    });
-    changeGravityButton.children[0].addOnMouseClickTrigger(function(object) {
-        StateManager.apply("changeGravity");
-    }); 
-    clickMeButton.children[0].addOnMouseClickTrigger(function(object) {
-        StateManager.apply("clickMe");
-    }); 
-    dontClickMeButton.children[0].addOnMouseClickTrigger(function(object) {
-        StateManager.apply("dontClickMe");
-    }); 
-
-    setTimeout(function() {
-        StateManager.apply("introWait1");
-    }, 20000);
-    setTimeout(function() {
-        StateManager.apply("introWait2");
-    }, 30000);
-    setTimeout(function() {
-        StateManager.apply("introWait3");
-    }, 45000);
-    setTimeout(function() {
-        StateManager.apply("introWait4");
-    }, 60000);
-
-    leavetrigger1.collider.collisionFunction = function (object1, object2) {
-        StateManager.apply("leavetrigger1");
-    }
-    leavetrigger2.collider.collisionFunction = function (object1, object2) {
-        StateManager.apply("leavetrigger2");
-    }
-    leavetrigger3.collider.collisionFunction = function (object1, object2) {
-        StateManager.apply("leavetrigger3");
-    }
-    returntrigger.collider.collisionFunction = function (object1, object2) {
-        StateManager.apply("returntrigger");
-    }
-    foundbugtrigger.collider.collisionFunction = function (object1, object2) {
-        var A_bug1 = document.getElementById('A_bug1');
-        if(A_bug1.currentTime == 0) {
-            A_bug1.play();
-            A_bug1.addEventListener("ended", function() {
-                setTimeout(function() {
-                    currentScene.playerController.player.transform.position = vec3.fromValues(-7.317382554523647, -2.9981283240562004, 13.815474266186357);
-                    currentScene.playerController.player.camera.rotation = vec4.fromValues(-0.01889348030090332, 0.6919060349464417, -0.018118197098374367, -0.7215129137039185);
-                    var A_bug2 = document.getElementById('A_bug2');
-                    A_bug2.play();
-                    setTimeout(function() {
-                        exitFoundBugButton.active = true;
-                        stayFoundBugButton.active = true;
-                    }, 2000);
-                }, 5000);
-            });
-        }
-
-        // play the found bug audio. if the audio is already playing (if currentTime != 0) then don't play it again.
-        console.log('Oh. Look at you. You found a bug! Congratulations. Wanna get out?... Umm. Good luck with that.');
-        foundbugtrigger.collider.collisionFunction = null;
-        if(!previousState) {
-            previousState = StateManager.getCurrentState();
-        }
-
-        setTimeout(function() {
-            if(!exitedFindingBug) {
-                document.getElementById('A_bugstay2').play();
-                StateManager.setState(previousState);
-                previousState = null;
-                currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
-                currentScene.playerController.player.camera.rotation = vec4.fromValues(0,1,0,0);
-            }
-        }, 3600000);
-    }
-    exitFoundBugButton.children[0].addOnMouseClickTrigger(function(object) {
-        exitFoundBugButton.active = false;
-        stayFoundBugButton.active = false;
-        exitedFindingBug = true;
-        StateManager.setState(previousState);
-        previousState = null;
-        currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 5.0, -7.9);
-        currentScene.playerController.player.camera.rotation = vec4.fromValues(0,1,0,0);
-    });
-    stayFoundBugButton.children[0].addOnMouseClickTrigger(function(object) {
-        var A_bug2 = document.getElementById('A_bug2');
-        if(!A_bug2.paused) {
-            A_bug2.addEventListener('ended', function() {document.getElementById('A_bugstay1').play();}); 
-        } else {
-            document.getElementById('A_bugstay1').play();
-        }
-        exitFoundBugButton.active = false;
-        stayFoundBugButton.active = false;        
-    });
-
 }
 
 
 var finishedLookDown = false;
 function gameChecks() {
-    if(!finishedLookDown && currentScene.playerController.player.camera.pitch  < -0.2) {
+    if(currentScene ==  mainScene && !finishedLookDown && currentScene.playerController.player.camera.pitch  < -0.2) {
         finishedLookDown = true;
         StateManager.apply("lookDown");
     }
