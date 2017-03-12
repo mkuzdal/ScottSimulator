@@ -788,6 +788,8 @@ function buildSceneGraph (SGraph) {
     setTimeout(function() {
         StateManager.apply("introWait4");
     }, 60000);
+
+    finishedLookDown = false; // for the inital look down check
 }
 
 var room;
