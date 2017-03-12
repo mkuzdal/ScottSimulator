@@ -92,8 +92,20 @@ class object {
     }
 
     draw () {
-        if (this.geometry) 
-            gl.drawArrays (this.drawType, 0, this.geometry.Nvertices);
+        if (this.geometry) {
+            if (this.material.ambient[3] != 1.0) {
+                gl.enable (gl.BLEND);
+                gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+                gl.disable (gl.DEPTH_TEST);
+
+                gl.drawArrays (this.drawType, 0, this.geometry.Nvertices);
+
+                gl.disable(gl.BLEND);
+                gl.enable (gl.DEPTH_TEST);
+            } else {
+                gl.drawArrays (this.drawType, 0, this.geometry.Nvertices);
+            }
+        }
     }
 
     loadFromObj (ObjID, MatID, TexID) {
@@ -264,11 +276,13 @@ class object {
             case "box":
             {
                 newCollider = new boxCollider (this.collider.min, this.collider.max, this.collider.physics);
+                newCollider.collisionFunction = this.collider.collisionFunction;
                 break;
             }
             case "sphere":
             {
                 newCollider = new sphereCollider (this.collider.center, this.collider.radius, this.collider.physics);
+                newCollider.collisionFunction = this.collider.collisionFunction;
                 break;
             }
         }
@@ -287,7 +301,6 @@ class object {
 
         newObject.drawType = this.drawType;
         newObject.tag = this.tag;
-        newObject.active = this.active;
         newObject.scene = this.scene;
 
         for (var i = 0; i < this.mouseTriggers.length; i++) {
@@ -404,13 +417,13 @@ class sceneGraph {
 		if (!root.active)
 			return;
 
-    //  if (type == DRAW_TYPE_DEFAULT || root.tag != "world") {
+        if (type == DRAW_TYPE_DEFAULT || root.tag != "world") {
     		if (root.collider.type == "null") {
                 this.drawNode (root);
             } else if (root.collider.inFustrum (PC) || root.collider.inFustrum (PL)) {
                 this.drawNode (root);
             } 
-    // }
+        }
         for (var i = 0; i < root.children.length; i++) {
             this.__drawTree_AUX (root.children[i], PC, PL, type);
         }
@@ -518,6 +531,30 @@ class sceneGraph {
         }
     }
 
+    remove (object) {
+        for (var i = 0; i < this.root.children.length; i++) {
+            this.__remove_AUX (this.root, object);
+        }
+    }
+
+    __remove_AUX (root, object) {
+        for (var i = 0; i < root.children.length; i++) {
+            if (root.children[i] == object) {
+                root.children.splice (i, 1);
+                i--;
+                for (var i = 0; i < object.animations.length; i++) {
+                    this.animationsManager.removeAnimation (object.animations[i]);
+                }
+
+                for (var i = 0; i < object.mouseTriggers.length; i++) {
+                    this.clickManager.removeTrigger (object.mouseTriggers[i]);
+                }
+            } else {
+                this.__remove_AUX (root.children[i], object);
+            }
+        }
+    }
+
     render (dTime) {
         this.animationsManager.animateAll (dTime);
         this.set ();
@@ -570,12 +607,7 @@ class sceneGraph {
             gl.uniform1i (gl.getUniformLocation (program, "shadowMap[" + i + "]"), 1 + i); 
         }
 
-        //gl.enable (gl.BLEND);
-        //gl.blendFunc (gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
         this.drawTree (DRAW_TYPE_DEFAULT);
-
-        //gl.disable(gl.BLEND);
         
         for (var i = 0; i < this.lightsManager.lightSources.length; i++) {
             gl.activeTexture (gl.TEXTURE1 + i);

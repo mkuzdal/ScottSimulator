@@ -40,6 +40,22 @@ class clickHandler {
         this.triggers.push (trigger);
     }
 
+    removeTrigger (trigger) {
+        for (var i = 0; i < this.triggers.length; i++) {
+            if (this.triggers[i] == trigger) {
+                this.triggers.splice (i, 1);
+                i--;
+            }
+        }
+
+        for (var i = 0; i < this.hover.length; i++) {
+            if (this.hover[i] == trigger) {
+                this.hover.splice (i, 1);
+                i--;
+            }
+        }
+    }
+
     handleMouseEvents () {       
         for (var i = 0; i < this.triggers.length; i++) {
             if (vec4.equals(this.pixel, this.triggers[i].ID)) { 

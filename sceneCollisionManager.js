@@ -1006,13 +1006,10 @@ class sceneCollisionManager {
 				vec3.negate (manifold.normal, manifold.normal);
 			} 
 
-	        var percent = 1.1;
+	        var percent = 1.5;
 	        if (object1.tag == "player") {
-		       percent = 2.0;
+		       percent = 1.1;
 	        } 
-
-	        if (object1.tag == 2)
-	        	console.log ("HERE");
 
 	  	    vec3.scaleAndAdd (object1.transform.position, object1.transform.position, manifold.normal, percent * manifold.penetrationDistance);
   

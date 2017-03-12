@@ -1,4 +1,4 @@
-function changeGravitationalCenter (center) {
+function changeGravitationalCentesssr (center) {
 	var objects = currentScene.getObjects ();
 
 	for (var i = 0; i < objects.length; i++) {

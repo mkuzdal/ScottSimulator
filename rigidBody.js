@@ -1,4 +1,4 @@
-var gravity = 10.0;
+var gravity = 20.0;
 var THRESHHOLD = 0.1;
 
 class rigidBody {
@@ -26,8 +26,8 @@ class rigidBody {
 		this.L = vec3.fromValues (0.0, 0.0, 0.0);
 
 		this.restitution = 1.0;
-		this.frictionStatic = 1.5;
-		this.frictionDynamic = 1.0;
+		this.frictionStatic = 1.0;
+		this.frictionDynamic = 0.5;
 
 		this.inv_I = mat3.clone (this.inv_Ibody);
 		this.f = vec3.fromValues (0.0, 0.0, 0.0);
@@ -75,7 +75,7 @@ class rigidBody {
 				quat.setAxisAngle (rotation, axisOfRot, angularVel * dt);
 				quat.mul (this.object.transform.rotation, rotation, this.object.transform.rotation);
 
-				vec3.lerp (this.L, this.L, vec3.fromValues (0.0, 0.0, 0.0), Math.min (dt * this.frictionDynamic));
+				vec3.lerp (this.L, this.L, vec3.fromValues (0.0, 0.0, 0.0), Math.min (1.0, dt * this.frictionDynamic));
 			}
 
             if (this.object.tag == "player") {

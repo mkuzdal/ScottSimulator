@@ -365,8 +365,10 @@ class animationRightdoor {
 }
 
 class animationScaleObject {
-    constructor (_object) {
+    constructor (_object, _toScale) {
         this.object = _object;
+        this.toScale = _toScale;
+
         this.currentHold = null;
 
         this.active = true;
@@ -381,12 +383,12 @@ class animationScaleObject {
             return;
 
         if (currentScene.clickManager.rightclicked) {
-            this.currentHold = this.object.clone ();
+            this.currentHold = this.toScale.clone ();
             currentScene.push (this.currentHold);
             this.currentHold.collider.physics = "trigger";
-            this.currentHold.material = new material (vec4.fromValues (0.3, 0.0, 0.0, 0.1),
-                                                      vec4.fromValues (0.3, 0.0, 0.0, 0.1),
-                                                      vec4.fromValues (0.3, 0.0, 0.0, 0.1),
+            this.currentHold.material = new material (vec4.fromValues (0.3, 0.0, 0.0, 0.4),
+                                                      vec4.fromValues (0.3, 0.0, 0.0, 0.4),
+                                                      vec4.fromValues (0.3, 0.0, 0.0, 0.4),
                                                       80.0);
         } 
 
@@ -419,6 +421,7 @@ class animationScaleObject {
                 this.currentHold.material.specular[3] = 1.0;
                 this.currentHold.material.diffuse[3] = 1.0;
                 
+                this.currentHold.addAnimation (new animationLifetime (this.currentHold, 20.0));
 
                 this.scale = 0.0;
                 this.currentHold = null;
@@ -427,15 +430,17 @@ class animationScaleObject {
     }
 
     clone () {
-        var newAnimation = new animationScaleObject (this.object);
+        var newAnimation = new animationScaleObject (this.object, this.toScale);
         newAnimation.active = this.active;
         return newAnimation;
     }
 }
 
 class animationLaunchObject {
-    constructor (_object) {
+    constructor (_object, _toLaunch) {
         this.object = _object;
+        this.toLaunch = _toLaunch;
+
         this.currentHold = null;
 
         this.active = true;
@@ -450,12 +455,12 @@ class animationLaunchObject {
             return;
 
         if (currentScene.clickManager.leftclicked) {
-            this.currentHold = this.object.clone ();
+            this.currentHold = this.toLaunch.clone ();
             currentScene.push (this.currentHold);
             this.currentHold.collider.physics = "trigger";
-            this.currentHold.material = new material (vec4.fromValues (0.0, 0.3, 0.0, 0.1),
-                                                      vec4.fromValues (0.0, 0.3, 0.0, 0.1),
-                                                      vec4.fromValues (0.0, 0.3, 0.0, 0.1),
+            this.currentHold.material = new material (vec4.fromValues (0.0, 0.3, 0.0, 0.4),
+                                                      vec4.fromValues (0.0, 0.3, 0.0, 0.4),
+                                                      vec4.fromValues (0.0, 0.3, 0.0, 0.4),
                                                       80.0);
         } 
 
@@ -488,6 +493,7 @@ class animationLaunchObject {
 
                 vec3.scale (this.currentHold.rigidBody.P, direction, this.scale * this.currentHold.rigidBody.mass * 40.0);                
 
+                this.currentHold.addAnimation (new animationLifetime (this.currentHold, 20.0));
                 this.scale = 0.0;
                 this.currentHold = null;
             }
@@ -495,8 +501,103 @@ class animationLaunchObject {
     }
 
     clone () {
-        var newAnimation = new animationLaunchObject (this.object);
+        var newAnimation = new animationLaunchObject (this.object, this.toLaunch);
         newAnimation.active = this.active;
         return newAnimation;
     }
 }
+
+class animationLifetime {
+    constructor (_object, _lifeTime) {
+        this.object = _object
+        this.lifeTime = _lifeTime;
+
+        this.tag = "lifetime"
+        this.currentTime = 0.0;
+
+        this.active = true;
+    }
+
+    animate (dTime) {
+        if (!this.active)
+            return;
+
+        this.currentTime += dTime;
+
+        if (this.currentTime > this.lifeTime) {
+            currentScene.remove (this.object);
+            this.active = false;
+        }
+    }
+
+    clone () {
+        var newAnimation = new animationLifetime (this.object, this.lifeTime);
+        newAnimation.active = this.active;
+        return newAnimation;
+    }
+}
+
+class animationEnemy {
+    constructor (_object) {
+        this.object = _object
+        this.seek = vec3.fromValues (0.0, 0.0, 0.0);
+
+        this.tag = "enemy";
+        this.speed = 0.3;
+        this.active = true;
+    }
+
+    animate (dTime) {
+        if (!this.active)
+            return;
+
+        vec3.lerp (this.object.transform.position, this.object.transform.position, this.seek, this.speed * dTime);     
+    }
+
+    clone () {
+        var newAnimation = new animationEnemy (this.object);
+        newAnimation.active = this.active;
+        return newAnimation;
+    }
+}
+
+class animationEnemySpawner {
+    constructor (_object, _toSpawn) {
+        this.object = _object
+        this.toSpawn = _toSpawn;
+        
+        this.tag = "enemySpawner";
+        this.radius = 20.0;
+        this.cooldown = 5.0;
+
+        this.current_cooldown = 0.0;
+
+        this.active = true;
+    }
+
+    animate (dTime) {
+        if (!this.active)
+            return;
+
+        this.current_cooldown -= dTime;
+        if (this.current_cooldown < 0.0) {
+            console.log ("SPAWN");
+            var angle = Math.random () * Math.PI * 2;
+
+            var toSpawn = this.toSpawn.clone ();
+            toSpawn.transform.position = vec3.fromValues (this.radius * Math.cos (angle), 0.0, this.radius * Math.sin (angle));
+            currentScene.push (toSpawn);
+            console.log (toSpawn);
+
+            this.current_cooldown = this.cooldown;
+            this.cooldown * 0.5;
+        }
+    }
+
+    clone () {
+        var newAnimation = new animationEnemySpawner (this.object, this.toSpawn);
+        newAnimation.active = this.active;
+        return newAnimation;
+    }
+}
+

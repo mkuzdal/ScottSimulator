@@ -176,3 +176,60 @@ class PlayerControllerFly {
     }
 }
 
+class PlayerControllerSurvival {
+    constructor (_player) {
+        this.player = _player;
+        this.camera = _player.camera;
+
+        this.health = 10;
+        this.score = 0;
+
+        this.movingforward = false;
+        this.movingbackward = false;
+        this.movingleft = false;
+        this.movingright = false;
+        this.movingup = false;
+        this.movingdown = false;
+    }
+
+    /** moveForward: moves the player in the forwards direction by 'speed' many units.
+     */
+    moveForward (speed) {
+        
+    }
+
+    /** moveBackward: moves the player in the backwards direction by 'speed' many units.
+     */
+    moveBackward (speed) {
+
+    }
+
+    /** moveLeft: moves the player in the left direction by 'speed' many units
+     */
+    moveLeft (speed) {
+
+    }
+
+    /** moveRight: moves the player in the right direction by 'speed' many units
+     */
+    moveRight (speed) {
+
+    }
+
+    /** moveUp: moves the player in the upwards direction by 'speed' many units
+     */
+    moveUp (speed) {
+
+    }
+
+    /** moveDown: moves the player in the downwards direction by 'speed' many units
+     */
+    moveDown (speed) {
+
+    }
+
+    jump (speed) {
+
+    }
+}
+
