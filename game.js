@@ -409,13 +409,15 @@ function buildSceneGraph (SGraph) {
     }
 
     var dangerDoorLeft = new object ();
+    var doorRotation = quat.create ();
+    quat.setAxisAngle (doorRotation, [0, 1, 0], glMatrix.toRadian (180.0));
     dangerDoorLeft.tag = "dangerDoorLeft";
     dangerDoorLeft.loadFromObj ("dangerDoorLeftOBJ", "dangerDoorLeftMAT", "dangerDoorLeftTEX");
-    dangerDoorLeft.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    dangerDoorLeft.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), doorRotation);
     hallway.children.push (dangerDoorLeft);
     dangerDoorLeft.addRigidBody (new rigidBody (10.0, "static"));
     dangerDoorLeft.collider.physics = "static";
-    dangerDoorLeft.addOnMouseClickTrigger (function (object) {
+    dangerDoorLeft.addOnMouseClickTrigger (function (object) {        
         for (var i = 0; i < object.animations.length; i++) {
             var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
             if (dist > 225.0)
@@ -429,15 +431,32 @@ function buildSceneGraph (SGraph) {
                     object.animations[i].open = true;
                     object.collider.physics = "trigger";
                 }
-            }
+            } 
         }
+        var otherDoor = currentScene.getObjectsByTag ("dangerDoorRight")[0];
+        for (var i = 0; i < otherDoor.animations.length; i++) {
+            var dist = vec3.squaredDistance (otherDoor.collider.currentCenter, currentScene.playerController.player.transform.position);
+            if (dist > 225.0)
+                return;
+
+            if (otherDoor.animations[i].tag == "dangerDoorRight") {
+                if (otherDoor.animations[i].open) {
+                    otherDoor.animations[i].open = false;
+                    otherDoor.collider.physics = "static";
+                } else {
+                    otherDoor.animations[i].open = true;
+                    otherDoor.collider.physics = "trigger";
+                }
+            } 
+        }
+
     });
     dangerDoorLeft.addAnimation (new animationDangerDoorLeft (dangerDoorLeft));
 
     var dangerDoorRight = new object ();
     dangerDoorRight.tag = "dangerDoorRight";
     dangerDoorRight.loadFromObj ("dangerDoorRightOBJ", "dangerDoorRightMAT", "dangerDoorRightTEX");
-    dangerDoorRight.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    dangerDoorRight.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), doorRotation);
     hallway.children.push (dangerDoorRight);
     dangerDoorRight.addRigidBody (new rigidBody (10.0, "static"));
     dangerDoorRight.collider.physics = "static";

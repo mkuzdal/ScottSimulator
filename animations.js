@@ -613,8 +613,8 @@ class animationDangerDoorRight {
         this.closedPosition = vec3.clone (this.object.transform.position);
         
         this.openPosition = vec3.clone (this.closedPosition);
-        this.openPosition[0] += 5.0;
-        
+        this.openPosition[0] -= 5.0;
+
         this.currentPosition = vec3.clone (this.closedPosition);
     }
 
@@ -630,7 +630,7 @@ class animationDangerDoorRight {
             destinationPos = vec3.clone (this.closedPosition);
         }
 
-        vec3.lerp (this.currentPosition, this.currentPosition, destinationPos, 4 * dTime);
+        vec3.lerp (this.currentPosition, this.currentPosition, destinationPos, 1.0 * dTime);
 
         this.object.transform.position = vec3.clone (this.currentPosition); 
     }
@@ -653,7 +653,7 @@ class animationDangerDoorLeft {
         this.closedPosition = vec3.clone (this.object.transform.position);
         
         this.openPosition = vec3.clone (this.closedPosition);
-        this.openPosition[0] -= 5.0;
+        this.openPosition[0] += 5.0;
         
         this.currentPosition = vec3.clone (this.closedPosition);
     }
@@ -670,7 +670,7 @@ class animationDangerDoorLeft {
             destinationPos = vec3.clone (this.closedPosition);
         }
 
-        vec3.lerp (this.currentPosition, this.currentPosition, destinationPos, 4 * dTime);
+        vec3.lerp (this.currentPosition, this.currentPosition, destinationPos, 1.0 * dTime);
 
         this.object.transform.position = vec3.clone (this.currentPosition); 
     }
