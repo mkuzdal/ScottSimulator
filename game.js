@@ -526,7 +526,11 @@ function buildSceneGraph (SGraph) {
                     );
     room.children.push (returntrigger);
 
-    foundbugtrigger = new object (new transform (vec3.fromValues (0.0, -4.0, 10.0), vec3.fromValues (100.0, 5.0, 15.0), quat.create ()),
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
+
+    foundbugtrigger = new object (new transform (vec3.fromValues (0.0, -4.0, 11.0), vec3.fromValues (100.0, 5.0, 15.0), quat.create ()),
                             null, null, null,
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "trigger"),
                             null
