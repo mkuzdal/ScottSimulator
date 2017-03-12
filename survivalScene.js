@@ -1,4 +1,4 @@
-function buildPhysicsScene (SGraph) {
+function buildSurvivalScene (SGraph) {
 
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (50.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
                               vec3.fromValues (0.0, 0.0, 0.0),
@@ -40,9 +40,8 @@ function buildPhysicsScene (SGraph) {
 
     SGraph.lightsManager.lightSources[4].tag = "black";
 
-
     var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
-    var player = new object (new transform (vec3.fromValues (0.0, 10.0, -15.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
+    var player = new object (new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                          null, 
                          null, 
                          null,
@@ -53,7 +52,7 @@ function buildPhysicsScene (SGraph) {
     player.rigidBody.angularRigidBody = false;
     player.tag = "player";
 
-    SGraph.playerController = new PlayerController (player);
+    SGraph.playerController = new PlayerControllerSurvival (player);
 
     generateCubeNormals (cubeVertices);
     generateCubeVertices (cubeVertices);
@@ -62,12 +61,12 @@ function buildPhysicsScene (SGraph) {
     var prismGeo = new geometry (pointsArray, normalsArray, textureArray);
 
 	// floor
-    var floor = new object (new transform (vec3.fromValues (0.0, -10.0, 0.0), vec3.fromValues (1000.0, 3.0, 1000.0), quat.create ()),
+    var floor = new object (new transform (vec3.fromValues (0.0, -4.0, 0.0), vec3.fromValues (1000.0, 3.0, 1000.0), quat.create ()),
                             new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                             prismGeo,
                             new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
-                            new rigidBody (1000.0, "static"));
+                            new rigidBody (10.0, "static"));
     floor.tag = "world";
     SGraph.push (floor);
 
@@ -76,7 +75,7 @@ function buildPhysicsScene (SGraph) {
                             prismGeo,
                             new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
-                            new rigidBody (1000.0, "static"));
+                            new rigidBody (10.0, "static"));
     roof.tag = "world";
     SGraph.push (roof);
 
@@ -85,7 +84,7 @@ function buildPhysicsScene (SGraph) {
                             prismGeo,
                             new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
-                            new rigidBody (1000.0, "static"));
+                            new rigidBody (10.0, "static"));
     left.tag = "world";
     SGraph.push (left);
 
@@ -94,7 +93,7 @@ function buildPhysicsScene (SGraph) {
                             prismGeo,
                             new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
-                            new rigidBody (1000.0, "static"));
+                            new rigidBody (10.0, "static"));
     right.tag = "world";
     SGraph.push (right);
 
@@ -103,7 +102,7 @@ function buildPhysicsScene (SGraph) {
                             prismGeo,
                             new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
-                            new rigidBody (1000.0, "static"));
+                            new rigidBody (10.0, "static"));
     front.tag = "world";
     SGraph.push (front);
 
@@ -112,49 +111,56 @@ function buildPhysicsScene (SGraph) {
                             prismGeo,
                             new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
-                            new rigidBody (1000.0, "static"));
+                            new rigidBody (10.0, "static"));
     back.tag = "world";
     SGraph.push (back);
 
-    var stool = new object ();
-    stool.tag = "tag";
-    stool.loadFromObj ("stoolOBJ", "stoolMAT", "stoolTEX");
-    stool.transform = new transform (vec3.fromValues (-1.0, 10.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
-    stool.addRigidBody (new rigidBody (50.0, "dynamic"));
-    stool.collider.physics = "dynamic";
-
-    SGraph.push (stool);
-
-    var cube = new object (new transform (vec3.fromValues (0.0, 20.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
-                           new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
-                           prismGeo,
-                           new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
-                           new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "dynamic"),
-                           new rigidBody (5.0, "dynamic"));
-    cube.tag = "cube";
-    
-    SGraph.push (cube);
 
     generateSphere (5);
     var sphereGeo = new geometry (pointsArray, normalsArray, textureArray);
-
     var sphere = new object (new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                              new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                              sphereGeo,
                              new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                              new sphereCollider (vec3.fromValues (0.0, 0.0, 0.0), 1.0, "dynamic"),
                              new rigidBody (5.0, "dynamic"));
-
     sphere.tag = "sphere";
 
-    player.addAnimation (new animationScaleObject (player, cube));
-    player.animations[0].object = cube;
     player.addAnimation (new animationLaunchObject (player, sphere));
-    player.animations[1].object = sphere;
+    player.animations[0].object = sphere;
 
     SGraph.push (player);
+
+    var enemy = new object (new transform (vec3.fromValues (0.0, 30.0, 0.0), vec3.fromValues (2.0, 8.0, 2.0), quat.create ()),
+                           new material (vec4.fromValues (0.8, 0.1, 0.1, 1.0), vec4.fromValues (0.8, 0.1, 0.1, 1.0), vec4.fromValues (0.8, 0.1, 0.1, 1.0), 40.0),
+                           prismGeo,
+                           new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                           new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "static"),
+                           null);
+    enemy.tag = "enemy";
+    enemy.scene = SGraph;
+    enemy.addAnimation (new animationEnemy (enemy));
+    enemy.collider.collisionFunction = function (object1, object2) {
+        if (object2.tag == "player") {
+            currentScene.playerController.health--;
+            if (currentScene.playerController.health <= 0) {
+                console.log ("YOU LOSE");
+            }
+            console.log (currentScene.playerController.health);
+            currentScene.remove (object1);
+        } else if (object2.tag == "sphere") {
+            currentScene.remove (object1);
+            currentScene.remove (object2);
+
+            currentScene.playerController.score += 10;
+            console.log (currentScene.playerController.score);
+        }
+    }
+
+    var enemySpawner = new object (new transform (), null, null, null, new nullCollider (), null);
+    enemySpawner.tag = "enemySpanwer";
+    enemySpawner.addAnimation (new animationEnemySpawner (enemySpawner, enemy));
+
+    SGraph.push (enemySpawner);
+
 }
-
-
-
-

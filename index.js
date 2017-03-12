@@ -18,6 +18,8 @@ var currentScene;
 var startMenuScene;
 var mainScene;
 var physicsDemoScene;
+var project1Scene;
+var survivalScene;
 
 var OFFSCREEN_WIDTH = 2048;
 var OFFSCREEN_HEIGHT = 2048;
@@ -113,11 +115,12 @@ window.onload = function init () {
     startMenuScene = new sceneGraph (buildMenuSceneGraph);
 	mainScene = new sceneGraph (buildSceneGraph);
     physicsDemoScene = new sceneGraph (buildPhysicsScene);
+    project1Scene = new sceneGraph (buildProject1Scene);
     currentScene = startMenuScene;
 
     startMenuScene.build ();
-    mainScene.build ();
     physicsDemoScene.build ();
+    project1Scene.build ();
 
 	buildStateMachine ();
 
@@ -127,7 +130,6 @@ window.onload = function init () {
             vec4.fromValues (0.05, 0.0, 0.5, 1.0),
             vec4.fromValues (-0.05, 0.0, 0.5, 1.0)
         ]);
-
 
     // Setting up pointerlock
     canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;

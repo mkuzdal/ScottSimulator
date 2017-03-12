@@ -1,7 +1,6 @@
 
 var MAX_LIGHT_COUNT = 5;
 
-
 class lightHandler {
     constructor (_scene) {
         this.lightCount = 0;
@@ -156,14 +155,14 @@ class light {
 
         gl.uniformMatrix4fv (gl.getUniformLocation (program, "lightProjectionMatrix[" + this.lightID + "]"), false, this.projectionMatrix);
         gl.uniformMatrix4fv (gl.getUniformLocation (program, "lightMatrix[" + this.lightID + "]"), false, this.view);
-        gl.uniform1f  (gl.getUniformLocation (program, "flightBias[" + this.lightID + "]"), this.bias);
+        gl.uniform1f  (gl.getUniformLocation (program, "fLightBias[" + this.lightID + "]"), this.bias);
     }
 
     /** setPerspective: sets the perspective projection matrix.
      */
     setPerspective () {
-        //mat4.ortho (this.projectionMatrix, -10.0, 10.0, -10.0, 10.0, 1.0, 256.0);
-        mat4.perspective (this.projectionMatrix, Math.PI * 70.0 / 180, OFFSCREEN_WIDTH / OFFSCREEN_HEIGHT, 1.0, 256.0);
+        //mat4.ortho (this.projectionMatrix, -10.0, 10.0, -10.0, 10.0, 1s.0, 256.0);
+        mat4.perspective (this.projectionMatrix, Math.PI * 90.0 / 180, OFFSCREEN_WIDTH / OFFSCREEN_HEIGHT, 1.0, 256.0);
     }
 
     /** setLightMatrix: sets the light view matrix.
