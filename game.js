@@ -118,7 +118,7 @@ function buildMenuSceneGraph(SGraph) {
 
     var startButton = new object ();
     startButton.tag = "startButton";
-    startButton.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
+    startButton.loadFromObj ("buttonOBJ", "buttonMAT", "buttonstartTEX");
     startButton.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     var startButtonMount = new object ();
     startButtonMount.tag = "startButtonMount";
