@@ -60,6 +60,11 @@ StateManager.play = function() {
 	if(currentEvent) currentEvent.play();
 }
 
+StateManager.stopAll = function() {
+	if(currentEvent) currentEvent.pause();
+	eventQueue = [];
+}
+
 StateManager.finishedEvent = function() {
 	currentEvent = null;
 	if(eventQueue.length > 0) StateManager.apply(eventQueue.shift());
