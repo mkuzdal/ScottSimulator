@@ -163,5 +163,4 @@ function buildSurvivalScene (SGraph) {
     enemySpawner.addAnimation (new animationEnemySpawner (enemySpawner, enemy));
 
     SGraph.push (enemySpawner);
-
 }
