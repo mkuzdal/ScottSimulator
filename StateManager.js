@@ -31,6 +31,7 @@ StateManager.setState = function(state) {
 }
 
 StateManager.apply = function(eventName) {
+	if(currentEvent && currentEvent.name == eventName) return;
 	var event = currentState.getEvent(eventName);
 	if(!currentEvent) {
 		if(event && currentState.getChild(event.name)) {
@@ -61,7 +62,10 @@ StateManager.play = function() {
 }
 
 StateManager.stopAll = function() {
-	if(currentEvent) currentEvent.pause();
+	if(currentEvent) {
+		currentEvent.pause();
+		currentEvent = null;
+	}
 	eventQueue = [];
 }
 

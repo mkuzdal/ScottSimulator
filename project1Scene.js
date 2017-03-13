@@ -1,3 +1,4 @@
+// like the functions in game.js, this function builds a scene graph, this time for the clone of assignment 1
 function buildProject1Scene (SGraph) {
 
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
