@@ -710,6 +710,11 @@ function buildSceneGraph (SGraph) {
         currentScene.animationsManager.addAnimation (new animationHold (object));
     });
 
+    spawnedStool = stool.clone();
+    spawnedStool.transform = new transform (vec3.fromValues(0.0, 5.0, 0.0), vec3.fromValues(0.4, 0.4, 0.4), quat.create ()); 
+    spawnedStool.active = false;
+    room.children.push(spawnedStool);
+
     //add all 4 doors 
     var leftdoor = new object ();
     leftdoor.tag = "leftdoorFront";
@@ -975,6 +980,8 @@ var changeGravityCautionBox, changeGravityButton, clickMeButton, dontClickMeButt
 var foundbugtrigger, exitedFindingBug = false;
 var exitFoundBugButton, stayFoundBugButton;
 
+var spawnedStool;
+
 var previousState = null; //used for when I leave a certain state into a branch but want to return. I could use something like stackframes but I'm too lazy and this is more than enough for my purposes;
 
 // This function builds the state machine, which controls which actions can hapen and when
@@ -1105,13 +1112,8 @@ function buildStateMachine () {
     var clickMe = new Event("clickMe", new Activity('A_spawnchair', 
         function() {
             // spawn a chair
-            var stool = new object();
-            currentScene.push (stool);
-            stool.tag = "stool";
-            stool.loadFromObj ("stoolOBJ", "stoolMAT", "stoolTEX");
-            stool.transform = new transform (vec3.fromValues(0.0, 5.0, 0.0), vec3.fromValues(0.4, 0.4, 0.4), quat.create ()); 
-            stool.addRigidBody (new rigidBody (10.0, "dynamic"));
-            stool.collider.physics = "dynamic";
+            spawnedStool.active = true;
+            clickMeButton.active = false;
         }, 
         function() {
             console.log('Clicked me!');
