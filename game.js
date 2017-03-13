@@ -1158,7 +1158,7 @@ function buildStateMachine () {
         function() {    
             console.log('Assignment 1');
             currentScene = mainScene;
-            currentScene.playerController.player.transform.position = vec3.fromValues (130.0, 10.0, 170.0);
+            currentScene.playerController.player.transform.position = vec3.fromValues (-130.0, 10.0, 170.0);
         }
     ));
     var hallwayendEvent = new Event("hallwayend", new Activity('A_eggertIntro', 
