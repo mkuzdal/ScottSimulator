@@ -397,6 +397,7 @@ function buildSceneGraph (SGraph) {
     hallwayCapLeft.collider.physics = "static";
     hallwayCapLeft.collider.collisionFunction = function (object1, object2) {
         StateManager.apply('hallwayleft');
+        object1.collider.collisionFunction = null;
     }
 
     var hallwayCapRight = hallwayCapLeft.clone ();
@@ -406,6 +407,7 @@ function buildSceneGraph (SGraph) {
     hallwayCapRight.collider.physics = "static";
     hallwayCapRight.collider.collisionFunction = function (object1, object2) {
         StateManager.apply('hallwayright');
+        object1.collider.collisionFunction = null;
     }
 
     var hallwayCapEnd = hallwayCapLeft.clone ();
@@ -415,6 +417,7 @@ function buildSceneGraph (SGraph) {
     hallwayCapEnd.collider.physics = "static";
     hallwayCapEnd.collider.collisionFunction = function (object1, object2) {
         StateManager.apply('hallwayend');
+        object1.collider.collisionFunction = null;
     }
 
 
@@ -944,8 +947,7 @@ function buildStateMachine () {
     StateManager.addState("clickedRight2");
     StateManager.addState("clickedRight3");
     StateManager.addState("clickedLeft");
-    StateManager.addState("changeGravity");
-    StateManager.addState("saved");
+    StateManager.addState("playingGame");
 
 
     var clickedStart = new Event("clickStart", new Activity('A_intro1', function() { mainScene.resetScene (); currentScene = mainScene; }, null));
@@ -1053,9 +1055,11 @@ function buildStateMachine () {
             stool.addRigidBody (new rigidBody (10.0, "dynamic"));
             stool.collider.physics = "dynamic";
             currentScene.push (stool);
+            clickMeButton.active = false;
         }, 
         function() {
             console.log('Clicked me!');
+            clickMeButton.active = true;
         }
     ));
     var dontClickMe = new Event("dontClickMe", new Activity(null, 
@@ -1078,14 +1082,17 @@ function buildStateMachine () {
         }, 
         function() {
             console.log('Physics demo.');
+            currentScene = survivalScene; // move player into survival scene
         }
     ));
     var hallwayrightEvent = new Event("hallwayright", new Activity('A_project1Intro', 
         function() {
             currentScene = project1Scene;
         }, 
-        function() {
+        function() {    
             console.log('Assignment 1');
+            currentScene = mainScene;
+            currentScene.playerController.player.transform.position = vec3.fromValues (130.0, 10.0, 170.0);
         }
     ));
     var hallwayendEvent = new Event("hallwayend", new Activity('A_eggertIntro', 
@@ -1099,6 +1106,8 @@ function buildStateMachine () {
             currentScene.playerController.player.transform.position = vec3.fromValues (0.0, 10.0, 300.0);
         }
     ));
+
+    var deathEvent = new Event("deathEvent", new Activity('A_death', function(){}, function() {currentScene = startMenuScene;}));
 
 
     var savedWorld = new Event("savedWorld", new Activity(null, function(){}, function(){console.log('Saved world!')}));
@@ -1124,7 +1133,6 @@ function buildStateMachine () {
     StateManager.getState("clickedLeft").addChild(changeGravity, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedLeft").addChild(clickMe, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedLeft").addChild(dontClickMe, StateManager.getState("clickedLeft"));
-    StateManager.getState("changeGravity").addChild(savedWorld, StateManager.getState("saved"));
     
     // add all the leaving triggers
     StateManager.getState("intro1").addChild(leaving1, StateManager.getState("leaving1"));
@@ -1137,15 +1145,14 @@ function buildStateMachine () {
     StateManager.getState("clickedRight2").addChild(leaving1, StateManager.getState("leaving1"));
     StateManager.getState("clickedRight3").addChild(leaving1, StateManager.getState("leaving1"));
     StateManager.getState("clickedLeft").addChild(leaving1, StateManager.getState("leaving1"));
-    StateManager.getState("changeGravity").addChild(leaving1, StateManager.getState("leaving1"));
-    StateManager.getState("saved").addChild(leaving1, StateManager.getState("leaving1"));
     StateManager.getState("leaving1").addChild(leaving2, StateManager.getState("leaving2"));
     StateManager.getState("leaving2").addChild(leaving3, StateManager.getState("leaving3"));
     StateManager.getState("leaving3").addChild(leaving4, StateManager.getState("leaving4"));
     StateManager.getState("leaving4").addChild(leaving5, StateManager.getState("leaving5"));
-    StateManager.getState("leaving5").addChild(hallwayleftEvent, StateManager.getState("leaving5"));
+    StateManager.getState("leaving5").addChild(hallwayleftEvent, StateManager.getState("playingGame"));
     StateManager.getState("leaving5").addChild(hallwayrightEvent, StateManager.getState("leaving5"));
     StateManager.getState("leaving5").addChild(hallwayendEvent, StateManager.getState("leaving5"));
+    StateManager.getState("playingGame").addChild(deathEvent, StateManager.getState("root"));
     StateManager.getState("leaving1").addChild(returning, StateManager.getState("root"));
     StateManager.getState("leaving2").addChild(returning, StateManager.getState("root"));
     StateManager.getState("leaving3").addChild(returning, StateManager.getState("root"));
