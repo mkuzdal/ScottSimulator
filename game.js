@@ -737,8 +737,6 @@ function buildSceneGraph (SGraph) {
     changeGravityButton = buttonMount.clone(); changeGravityButton.transform.position = vec3.fromValues(0,0,0); changeGravityButton.active = false; room.children.push (changeGravityButton);
     clickMeButton = buttonMount.clone(); clickMeButton.transform.position = vec3.fromValues(-5,0,0); clickMeButton.active = false; room.children.push (clickMeButton);
     dontClickMeButton = buttonMount.clone(); dontClickMeButton.transform.position = vec3.fromValues(5,0,0); dontClickMeButton.active = false; room.children.push (dontClickMeButton);
-    swapTexturesButton = buttonMount.clone(); swapTexturesButton.transform.position = vec3.fromValues(10,0,0); swapTexturesButton.active = false; room.children.push (swapTexturesButton);
-    swapTexturesButton.children[0].texture = new texture (document.getElementById ("projectorTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]);
 
     exitFoundBugButton = buttonMount.clone(); exitFoundBugButton.transform.position = vec3.fromValues(15,0,10); exitFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); exitFoundBugButton.active = false; room.children.push (exitFoundBugButton);
     stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
@@ -763,9 +761,6 @@ function buildSceneGraph (SGraph) {
     dontClickMeButton.children[0].addOnMouseClickTrigger(function(object) {
         StateManager.apply("dontClickMe");
     }); 
-    swapTexturesButton.children[0].addOnMouseClickTrigger(function(object) {
-        StateManager.apply("swapTextures");
-    });
 
     leavetrigger1.collider.collisionFunction = function (object1, object2) {
         StateManager.apply("leavetrigger1");
@@ -874,7 +869,7 @@ var room;
 var leavetrigger1, leavetrigger2, leavetrigger3;
 var returntrigger;
 var rightButtonMount, leftButtonMount;
-var changeGravityCautionBox, changeGravityButton, swapTexturesButton, clickMeButton, dontClickMeButton, numIncorrectClicks = 0;
+var changeGravityCautionBox, changeGravityButton, clickMeButton, dontClickMeButton, numIncorrectClicks = 0;
 
 var foundbugtrigger, exitedFindingBug = false;
 var exitFoundBugButton, stayFoundBugButton;
@@ -961,7 +956,7 @@ function buildStateMachine () {
     ));
     var clickedRight3 = new Event("clickedRight", new Activity('A_rightbutton3', 
         function() {
-            rightButtonMount.children[0].texture = new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]);
+            swapTextures(document.getElementById('projectorTEX'));
         }, 
         function() {
             console.log('You have done it now Scott...');
@@ -970,6 +965,7 @@ function buildStateMachine () {
     var clickedRight4 = new Event("clickedRight", new Activity('A_rightbutton4', 
         function() {
             rightButtonMount.active = false;
+            currentScene = startMenuScene;
         }, 
         function() {console.log('Seriously? Again???')}
     ));
@@ -980,7 +976,6 @@ function buildStateMachine () {
             clickMeButton.active = true;
             dontClickMeButton.active = true;
             changeGravityCautionBox.active = true;
-            swapTexturesButton.active = true;
         }, 
         function() {
             console.log('Good job');
@@ -1025,16 +1020,7 @@ function buildStateMachine () {
         }
     ));
 
-    var swapTexturesEvent = new Event("swapTextures", new Activity(null, 
-        function() {
-            swapTextures(document.getElementById('projectorTEX'));
-        }, 
-        function() {
-            console.log('NO NONONOONONO! Scott... Well. This is awkward.');
-        }
-    ));
-
-    var hallwayleftEvent = new Event("hallwayleft", new Activity(null, 
+    var hallwayleftEvent = new Event("hallwayleft", new Activity('A_testingIntro', 
         function() {
             currentScene = physicsDemoScene;
         }, 
@@ -1042,7 +1028,7 @@ function buildStateMachine () {
             console.log('Physics demo.');
         }
     ));
-    var hallwayrightEvent = new Event("hallwayright", new Activity(null, 
+    var hallwayrightEvent = new Event("hallwayright", new Activity('A_project1Intro', 
         function() {
             currentScene = project1Scene;
         }, 
@@ -1050,17 +1036,15 @@ function buildStateMachine () {
             console.log('Assignment 1');
         }
     ));
-    var hallwayendEvent = new Event("hallwayend", new Activity(null, 
+    var hallwayendEvent = new Event("hallwayend", new Activity('A_eggertIntro', 
         function() {
             currentScene = eggertRoomScene;
         }, 
         function() {
             console.log('Eggert Room');
             // put them back in the OG room
-            /*
             currentScene = mainScene;
             currentScene.playerController.player.transform.position = vec3.fromValues (0.0, 10.0, 300.0);
-            */
         }
     ));
 
@@ -1080,7 +1064,7 @@ function buildStateMachine () {
     StateManager.getState("twobuttons").addChild(clickedRight1, StateManager.getState("clickedRight1"));
     StateManager.getState("clickedRight1").addChild(clickedRight2, StateManager.getState("clickedRight2"));
     StateManager.getState("clickedRight2").addChild(clickedRight3, StateManager.getState("clickedRight3"));
-    StateManager.getState("clickedRight3").addChild(clickedRight4, StateManager.getState("clickedRight3"));
+    StateManager.getState("clickedRight3").addChild(clickedRight4, StateManager.getState("root"));
     StateManager.getState("twobuttons").addChild(clickedLeft, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedRight1").addChild(clickedLeft, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedRight2").addChild(clickedLeft, StateManager.getState("clickedLeft"));
@@ -1088,7 +1072,6 @@ function buildStateMachine () {
     StateManager.getState("clickedLeft").addChild(changeGravity, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedLeft").addChild(clickMe, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedLeft").addChild(dontClickMe, StateManager.getState("clickedLeft"));
-    StateManager.getState("clickedLeft").addChild(swapTexturesEvent, StateManager.getState("clickedLeft"));
     StateManager.getState("changeGravity").addChild(savedWorld, StateManager.getState("saved"));
     
     // add all the leaving triggers
