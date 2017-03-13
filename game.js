@@ -230,8 +230,8 @@ function buildSceneGraph (SGraph) {
                             new rigidBody (1000.0, "static"))
                     );
 
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, -9.5, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
-                            null, null, null,
+    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, -9.0, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
+                            null, null, null, 
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
@@ -696,7 +696,7 @@ function buildSceneGraph (SGraph) {
     var stool = new object();
     stool.tag = "stool";
     stool.loadFromObj ("stoolOBJ", "stoolMAT", "stoolTEX");
-	stool.transform = new transform (vec3.fromValues(-16, -7.0, -8.5), vec3.fromValues(0.4, 0.4, 0.4), quat.clone(rotation)); 
+	stool.transform = new transform (vec3.fromValues(-16, 0.0, -8.5), vec3.fromValues(0.4, 0.4, 0.4), quat.clone(rotation)); 
 	room.children.push (stool);
     stool.addRigidBody (new rigidBody (10.0, "dynamic"));
     stool.collider.physics = "dynamic";
