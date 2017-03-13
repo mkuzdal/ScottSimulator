@@ -1,13 +1,10 @@
 # ScottSimulator
 UCLA CS174A Computer Graphics Final Project
-
-Allen Zhou 004607924
-
-Matthew Kuzdal 404564296
-
-Preetham Reddy Narayanareddy 604630101
-
-Yaacov Tarko 304316669
+Team Members:
+  1. Allen Zhou 004607924
+  2. Matthew Kuzdal 404564296
+  3. Preetham Reddy Narayanareddy 604630101
+  4. Yaacov Tarko 304316669
 
 This is our final project for CS-174a. 
 
