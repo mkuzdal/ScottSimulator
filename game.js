@@ -334,6 +334,38 @@ function buildSceneGraph (SGraph) {
     hallwaytop.collider.physics = "static";
 
 
+    var hallwayCapLeft = new object (new transform (vec3.fromValues (155.0, 0.0, 0.0), vec3.fromValues (5.0, 20.0, 20.0), quat.create ()),
+                                 new material (vec4.fromValues (0.05, 0.05, 0.05, 1.0), vec4.fromValues (0.05, 0.05, 0.05, 1.0), vec4.fromValues (0.05, 0.05, 0.05, 1.0), 40.0),
+                                 new geometry (pointsArray, normalsArray, textureArray),
+                                 new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                                 new boxCollider (),
+                                 new rigidBody (1000.0, "static"));
+    hallwayCapLeft.tag = "hallwaycapL";
+    hallway.children.push (hallwayCapLeft);
+    hallwayCapLeft.collider.physics = "static";
+    hallwayCapLeft.collider.collisionFunction = function (object1, object2) {
+        StateManager.apply('hallwayleft');
+    }
+
+    var hallwayCapRight = hallwayCapLeft.clone ();
+    hallwayCapRight.transform = new transform (vec3.fromValues (-155.0, 0.0, 0.0), vec3.fromValues (5.0, 20.0, 20.0), quat.create ());
+    hallwayCapRight.tag = "hallwaycapR";
+    hallway.children.push (hallwayCapRight);
+    hallwayCapRight.collider.physics = "static";
+    hallwayCapRight.collider.collisionFunction = function (object1, object2) {
+        StateManager.apply('hallwayright');
+    }
+
+    var hallwayCapEnd = hallwayCapLeft.clone ();
+    hallwayCapEnd.transform = new transform (vec3.fromValues (0.0, 0.0, 155.0), vec3.fromValues (20.0, 20.0, 5.0), quat.create ());
+    hallwayCapEnd.tag = "hallwaycapEnd";
+    hallway.children.push (hallwayCapEnd);
+    hallwayCapEnd.collider.physics = "static";
+    hallwayCapEnd.collider.collisionFunction = function (object1, object2) {
+        StateManager.apply('hallwayend');
+    }
+
+
     var dangerDoorLeft = new object ();
     var doorRotation = quat.create ();
     quat.setAxisAngle (doorRotation, [0, 1, 0], glMatrix.toRadian (180.0));
@@ -470,39 +502,6 @@ function buildSceneGraph (SGraph) {
                             null
                     );
     room.children.push (foundbugtrigger);
-
-
-    var hallwayCapLeft = new object (new transform (vec3.fromValues (155.0, 0.0, 0.0), vec3.fromValues (5.0, 20.0, 20.0), quat.create ()),
-                                 new material (vec4.fromValues (0.05, 0.05, 0.05, 1.0), vec4.fromValues (0.05, 0.05, 0.05, 1.0), vec4.fromValues (0.05, 0.05, 0.05, 1.0), 40.0),
-                                 new geometry (pointsArray, normalsArray, textureArray),
-                                 new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
-                                 new boxCollider (),
-                                 new rigidBody (1000.0, "static"));
-    hallwayCapLeft.tag = "hallwaycapL";
-    hallway.children.push (hallwayCapLeft);
-    hallwayCapLeft.collider.physics = "static";
-    hallwayCapLeft.collider.collisionFunction = function (object1, object2) {
-        StateManager.apply('hallwayleft');
-    }
-
-    var hallwayCapRight = hallwayCapLeft.clone ();
-    hallwayCapRight.transform = new transform (vec3.fromValues (-155.0, 0.0, 0.0), vec3.fromValues (5.0, 20.0, 20.0), quat.create ());
-    hallwayCapRight.tag = "hallwaycapR";
-    hallway.children.push (hallwayCapRight);
-    hallwayCapRight.collider.physics = "static";
-    hallwayCapRight.collider.collisionFunction = function (object1, object2) {
-        StateManager.apply('hallwayright');
-    }
-
-    var hallwayCapEnd = hallwayCapLeft.clone ();
-    hallwayCapEnd.transform = new transform (vec3.fromValues (0.0, 0.0, 155.0), vec3.fromValues (20.0, 20.0, 5.0), quat.create ());
-    hallwayCapEnd.tag = "hallwaycapEnd";
-    hallway.children.push (hallwayCapEnd);
-    hallwayCapEnd.collider.physics = "static";
-    hallwayCapEnd.collider.collisionFunction = function (object1, object2) {
-        StateManager.apply('hallwayend');
-    }
-
 
 	var roof = new object ();
     roof.tag = "roof";
