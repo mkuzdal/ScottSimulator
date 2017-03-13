@@ -684,3 +684,41 @@ class animationDangerDoorLeft {
     }
 }
 
+class animationButton {
+    constructor (_object) {
+        this.object = _object;
+
+        this.pressed = false;
+        this.active = true;
+        this.tag = "button";
+
+        this.normalPosition = vec3.clone (this.object.transform.position);
+        
+        this.pressedPosition = vec3.clone (this.normalPosition);
+        this.pressedPosition[1] -= 0.3;
+        
+        this.currentPosition = vec3.clone (this.normalPosition);
+    }
+
+    animate (dTime) {
+        if (!this.active) 
+            return;
+
+        var destinationPos = vec3.clone (this.normalPosition);
+
+        if (this.pressed) {
+            destinationPos = vec3.clone (this.pressedPosition);
+        } 
+    
+        vec3.lerp (this.currentPosition, this.currentPosition, destinationPos, 4.0 * dTime);
+
+        this.object.transform.position = vec3.clone (this.currentPosition); 
+    }
+
+    clone () {
+        var newAnimation = new animationButton (this.object);
+        newAnimation.active = this.active;
+        return newAnimation;
+    }
+}
+

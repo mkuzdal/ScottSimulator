@@ -770,6 +770,7 @@ function buildSceneGraph (SGraph) {
     button.tag = "button";
     button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
     button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    button.addAnimation (new animationButton (button));
     var buttonMount = new object ();
     buttonMount.tag = "buttonMount";
     buttonMount.loadFromObj ("buttonMountOBJ", "buttonMountMAT", "buttonMountTEX");
@@ -797,15 +798,18 @@ function buildSceneGraph (SGraph) {
 
 
     rightButtonMount.children[0].addOnMouseClickTrigger(function(object) {
+        object.animations[0].pressed = true;
         StateManager.apply("clickedRight");
     });
     leftButtonMount.children[0].addOnMouseClickTrigger(function(object) {
+        object.animations[0].pressed = true;
         StateManager.apply("clickedLeft");
     }); 
     changeGravityCautionBox.addOnMouseClickTrigger(function(object) {
         changeGravityCautionBox.active = false;
         changeGravityButton.active = true;
     });
+    
     changeGravityButton.children[0].addOnMouseClickTrigger(function(object) {
         StateManager.apply("changeGravity");
     }); 
