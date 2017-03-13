@@ -1040,6 +1040,7 @@ function buildStateMachine () {
     var clickedRight1 = new Event("clickedRight", new Activity('A_rightbutton1', 
         function() {
             rightButtonMount.transform.scale = vec3.fromValues(0.2, 0.2, 0.2);
+            rightButtonMount.children[0].animations[0].pressed = false;
         }, 
         function() {
             console.log('You might not have heard me. I said the left button')
@@ -1051,6 +1052,7 @@ function buildStateMachine () {
             //currentScene.playerController.player.transform.rotation = vec3.fromValues(-0.07094697654247284, -0.9180688858032227, -0.19179458916187286, 0.3396040201187134);
             
             rightButtonMount.transform.position = vec3.fromValues(-3.0,-5,-17.5); 
+            rightButtonMount.children[0].animations[0].pressed = false;
             quat.rotateY(rightButtonMount.transform.rotation, rightButtonMount.transform.rotation, glMatrix.toRadian(180));
             rightButtonPicture.active = true;
             leftButtonMount.transform.scale = vec3.fromValues(5.0, 5.0, 5.0);
