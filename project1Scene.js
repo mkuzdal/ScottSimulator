@@ -100,7 +100,12 @@ function buildProject1Scene (SGraph) {
 
     for (var i = 0; i < cubes.children.length; i++) {
         var omega = 40 + 10 * i;
-        cubes.children[i].addAnimation (new animationRotation (cubes.children[i], omega, vec3.fromValues (0.0, 1.0, 0.0)));
+        var randX = Math.random ();
+        var randY = Math.random ();
+        var randZ = Math.random ();
+        var axis = vec3.fromValues (randX, randY, randZ);
+        vec3.normalize (axis, axis);
+        cubes.children[i].addAnimation (new animationRotation (cubes.children[i], omega, axis));
     } 
 
     SGraph.push (cubes);
