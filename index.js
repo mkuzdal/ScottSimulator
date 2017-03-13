@@ -1,6 +1,6 @@
 /** @file: test.js
  *  Main runtime code for ScottSimulator
- *  MIT license here
+ *  Licensed under the MIT license
  *
  **/
 
