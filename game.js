@@ -1,5 +1,7 @@
+// This builds the scene graph for the main menu, which is just a big box and a start button
 function buildMenuSceneGraph(SGraph) {
 
+    // Adding a bunch of light sources to the world so it looks nice
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (50.0, 40.0, 0.0), vec3.fromValues(1.0, 1.0, 1.0), quat.create ()),
                               vec3.fromValues (0.0, 0.0, 0.0),
                               vec4.fromValues (0.1, 0.1, 0.1, 1.0),
@@ -40,6 +42,7 @@ function buildMenuSceneGraph(SGraph) {
 
     SGraph.lightsManager.lightSources[0].tag = "black";
 
+    // Setting up the camera and attaching it to a player with a collider
     var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
     var player = new object (new transform (vec3.fromValues (0.0, 5.0, -15.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                          null, 
@@ -61,7 +64,7 @@ function buildMenuSceneGraph(SGraph) {
 
     var prismGeo = new geometry (pointsArray, normalsArray, textureArray);
 
-    // floor
+    // Setting up planes and box colliders, just a big box
     var floor = new object (new transform (vec3.fromValues (0.0, -4.0, 0.0), vec3.fromValues (1000.0, 3.0, 1000.0), quat.create ()),
                             new material (vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), vec4.fromValues (0.6, 0.6, 0.6, 0.7), 40.0),
                             prismGeo,
@@ -116,6 +119,7 @@ function buildMenuSceneGraph(SGraph) {
     back.tag = "world";
     SGraph.push (back);
 
+    // Add a single button to the scene, this takes you into the main game
     var startButton = new object ();
     startButton.tag = "startButton";
     startButton.loadFromObj ("buttonOBJ", "buttonMAT", "buttonstartTEX");
@@ -136,12 +140,18 @@ function buildMenuSceneGraph(SGraph) {
     SGraph.push(startButtonMount);
 }
 
+// This builds the scene graph for the main lecture room
 function buildSceneGraph (SGraph) {
 
     generateCubeNormals (cubeVertices);
     generateCubeVertices (cubeVertices);
     generateCubeTexCoords (texCoords);
+    // This function and all the similar scene graph generating function follow the general struction of:
+    // add lights
+    // add visible objects
+    // add invisible objects (to be used as triggers for events)
 
+    // Add a bunch of lights and a camera to the scene
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, -45.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                                                vec3.fromValues (0.0, -4.0, 10.0),
                                                vec4.fromValues (0.1, 0.1, 0.1, 1.0),
@@ -172,8 +182,10 @@ function buildSceneGraph (SGraph) {
     player.tag = "player";
 
     SGraph.push (player);
+    // Attach a player controller to the player object
     SGraph.playerController = new PlayerController (player);
-
+    // For a long section after this, just adding various objects to the scene
+    // This includes adding invisible objects as triggers (on collide)
 	// room
 	room = new object ();
     room.tag = "world";
@@ -956,6 +968,7 @@ var exitFoundBugButton, stayFoundBugButton;
 
 var previousState = null; //used for when I leave a certain state into a branch but want to return. I could use something like stackframes but I'm too lazy and this is more than enough for my purposes;
 
+// This function builds the state machine, which controls which actions can hapen and when
 function buildStateMachine () {
     StateManager.addState("intro1");
     StateManager.addState("intro2");
