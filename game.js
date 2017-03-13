@@ -38,7 +38,7 @@ function buildMenuSceneGraph(SGraph) {
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
 
-    SGraph.lightsManager.lightSources[4].tag = "black";
+    SGraph.lightsManager.lightSources[0].tag = "black";
 
     var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
     var player = new object (new transform (vec3.fromValues (0.0, 5.0, -15.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
@@ -343,7 +343,7 @@ function buildSceneGraph (SGraph) {
     hallway.children.push (dangerDoorLeft);
     dangerDoorLeft.addRigidBody (new rigidBody (10.0, "static"));
     dangerDoorLeft.collider.physics = "static";
-    dangerDoorLeft.addOnMouseClickTrigger (function (object) {        
+    dangerDoorLeft.addOnMouseClickTrigger (function (object) {
         for (var i = 0; i < object.animations.length; i++) {
             var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
             if (dist > 225.0)
@@ -386,7 +386,7 @@ function buildSceneGraph (SGraph) {
     hallway.children.push (dangerDoorRight);
     dangerDoorRight.addRigidBody (new rigidBody (10.0, "static"));
     dangerDoorRight.collider.physics = "static";
-    dangerDoorRight.addOnMouseClickTrigger (function (object) {        
+    dangerDoorRight.addOnMouseClickTrigger (function (object) {
         for (var i = 0; i < object.animations.length; i++) {
             var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
             if (dist > 225.0)
@@ -463,7 +463,6 @@ function buildSceneGraph (SGraph) {
                             null
                     );
     room.children.push (returntrigger);
-
 
     foundbugtrigger = new object (new transform (vec3.fromValues (0.0, -5.0, 11.0), vec3.fromValues (100.0, 5.0, 15.0), quat.create ()),
                             null, null, null,
