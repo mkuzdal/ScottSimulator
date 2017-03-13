@@ -1170,6 +1170,8 @@ function buildStateMachine () {
             // put them back in the OG room
             currentScene = mainScene;
             currentScene.playerController.player.transform.position = vec3.fromValues (0.0, 10.0, 300.0);
+            currentScene.getObjectsByTag('dangerDoorLeft')[0].animations[0].open = false;
+            currentScene.getObjectsByTag('dangerDoorRight')[0].animations[0].open = false;
         }
     ));
 
