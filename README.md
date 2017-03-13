@@ -1,5 +1,6 @@
 # ScottSimulator
 UCLA CS174A Computer Graphics Final Project
+
 Team Members:
   1. Allen Zhou - 004607924
   2. Matthew Kuzdal - 404564296
