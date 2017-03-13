@@ -220,17 +220,21 @@ function buildSceneGraph (SGraph) {
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
-    roomColliders.push ( new object (new transform (vec3.fromValues (17.5, 0.0, 0.0), vec3.fromValues (3.0, 30.0, 50.0), quat.create ()),
-                            null, null, null,                            
+    // Left wall
+    roomColliders.push ( new object (new transform (vec3.fromValues (17.5, 0.0, 12.0), vec3.fromValues (3.0, 30.0, 50.0), quat.create ()),
+                            null, null, null,
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
+
     roomColliders.push ( new object (new transform (vec3.fromValues (-17.5, 0.0, 0.0), vec3.fromValues (3.0, 30.0, 50.0), quat.create ()),
                             null, null, null,
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 0.0, -17.5), vec3.fromValues (50.0, 30.0, 3.0), quat.create ()),
+
+    // Front wall
+    roomColliders.push ( new object (new transform (vec3.fromValues (-16.0, 0.0, -17.5), vec3.fromValues (50.0, 30.0, 3.0), quat.create ()),
                             null, null, null,
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
@@ -260,6 +264,55 @@ function buildSceneGraph (SGraph) {
                             new boxCollider (),
                             new rigidBody (1000.0, "static"))
                     );
+
+    // broomCloset
+    var broomCloset = new object ();
+    broomCloset.tag = "broomCloset";
+    broomCloset.loadFromObj ("broomClosetOBJ", "broomClosetMAT", "broomClosetTEX");
+    broomCloset.collider.physics = "trigger";
+    broomCloset.children.push (new object (new transform (vec3.fromValues (15.0, 0.0, -5.0), vec3.fromValues (20.0, 20.0, 20.0), quat.create ()),
+                                        null, null, null, 
+                                        new boxCollider (),
+                                        new rigidBody (1000.0, "static")));
+    broomCloset.children.push (new object (new transform (vec3.fromValues (-15.0, 0.0, -5.0), vec3.fromValues (20.0, 20.0, 20.0), quat.create ()),
+                                        null, null, null,
+                                        new boxCollider (),
+                                        new rigidBody (1000.0, "static")));
+    broomCloset.children.push (new object (new transform (vec3.fromValues (0.0, 0.0, -15.0), vec3.fromValues (20.0, 20.0, 20.0), quat.create ()),
+                                        null, null, null,
+                                        new boxCollider (),
+                                        new rigidBody (1000.0, "static")));
+    broomCloset.children.push (new object (new transform (vec3.fromValues (0.0, 15.0, -5.0), vec3.fromValues (20.0, 20.0, 20.0), quat.create ()),
+                                        null, null, null,
+                                        new boxCollider (),
+                                        new rigidBody (1000.0, "static")));
+
+    var rotation = quat.create ();
+    quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (-30));
+    broomCloset.transform = new transform (vec3.fromValues (15.8, -2.7, -19.6), vec3.fromValues (1.0, 1.0, 1.0), rotation);
+
+    var bazooka = new object ();
+    bazooka.tag = "bazooka";
+    bazooka.loadFromObj ("bazookaOBJ", "bazookaMAT", "bazookaTEX");
+    bazooka.collider.physics = "trigger";
+    var rotation = quat.create ();
+    quat.setAxisAngle (rotation, [0, 0, 1], glMatrix.toRadian (90));
+    bazooka.transform = new transform (vec3.fromValues (0.0, -3.5, -4.0), vec3.fromValues (1.0, 1.0, 1.0), rotation);
+    bazooka.addOnMouseClickTrigger(function(object) {
+        var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
+            if (dist > 100.0)
+                return;
+
+        currentScene.remove (object);
+        currentScene.playerController.player.children.push (object);
+        var rotation = quat.create ();
+        quat.setAxisAngle (rotation, [0,1,0], glMatrix.toRadian (90.0));
+        object.transform = new transform (vec3.fromValues (0.6, 0.0, -0.5), vec3.fromValues (1.0, 1.0, 1.0), rotation);
+        object.rigidBody = null;
+        object.collider = new nullCollider ();
+    });
+    broomCloset.children.push (bazooka);
+    room.children.push (broomCloset);
 
     // Hallway:
     var hallway = new object ();
@@ -332,7 +385,6 @@ function buildSceneGraph (SGraph) {
     hallway.children.push (hallwaytop);
     hallwaytop.addRigidBody (new rigidBody (10.0, "static"));
     hallwaytop.collider.physics = "static";
-
 
     var hallwayCapLeft = new object (new transform (vec3.fromValues (155.0, 0.0, 0.0), vec3.fromValues (5.0, 20.0, 20.0), quat.create ()),
                                  new material (vec4.fromValues (0.05, 0.05, 0.05, 1.0), vec4.fromValues (0.05, 0.05, 0.05, 1.0), vec4.fromValues (0.05, 0.05, 0.05, 1.0), 40.0),
