@@ -843,6 +843,7 @@ function buildSceneGraph (SGraph) {
     changeGravityCautionBox.texture = new texture(document.getElementById("buttonpanicTEX"), changeGravityCautionBox.texture.options)
 
     exitFoundBugButton = buttonMount.clone(); exitFoundBugButton.transform.position = vec3.fromValues(15,0,10); exitFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); exitFoundBugButton.active = false; room.children.push (exitFoundBugButton);
+    exitFoundBugButton.children[0].texture = new texture(document.getElementById("buttongreenTEX"), exitFoundBugButton.texture.options)
     stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
 
     rightButtonPicture.addOnMouseClickTrigger(function(object) {
