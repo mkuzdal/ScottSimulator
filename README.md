@@ -12,6 +12,8 @@ The game concept is loosely based off of The Stanley Parable.
 
 Ths idea is that the narrator is telling you, Scott, what to do, but since you have "full" control over yourself, you can choose to either follow the narrators instructions, or disregard him and explore your own adventure.
 
+Controls are WASD, space for jump, shift for crouch, and mouse left and right click for various interactions.
+
 The commit history can be seen on this repository: https://github.com/mkuzdal/ScottSimulator
 
 Advanced topics covered:
