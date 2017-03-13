@@ -117,14 +117,15 @@ window.onload = function init () {
 	mainScene = new sceneGraph (buildSceneGraph);
     physicsDemoScene = new sceneGraph (buildPhysicsScene);
     project1Scene = new sceneGraph (buildProject1Scene);
+    survivalScene = new sceneGraph (buildSurvivalScene);
     eggertRoomScene = new sceneGraph (buildEggertRoomSceneGraph);
     currentScene = startMenuScene;
 
     startMenuScene.build ();
     physicsDemoScene.build ();
     project1Scene.build ();
+    survivalScene.build ();
     eggertRoomScene.build ();
-
 	buildStateMachine ();
 
     crosshair = new Crosshair ([

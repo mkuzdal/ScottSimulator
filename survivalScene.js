@@ -45,7 +45,7 @@ function buildSurvivalScene (SGraph) {
                          null, 
                          null, 
                          null,
-                         new boxCollider (vec3.fromValues (-0.25, -5, -0.25), vec3.fromValues (0.25, 0.0, 0.25), "dynamic"),
+                         new boxCollider (vec3.fromValues (-1.0, -5.0, -1.0), vec3.fromValues (0.25, 0.0, 0.25), "dynamic"),
                          new rigidBody (100.0, "dynamic"));
 
     player.camera = cam;
@@ -131,15 +131,15 @@ function buildSurvivalScene (SGraph) {
 
     SGraph.push (player);
 
-    var enemy = new object (new transform (vec3.fromValues (0.0, 30.0, 0.0), vec3.fromValues (2.0, 8.0, 2.0), quat.create ()),
+    var enemy = new object (new transform (vec3.fromValues (30.0, 30.0, 30.0), vec3.fromValues (2.0, 8.0, 2.0), quat.create ()),
                            new material (vec4.fromValues (0.8, 0.1, 0.1, 1.0), vec4.fromValues (0.8, 0.1, 0.1, 1.0), vec4.fromValues (0.8, 0.1, 0.1, 1.0), 40.0),
                            prismGeo,
                            new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                            new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "static"),
                            null);
+
     enemy.tag = "enemy";
     enemy.scene = SGraph;
-    enemy.addAnimation (new animationEnemy (enemy));
     enemy.collider.collisionFunction = function (object1, object2) {
         if (object2.tag == "player") {
             currentScene.playerController.health--;
@@ -147,7 +147,7 @@ function buildSurvivalScene (SGraph) {
                 console.log ("YOU LOSE");
             }
             console.log (currentScene.playerController.health);
-            currentScene.remove (object1);
+
         } else if (object2.tag == "sphere") {
             currentScene.remove (object1);
             currentScene.remove (object2);

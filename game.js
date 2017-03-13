@@ -38,7 +38,7 @@ function buildMenuSceneGraph(SGraph) {
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
 
-    SGraph.lightsManager.lightSources[4].tag = "black";
+    SGraph.lightsManager.lightSources[0].tag = "black";
 
     var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
     var player = new object (new transform (vec3.fromValues (0.0, 5.0, -15.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
@@ -134,6 +134,10 @@ function buildMenuSceneGraph(SGraph) {
 }
 
 function buildSceneGraph (SGraph) {
+
+    generateCubeNormals (cubeVertices);
+    generateCubeVertices (cubeVertices);
+    generateCubeTexCoords (texCoords);
 
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, -45.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                                                vec3.fromValues (0.0, -4.0, 10.0),
@@ -257,50 +261,6 @@ function buildSceneGraph (SGraph) {
                             new rigidBody (1000.0, "static"))
                     );
 
-    //the next 3 panels are the components of the back wall of the classroom (the top, not where Scott lectures)
-    /*
-    const hallway_length=20;
-    roomColliders.push (new object (new transform (vec3.fromValues (0.0, -8.0, 18.0 + hallway_length ), vec3.fromValues (50.0, 27.6, 1.0+2*hallway_length), quat.create()),
-                            null, null, null, 
-                            new boxCollider(),
-                            new rigidBody (1000.0, "static"))
-                    );
-
-     roomColliders.push (new object (new transform (vec3.fromValues (-12, 12.0, 18.0 + hallway_length), vec3.fromValues (16.0, 16.0, 1.0+ 2* hallway_length), quat.create()),
-                            null, null, null, 
-                            new boxCollider(),
-                            new rigidBody (1000.0, "static"))
-                    );
-
-     roomColliders.push (new object (new transform (vec3.fromValues (12, 12.0, 18.0 + hallway_length), vec3.fromValues (16.0, 16.0, 1.0+ 2*hallway_length), quat.create()),
-                            null, null, null,
-                            new boxCollider(),
-                            new rigidBody (1000.0, "static"))
-                    );
-
-
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 10.0, 12.4), vec3.fromValues (21.5, 8.0, 0.9), quat.create ()),
-                            null, null, null, 
-                            new boxCollider (),
-                            new rigidBody (1000.0, "static"))
-                    );
-    roomColliders.push ( new object (new transform (vec3.fromValues (0.0, 14.0, 0.0), vec3.fromValues (100.0, 3.0, 100.0), quat.create ()),
-                            null, null, null,                            
-                            new boxCollider (),
-                            new rigidBody (1000.0, "static"))
-                    );
-
-    generateCubeNormals (cubeVertices);
-    generateCubeVertices (cubeVertices);
-    generateCubeTexCoords (texCoords);
-
-    var hallway = new object (new transform (vec3.fromValues (0.0, 10.0, 18.0 + hallway_length), vec3.fromValues (8.0, 7.0, 1.0+2*hallway_length), quat.create ()),
-                            new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
-                            new geometry (pointsArray, normalsArray, textureArray),
-                            new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
-                            null, null);
-    room.children.push(hallway);
-*/
     // Hallway:
     var hallway = new object ();
     hallway.tag = "world"
@@ -373,9 +333,6 @@ function buildSceneGraph (SGraph) {
     hallwaytop.addRigidBody (new rigidBody (10.0, "static"));
     hallwaytop.collider.physics = "static";
 
-    generateCubeNormals (cubeVertices);
-    generateCubeVertices (cubeVertices);
-    generateCubeTexCoords (texCoords);
 
     var hallwayCapLeft = new object (new transform (vec3.fromValues (155.0, 0.0, 0.0), vec3.fromValues (5.0, 20.0, 20.0), quat.create ()),
                                  new material (vec4.fromValues (0.05, 0.05, 0.05, 1.0), vec4.fromValues (0.05, 0.05, 0.05, 1.0), vec4.fromValues (0.05, 0.05, 0.05, 1.0), 40.0),
@@ -387,7 +344,7 @@ function buildSceneGraph (SGraph) {
     hallway.children.push (hallwayCapLeft);
     hallwayCapLeft.collider.physics = "static";
     hallwayCapLeft.collider.collisionFunction = function (object1, object2) {
-        currentScene = physicsDemoScene;
+        StateManager.apply('hallwayleft');
     }
 
     var hallwayCapRight = hallwayCapLeft.clone ();
@@ -396,7 +353,7 @@ function buildSceneGraph (SGraph) {
     hallway.children.push (hallwayCapRight);
     hallwayCapRight.collider.physics = "static";
     hallwayCapRight.collider.collisionFunction = function (object1, object2) {
-        currentScene = project1Scene;
+        StateManager.apply('hallwayright');
     }
 
     var hallwayCapEnd = hallwayCapLeft.clone ();
@@ -405,8 +362,9 @@ function buildSceneGraph (SGraph) {
     hallway.children.push (hallwayCapEnd);
     hallwayCapEnd.collider.physics = "static";
     hallwayCapEnd.collider.collisionFunction = function (object1, object2) {
-        currentScene = eggertRoomScene;
+        StateManager.apply('hallwayend');
     }
+
 
     var dangerDoorLeft = new object ();
     var doorRotation = quat.create ();
@@ -417,7 +375,7 @@ function buildSceneGraph (SGraph) {
     hallway.children.push (dangerDoorLeft);
     dangerDoorLeft.addRigidBody (new rigidBody (10.0, "static"));
     dangerDoorLeft.collider.physics = "static";
-    dangerDoorLeft.addOnMouseClickTrigger (function (object) {        
+    dangerDoorLeft.addOnMouseClickTrigger (function (object) {
         for (var i = 0; i < object.animations.length; i++) {
             var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
             if (dist > 225.0)
@@ -460,7 +418,7 @@ function buildSceneGraph (SGraph) {
     hallway.children.push (dangerDoorRight);
     dangerDoorRight.addRigidBody (new rigidBody (10.0, "static"));
     dangerDoorRight.collider.physics = "static";
-    dangerDoorRight.addOnMouseClickTrigger (function (object) {        
+    dangerDoorRight.addOnMouseClickTrigger (function (object) {
         for (var i = 0; i < object.animations.length; i++) {
             var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
             if (dist > 225.0)
@@ -538,10 +496,6 @@ function buildSceneGraph (SGraph) {
                     );
     room.children.push (returntrigger);
 
-
-    generateCubeNormals (cubeVertices);
-    generateCubeVertices (cubeVertices);
-    generateCubeTexCoords (texCoords);
     foundbugtrigger = new object (new transform (vec3.fromValues (0.0, -5.0, 11.0), vec3.fromValues (100.0, 5.0, 15.0), quat.create ()),
                             null, null, null,
                             new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5), "trigger"),
@@ -578,18 +532,21 @@ function buildSceneGraph (SGraph) {
     var rotation = quat.create ();
     quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (0.0));
     projector.transform = new transform (vec3.fromValues (0.0, 7.2, -17.5), vec3.fromValues (0.8, 0.8, 0.8), quat.clone(rotation));
+    projector.active = false;
     room.children.push (projector);
 
     var projector2 = projector.clone ();
     var rotation = quat.create ();
     quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (30.0));
     projector2.transform = new transform (vec3.fromValues (-13.6, 7.2, -14.9), vec3.fromValues (0.8, 0.8, 0.8), quat.clone(rotation));
+    projector2.active = false;
     room.children.push (projector2);
 
     var projector3 = projector.clone ();
     var rotation = quat.create ();
     quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (-30.0));
     projector3.transform = new transform (vec3.fromValues (13.6, 7.2, -14.9), vec3.fromValues (0.8, 0.8, 0.8), quat.clone(rotation));
+    projector3.active = false;
     room.children.push (projector3);
 
 	// desk
@@ -780,7 +737,9 @@ function buildSceneGraph (SGraph) {
     changeGravityButton = buttonMount.clone(); changeGravityButton.transform.position = vec3.fromValues(0,0,0); changeGravityButton.active = false; room.children.push (changeGravityButton);
     clickMeButton = buttonMount.clone(); clickMeButton.transform.position = vec3.fromValues(-5,0,0); clickMeButton.active = false; room.children.push (clickMeButton);
     dontClickMeButton = buttonMount.clone(); dontClickMeButton.transform.position = vec3.fromValues(5,0,0); dontClickMeButton.active = false; room.children.push (dontClickMeButton);
-    
+    swapTexturesButton = buttonMount.clone(); swapTexturesButton.transform.position = vec3.fromValues(10,0,0); swapTexturesButton.active = false; room.children.push (swapTexturesButton);
+    swapTexturesButton.children[0].texture = new texture (document.getElementById ("projectorTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]);
+
     exitFoundBugButton = buttonMount.clone(); exitFoundBugButton.transform.position = vec3.fromValues(15,0,10); exitFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); exitFoundBugButton.active = false; room.children.push (exitFoundBugButton);
     stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
 
@@ -804,6 +763,9 @@ function buildSceneGraph (SGraph) {
     dontClickMeButton.children[0].addOnMouseClickTrigger(function(object) {
         StateManager.apply("dontClickMe");
     }); 
+    swapTexturesButton.children[0].addOnMouseClickTrigger(function(object) {
+        StateManager.apply("swapTextures");
+    });
 
     leavetrigger1.collider.collisionFunction = function (object1, object2) {
         StateManager.apply("leavetrigger1");
@@ -831,8 +793,7 @@ function buildSceneGraph (SGraph) {
         StateManager.apply("leavetrigger5");
     }
     returntrigger.collider.collisionFunction = function (object1, object2) {
-        var currentStateName = StateManager.getCurrentState().name;
-        if(name == 'leaving1' || name == 'leaving2' || name == 'leaving3') StateManager.apply("returntrigger");
+        StateManager.apply("returntrigger");
     }
     foundbugtrigger.collider.collisionFunction = function (object1, object2) {
         StateManager.stopAll(); // doesn't do any pending functions or state changes either.
@@ -913,7 +874,7 @@ var room;
 var leavetrigger1, leavetrigger2, leavetrigger3;
 var returntrigger;
 var rightButtonMount, leftButtonMount;
-var changeGravityCautionBox, changeGravityButton, clickMeButton, dontClickMeButton, numIncorrectClicks = 0;
+var changeGravityCautionBox, changeGravityButton, swapTexturesButton, clickMeButton, dontClickMeButton, numIncorrectClicks = 0;
 
 var foundbugtrigger, exitedFindingBug = false;
 var exitFoundBugButton, stayFoundBugButton;
@@ -955,12 +916,19 @@ function buildStateMachine () {
         }
     ));
     var leaving2 = new Event("leavetrigger2", new Activity('A_leaving2', function(){}, function(){console.log('Don\'t make me do this!')}));
-    var leaving3 = new Event("leavetrigger3", new Activity('A_leaving3', function(){}, function(){console.log('Alright. That\'s the last straw. (play baby music)')}));
-    var leaving4 = new Event("leavetrigger4", new Activity(null, function(){}, function(){console.log('Ok. Seriously though. You really do not want to go here.')}));
-    var leaving5 = new Event("leavetrigger5", new Activity(null, function(){}, function(){console.log('I guess if you\'ve come this far you are really persistent. <insert shrimp facts>')}));
+    var leaving3 = new Event("leavetrigger3", new Activity('A_leaving3', 
+        function() {
+            var projectors = currentScene.getObjectsByTag('projector');
+            for (var i=0; i<projectors.length; i++) projectors[i].active = true;
+        }, 
+        function() {
+            console.log('Alright. That\'s the last straw. (play baby music)')
+        }
+    ));
+    var leaving4 = new Event("leavetrigger4", new Activity('A_leaving4', function(){}, function(){console.log('Ok. Seriously though. You really do not want to go here.')}));
+    var leaving5 = new Event("leavetrigger5", new Activity('A_leaving5', function(){}, function(){console.log('I guess if you\'ve come this far you are really persistent. <insert shrimp facts>')}));
     var returning = new Event("returntrigger", new Activity(null, 
         function() {
-            returntrigger.collider.collisionFunction = null;
             StateManager.setState(previousState);
             previousState = null;
         }, 
@@ -1012,6 +980,7 @@ function buildStateMachine () {
             clickMeButton.active = true;
             dontClickMeButton.active = true;
             changeGravityCautionBox.active = true;
+            swapTexturesButton.active = true;
         }, 
         function() {
             console.log('Good job');
@@ -1042,7 +1011,6 @@ function buildStateMachine () {
             console.log('Clicked me!');
         }
     ));
-
     var dontClickMe = new Event("dontClickMe", new Activity(null, 
         function() {
             // swap position with click me button
@@ -1056,6 +1024,47 @@ function buildStateMachine () {
             console.log('Don\'t clicked me!');
         }
     ));
+
+    var swapTexturesEvent = new Event("swapTextures", new Activity(null, 
+        function() {
+            swapTextures(document.getElementById('projectorTEX'));
+        }, 
+        function() {
+            console.log('NO NONONOONONO! Scott... Well. This is awkward.');
+        }
+    ));
+
+    var hallwayleftEvent = new Event("hallwayleft", new Activity(null, 
+        function() {
+            currentScene = physicsDemoScene;
+        }, 
+        function() {
+            console.log('Physics demo.');
+        }
+    ));
+    var hallwayrightEvent = new Event("hallwayright", new Activity(null, 
+        function() {
+            currentScene = project1Scene;
+        }, 
+        function() {
+            console.log('Assignment 1');
+        }
+    ));
+    var hallwayendEvent = new Event("hallwayend", new Activity(null, 
+        function() {
+            currentScene = eggertRoomScene;
+        }, 
+        function() {
+            console.log('Eggert Room');
+            // put them back in the OG room
+            /*
+            currentScene = mainScene;
+            currentScene.playerController.player.transform.position = vec3.fromValues (0.0, 10.0, 300.0);
+            */
+        }
+    ));
+
+
     var savedWorld = new Event("savedWorld", new Activity(null, function(){}, function(){console.log('Saved world!')}));
 
     StateManager.getState("root").addChild(clickedStart, StateManager.getState("intro1"));
@@ -1079,6 +1088,7 @@ function buildStateMachine () {
     StateManager.getState("clickedLeft").addChild(changeGravity, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedLeft").addChild(clickMe, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedLeft").addChild(dontClickMe, StateManager.getState("clickedLeft"));
+    StateManager.getState("clickedLeft").addChild(swapTexturesEvent, StateManager.getState("clickedLeft"));
     StateManager.getState("changeGravity").addChild(savedWorld, StateManager.getState("saved"));
     
     // add all the leaving triggers
@@ -1098,6 +1108,9 @@ function buildStateMachine () {
     StateManager.getState("leaving2").addChild(leaving3, StateManager.getState("leaving3"));
     StateManager.getState("leaving3").addChild(leaving4, StateManager.getState("leaving4"));
     StateManager.getState("leaving4").addChild(leaving5, StateManager.getState("leaving5"));
+    StateManager.getState("leaving5").addChild(hallwayleftEvent, StateManager.getState("leaving5"));
+    StateManager.getState("leaving5").addChild(hallwayrightEvent, StateManager.getState("leaving5"));
+    StateManager.getState("leaving5").addChild(hallwayendEvent, StateManager.getState("leaving5"));
     StateManager.getState("leaving1").addChild(returning, StateManager.getState("root"));
     StateManager.getState("leaving2").addChild(returning, StateManager.getState("root"));
     StateManager.getState("leaving3").addChild(returning, StateManager.getState("root"));

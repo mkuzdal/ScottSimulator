@@ -540,17 +540,41 @@ class sceneGraph {
     __remove_AUX (root, object) {
         for (var i = 0; i < root.children.length; i++) {
             if (root.children[i] == object) {
-                root.children.splice (i, 1);
-                i--;
-                for (var i = 0; i < object.animations.length; i++) {
-                    this.animationsManager.removeAnimation (object.animations[i]);
+                for (var j = 0; j < root.children[i].animations.length; j++) {
+                    this.animationsManager.removeAnimation (root.children[i].animations[j]);
                 }
 
-                for (var i = 0; i < object.mouseTriggers.length; i++) {
-                    this.clickManager.removeTrigger (object.mouseTriggers[i]);
+                for (var j = 0; j < root.children[i].mouseTriggers.length; j++) {
+                    this.clickManager.removeTrigger (root.children[i].mouseTriggers[j]);
                 }
+                root.children.splice (i, 1);
+                i--;
             } else {
                 this.__remove_AUX (root.children[i], object);
+            }
+        }
+    }
+
+    removeByTag (tag) {
+        for (var i = 0; i < this.root.children.length; i++) {
+            this.__removeByTag_AUX (this.root, tag);
+        }
+    }
+
+    __removeByTag_AUX (root, tag) {
+        for (var i = 0; i < root.children.length; i++) {
+            if (root.children[i].tag == tag) {
+                for (var j = 0; j < root.children[i].animations.length; j++) {
+                    this.animationsManager.removeAnimation (root.children[i].animations[j]);
+                }
+
+                for (var j = 0; j < root.children[i].mouseTriggers.length; j++) {
+                    this.clickManager.removeTrigger (root.children[i].mouseTriggers[j]);
+                }
+                root.children.splice (i, 1);
+                i--;
+            } else {
+                this.__removeByTag_AUX (root.children[i], tag);
             }
         }
     }
