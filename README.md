@@ -8,6 +8,8 @@ Team Members:
 
 This is our final project for CS-174a. 
 
+It can be demo'd here: https://mkuzdal.github.io/ScottSimulator/
+
 The game concept is loosely based off of The Stanley Parable.
 
 Ths idea is that the narrator is telling you, Scott, what to do, but since you have "full" control over yourself, you can choose to either follow the narrators instructions, or disregard him and explore your own adventure.
