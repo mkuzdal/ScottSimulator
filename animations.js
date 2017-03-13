@@ -541,7 +541,6 @@ class animationLifetime {
 class animationEnemy {
     constructor (_object) {
         this.object = _object
-        this.seek = vec3.fromValues (0.0, 0.0, 0.0);
 
         this.tag = "enemy";
         this.speed = 0.3;
@@ -552,6 +551,8 @@ class animationEnemy {
         if (!this.active)
             return;
 
+        this.seek = vec3.clone (currentScene.playerController.player.transform.position);
+        this.seek[1] = 0.0;
         vec3.lerp (this.object.transform.position, this.object.transform.position, this.seek, this.speed * dTime);     
     }
 
