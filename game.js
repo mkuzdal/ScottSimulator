@@ -784,7 +784,7 @@ function buildSceneGraph (SGraph) {
     var buttonMount = new object ();
     buttonMount.tag = "buttonMount";
     buttonMount.loadFromObj ("buttonMountOBJ", "buttonMountMAT", "buttonMountTEX");
-    buttonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    buttonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (-0.7071, 0.0, 0.0, 0.7071));
     buttonMount.children.push (button);
     
     rightButtonPicture = new object ();
@@ -794,8 +794,8 @@ function buildSceneGraph (SGraph) {
     rightButtonPicture.active = false;
     room.children.push (rightButtonPicture);
 
-    rightButtonMount = buttonMount.clone(); rightButtonMount.transform.position = vec3.fromValues (-5,0,3); rightButtonMount.active = true; room.children.push (rightButtonMount);
-    leftButtonMount = buttonMount.clone(); leftButtonMount.transform.position = vec3.fromValues (5,0,3); leftButtonMount.active = true; room.children.push (leftButtonMount);
+    rightButtonMount = buttonMount.clone(); rightButtonMount.transform.position = vec3.fromValues (-3,-5,-11.2); rightButtonMount.active = true; room.children.push (rightButtonMount);
+    leftButtonMount = buttonMount.clone(); leftButtonMount.transform.position = vec3.fromValues (3,-5,-11.2); leftButtonMount.active = true; room.children.push (leftButtonMount);
     
     changeGravityCautionBox = new object(new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (3.0, 1.0, 3.0), quat.create ()),
                                 new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
