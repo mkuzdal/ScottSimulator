@@ -55,7 +55,7 @@ class object {
         
         if (this.camera) {
             this.camera.position = vec3.clone (this.transform.position);
-            //this.transform.rotation = quat.clone (this.camera.rotation);
+            this.transform.rotation = quat.clone (this.camera.rotation);
         }
 
         this.transform.update ();
@@ -371,6 +371,16 @@ class object {
 
         if (this.scene) {
             this.scene.animationsManager.addAnimation (_animation);
+        }
+    }
+
+    removeAnimation (_animation) {
+        for (var i =0 ;i < this.animations.length; i++) {
+            if (this.animations[i] == _animation) {
+                this.animations.splice (i, 1);
+                this.scene.animationsManager.removeAnimation (_animation);
+                return;
+            }
         }
     }
 }
