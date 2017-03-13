@@ -786,7 +786,7 @@ function buildSceneGraph (SGraph) {
     changeGravityCautionBox = new object(new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (3.0, 1.0, 3.0), quat.create ()),
                                 new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                                 new geometry (pointsArray, normalsArray, textureArray),
-                                new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                                new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                                 new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
                                 new rigidBody (50.0, "static")); changeGravityCautionBox.active = false;
     room.children.push(changeGravityCautionBox);
@@ -796,7 +796,6 @@ function buildSceneGraph (SGraph) {
 
     exitFoundBugButton = buttonMount.clone(); exitFoundBugButton.transform.position = vec3.fromValues(15,0,10); exitFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); exitFoundBugButton.active = false; room.children.push (exitFoundBugButton);
     stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
-
 
     rightButtonMount.children[0].addOnMouseClickTrigger(function(object) {
         object.animations[0].pressed = true;
@@ -812,12 +811,17 @@ function buildSceneGraph (SGraph) {
     });
     
     changeGravityButton.children[0].addOnMouseClickTrigger(function(object) {
+        object.animations[0].pressed = true;    
         StateManager.apply("changeGravity");
     }); 
+
     clickMeButton.children[0].addOnMouseClickTrigger(function(object) {
+        object.animations[0].pressed = true;
         StateManager.apply("clickMe");
     }); 
+
     dontClickMeButton.children[0].addOnMouseClickTrigger(function(object) {
+        object.animations[0].pressed = true;        
         StateManager.apply("dontClickMe");
     }); 
 
