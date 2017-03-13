@@ -18,9 +18,9 @@ Ths idea is that the narrator is telling you, Scott, what to do, but since you h
 The commit history can be seen on this repository: https://github.com/mkuzdal/ScottSimulator
 
 Advanced topics covered:
-    - Shadows Mapping (multiple lights)
-    - Scene Graph
-    - Culling
-    - Collisions
-    - Physics
-    - Mouse Picking
+  1. Shadows Mapping (multiple lights)
+  2. Scene Graph
+  3. Culling
+  4. Collisions
+  5. Physics
+  6. Mouse Picking
