@@ -272,26 +272,30 @@ function buildEggertRoomSceneGraph (SGraph) {
 	seat.loadFromObj ("seatOBJ", "seatMAT", "seatTEX");
 	var rotation = quat.create ();
 	quat.setAxisAngle (rotation, [0,1,0], glMatrix.toRadian(-90));
-    var rotation2 = quat.create ();
-    quat.setAxisAngle (rotation2, [1, 0, 0], glMatrix.toRadian (-105));
-    quat.mul (rotation, rotation, rotation2);
+    //var rotation2 = quat.create ();
+    //quat.setAxisAngle (rotation2, [1, 0, 0], glMatrix.toRadian (-105));
+    //quat.mul (rotation, rotation, rotation2);
 	seat.transform = new transform (vec3.fromValues(0.0,0.3,0.22), vec3.fromValues (1.0, 1.0, 1.0), quat.clone(rotation));
 
 	chair.children.push (seat);
     chair.addRigidBody (new rigidBody (10.0, "static"));
-    chair.children[0].addOnMouseClickTrigger (function (object) {
-        for (var i = 0; i < object.animations.length; i++) {
-            var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
-            if (dist > 225.0)
-                return;
+    var person = new object ();
+    person.loadFromObj ("personOBJ", "personMAT", "personTEX");
+    person.transform = new transform (vec3.fromValues(0.0,0.5,0.0), vec3.fromValues (0.7, 0.7, 0.7), quat.create ());
 
-            if (object.animations[i].tag == "chair") {
-                object.animations[i].open = !object.animations[i].open;
-            }
-        }
-    });
+    // chair.children[0].addOnMouseClickTrigger (function (object) {
+    //     for (var i = 0; i < object.animations.length; i++) {
+    //         var dist = vec3.squaredDistance (object.collider.currentCenter, currentScene.playerController.player.transform.position);
+    //         if (dist > 225.0)
+    //             return;
 
-    chair.children[0].addAnimation (new animationChair (chair.children[0]));
+    //         if (object.animations[i].tag == "chair") {
+    //             object.animations[i].open = !object.animations[i].open;
+    //         }
+    //     }
+    // });
+
+    //chair.children[0].addAnimation (new animationChair (chair.children[0]));
 
 	var rows_of_chairs=4;
     var chairs_per_row=8;
@@ -304,6 +308,9 @@ function buildEggertRoomSceneGraph (SGraph) {
     		quat.setAxisAngle(rotation, [0,1,0], glMatrix.toRadian(-90 - 10 + (2.5 * j)));
     		tempChair.transform.rotation = quat.clone(rotation);
     		room.children.push (tempChair);
+            var random = Math.random() * 5;
+            if (random > 1.5)
+                tempChair.children.push(person.clone());
     	}
     	//also create the chairs on the edges of the room, on the outside of the aisles
     	var rightChair = chair.clone();
@@ -312,6 +319,9 @@ function buildEggertRoomSceneGraph (SGraph) {
     	rightChair.transform.rotation = quat.clone(rightChairRotate);
     	rightChair.transform.position = vec3.fromValues(-15.5, -3.8+2.8*i, -1.8+4*i-1.2);
     	room.children.push(rightChair);
+        var random = Math.random() * 5;
+        if (random > 1.5)
+            rightChair.children.push(person.clone());
 
     	var leftChair = chair.clone();
     	var leftChairRotate = quat.create();
@@ -319,6 +329,9 @@ function buildEggertRoomSceneGraph (SGraph) {
     	leftChair.transform.rotation = quat.clone(leftChairRotate);
     	leftChair.transform.position = vec3.fromValues(15.5, -3.8+2.8*i, -1.8+4*i-1.2);
     	room.children.push(leftChair); 
+        var random = Math.random() * 5;
+        if (random > 1.5)
+            leftChair.children.push(person.clone());
     }
 
     //add a stool in the corner 
