@@ -294,7 +294,7 @@ function buildSceneGraph (SGraph) {
     var bazooka = new object ();
     bazooka.tag = "bazooka";
     bazooka.loadFromObj ("bazookaOBJ", "bazookaMAT", "bazookaTEX");
-    bazooka.collider = nullCollider ();
+    bazooka.collider.physics = "trigger";
     var rotation = quat.create ();
     quat.setAxisAngle (rotation, [0, 0, 1], glMatrix.toRadian (90));
     bazooka.transform = new transform (vec3.fromValues (0.0, -3.5, -4.0), vec3.fromValues (1.0, 1.0, 1.0), rotation);
@@ -308,6 +308,8 @@ function buildSceneGraph (SGraph) {
         var rotation = quat.create ();
         quat.setAxisAngle (rotation, [0,1,0], glMatrix.toRadian (90.0));
         object.transform = new transform (vec3.fromValues (0.6, 0.0, -0.5), vec3.fromValues (1.0, 1.0, 1.0), rotation);
+        object.rigidBody = null;
+        object.collider = new nullCollider ();
     });
     broomCloset.children.push (bazooka);
     room.children.push (broomCloset);
