@@ -123,7 +123,10 @@ function buildMenuSceneGraph(SGraph) {
     var startButtonMount = new object ();
     startButtonMount.tag = "startButtonMount";
     startButtonMount.loadFromObj ("buttonMountOBJ", "buttonMountMAT", "buttonMountTEX");
-    startButtonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    var rotation = quat.create();
+    quat.rotateZ(rotation, rotation, glMatrix.toRadian(-90));
+    quat.rotateX(rotation, rotation, glMatrix.toRadian(-90));
+    startButtonMount.transform = new transform (vec3.fromValues (0.0, 3.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.clone (rotation));
     startButtonMount.children.push (startButton);
 
     startButtonMount.children[0].addOnMouseClickTrigger(function(object) {
