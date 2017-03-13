@@ -791,7 +791,9 @@ function buildSceneGraph (SGraph) {
     var button = new object ();
     button.tag = "button";
     button.loadFromObj ("buttonOBJ", "buttonMAT", "buttonTEX");
-    button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
+    var rotation = quat.create();
+    quat.rotateY(rotation, rotation, glMatrix.toRadian(90));
+    button.transform = new transform (vec3.fromValues (0.0, 0.15, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.clone (rotation));
     button.addAnimation (new animationButton (button));
     var buttonMount = new object ();
     buttonMount.tag = "buttonMount";
@@ -802,23 +804,27 @@ function buildSceneGraph (SGraph) {
     rightButtonPicture = new object ();
     rightButtonPicture.tag = "rightButtonPicture";
     rightButtonPicture.loadFromObj ("pictureOBJ", "pictureMAT", "pictureTEX");
-    rightButtonPicture.transform = new transform (vec3.fromValues (0.0,0.75,-17.0), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.7071, 0.0, 0.0, 0.7071));
+    rightButtonPicture.transform = new transform (vec3.fromValues (-3.0,-5,-11.2), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.7071, 0.0, 0.0, 0.7071));
     rightButtonPicture.active = false;
     room.children.push (rightButtonPicture);
 
     rightButtonMount = buttonMount.clone(); rightButtonMount.transform.position = vec3.fromValues (-3,-5,-11.2); rightButtonMount.active = true; room.children.push (rightButtonMount);
     leftButtonMount = buttonMount.clone(); leftButtonMount.transform.position = vec3.fromValues (3,-5,-11.2); leftButtonMount.active = true; room.children.push (leftButtonMount);
     
-    changeGravityCautionBox = new object(new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (3.0, 1.0, 3.0), quat.create ()),
+    changeGravityCautionBox = new object(new transform (vec3.fromValues (3,-5,-11.2), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
                                 new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                                 new geometry (pointsArray, normalsArray, textureArray),
                                 new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                                 new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
                                 new rigidBody (50.0, "static")); changeGravityCautionBox.active = false;
     room.children.push(changeGravityCautionBox);
-    changeGravityButton = buttonMount.clone(); changeGravityButton.transform.position = vec3.fromValues(0,0,0); changeGravityButton.active = false; room.children.push (changeGravityButton);
-    clickMeButton = buttonMount.clone(); clickMeButton.transform.position = vec3.fromValues(-5,0,0); clickMeButton.active = false; room.children.push (clickMeButton);
-    dontClickMeButton = buttonMount.clone(); dontClickMeButton.transform.position = vec3.fromValues(5,0,0); dontClickMeButton.active = false; room.children.push (dontClickMeButton);
+    changeGravityButton = buttonMount.clone(); changeGravityButton.transform.position = vec3.fromValues(3,-5,-11.2); changeGravityButton.active = false; room.children.push (changeGravityButton);
+    changeGravityButton.children[0].texture = new texture(document.getElementById("buttonpanicTEX"), changeGravityButton.texture.options)
+    clickMeButton = buttonMount.clone(); clickMeButton.transform.position = vec3.fromValues(-3,-5,-11.2); clickMeButton.active = false; room.children.push (clickMeButton);
+    clickMeButton.children[0].texture = new texture(document.getElementById("buttonclickmeTEX"), clickMeButton.texture.options)
+    dontClickMeButton = buttonMount.clone(); dontClickMeButton.transform.position = vec3.fromValues(0,-5,-11.2); dontClickMeButton.active = false; room.children.push (dontClickMeButton);
+    dontClickMeButton.children[0].texture = new texture(document.getElementById("buttondontclickmeTEX"), dontClickMeButton.texture.options)
+    changeGravityCautionBox.texture = new texture(document.getElementById("buttonpanicTEX"), changeGravityCautionBox.texture.options)
 
     exitFoundBugButton = buttonMount.clone(); exitFoundBugButton.transform.position = vec3.fromValues(15,0,10); exitFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); exitFoundBugButton.active = false; room.children.push (exitFoundBugButton);
     stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
@@ -1030,8 +1036,7 @@ function buildStateMachine () {
     
     var clickedRight1 = new Event("clickedRight", new Activity('A_rightbutton1', 
         function() {
-            rightButtonMount.transform.position = vec3.fromValues(0.0,0.75,-17.5); 
-            rightButtonMount.transform.rotation = vec4.fromValues(0.7071, 0.0, 0.0, 0.7071);
+            rightButtonMount.transform.scale = vec3.fromValues(0.2, 0.2, 0.2);
         }, 
         function() {
             console.log('You might not have heard me. I said the left button')
@@ -1041,7 +1046,9 @@ function buildStateMachine () {
         function() {
             //currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 10, -15.8);
             //currentScene.playerController.player.transform.rotation = vec3.fromValues(-0.07094697654247284, -0.9180688858032227, -0.19179458916187286, 0.3396040201187134);
-            rightButtonMount.active = false;
+            
+            rightButtonMount.transform.position = vec3.fromValues(-3.0,-5,-17.5); 
+            quat.rotateY(rightButtonMount.transform.rotation, rightButtonMount.transform.rotation, glMatrix.toRadian(180));
             rightButtonPicture.active = true;
             leftButtonMount.transform.scale = vec3.fromValues(5.0, 5.0, 5.0);
         }, 
