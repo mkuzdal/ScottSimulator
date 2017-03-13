@@ -515,18 +515,37 @@ class sceneGraph {
     }
 
     __set_AUX (root, CTM, scaling) {
-        var CTM_prime = mat4.create ();
-        mat4.mul (CTM_prime, CTM, root.transform.matrix);
-        var scaling_prime = scaling * root.transform.scale[0];
-        root.collider.matrix = mat4.clone (CTM_prime);
-        if (root.collider.type == "sphere") {
-            root.collider.scaling = scaling_prime;
-        }
+        if (root.tag != "player") {
+            var CTM_prime = mat4.create ();
+            mat4.mul (CTM_prime, CTM, root.transform.matrix);
+            var scaling_prime = scaling * root.transform.scale[0];
+            root.collider.matrix = mat4.clone (CTM_prime);
+            if (root.collider.type == "sphere") {
+                root.collider.scaling = scaling_prime;
+            }
 
-        if (root.collider.type != "null") {
-            root.collider.setup ();
-            this.collisionsManager.objects.push (root);
-        }
+            if (root.collider.type != "null") {
+                root.collider.setup ();
+                this.collisionsManager.objects.push (root);
+            }
+        } else {
+            var CTM_prime = mat4.create ();
+            var transformMat = mat4.create ();
+            mat4.fromRotationTranslationScale (transformMat, quat.create (), root.transform.position, root.transform.scale);
+            mat4.mul (CTM_prime, CTM, transformMat);
+            var scaling_prime = scaling * root.transform.scale[0];
+            root.collider.matrix = mat4.clone (CTM_prime);
+            if (root.collider.type == "sphere") {
+                root.collider.scaling = scaling_prime;
+            }
+
+            if (root.collider.type != "null") {
+                root.collider.setup ();
+                this.collisionsManager.objects.push (root);
+            }
+            CTM_prime = mat4.create ();
+            mat4.mul (CTM_prime, CTM, root.transform.matrix);
+        }   
 
         for (var i = 0; i < root.children.length; i++) {
             this.__set_AUX (root.children[i], CTM_prime, scaling_prime);
