@@ -952,7 +952,7 @@ function buildSceneGraph (SGraph) {
     }, 60000);
 
     finishedLookDown = false; // for the inital look down check
-
+    previousState = null;
 
     SGraph.push (room);
 }

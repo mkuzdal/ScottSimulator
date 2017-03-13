@@ -61,7 +61,10 @@ StateManager.play = function() {
 }
 
 StateManager.stopAll = function() {
-	if(currentEvent) currentEvent.pause();
+	if(currentEvent) {
+		currentEvent.pause();
+		currentEvent = null;
+	}
 	eventQueue = [];
 }
 
