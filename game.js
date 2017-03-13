@@ -170,7 +170,7 @@ function buildSceneGraph (SGraph) {
     SGraph.lightsManager.lightSources[1].shadows = false;
 
     var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
-    var player = new object (new transform (vec3.fromValues (0.0, 5.0, -7.9), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.0, 0.3827, 0.0, 0.9239)),
+    var player = new object (new transform (vec3.fromValues (0.0, 5.0, -12), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.0, 0.3827, 0.0, 0.9239)),
                          null, 
                          null, 
                          null,
@@ -958,7 +958,7 @@ function buildSceneGraph (SGraph) {
     }, 60000);
 
     finishedLookDown = false; // for the inital look down check
-
+    previousState = null;
 
     SGraph.push (room);
 }
@@ -1076,6 +1076,7 @@ function buildStateMachine () {
     var clickedLeft = new Event("clickedLeft", new Activity('A_leftbutton', 
         function() {
             rightButtonMount.active = false;
+            rightButtonPicture.active = false;
             leftButtonMount.active = false;
             clickMeButton.active = true;
             dontClickMeButton.active = true;
