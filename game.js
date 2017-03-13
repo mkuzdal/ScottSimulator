@@ -38,7 +38,7 @@ function buildMenuSceneGraph(SGraph) {
                               vec4.fromValues (0.2, 0.2, 0.2, 1.0),
                               vec4.fromValues (0.3, 0.3, 0.3, 1.0)));
 
-    SGraph.lightsManager.lightSources[4].tag = "black";
+    SGraph.lightsManager.lightSources[0].tag = "black";
 
     var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
     var player = new object (new transform (vec3.fromValues (0.0, 5.0, -15.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),

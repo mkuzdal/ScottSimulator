@@ -568,7 +568,7 @@ class animationEnemySpawner {
         this.toSpawn = _toSpawn;
         
         this.tag = "enemySpawner";
-        this.radius = 20.0;
+        this.radius = 25.0;
         this.cooldown = 5.0;
 
         this.current_cooldown = 0.0;
@@ -586,12 +586,14 @@ class animationEnemySpawner {
             var angle = Math.random () * Math.PI * 2;
 
             var toSpawn = this.toSpawn.clone ();
+            toSpawn.addAnimation (new animationEnemy (toSpawn));
+
             toSpawn.transform.position = vec3.fromValues (this.radius * Math.cos (angle), 0.0, this.radius * Math.sin (angle));
+
             currentScene.push (toSpawn);
-            console.log (toSpawn);
 
             this.current_cooldown = this.cooldown;
-            this.cooldown * 0.5;
+            this.cooldown *= 0.9;
         }
     }
 
