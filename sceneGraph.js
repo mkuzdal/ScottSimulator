@@ -5,7 +5,6 @@ var DRAW_TYPE_COLOR = 1;
 var DRAW_TYPE_ORTHO = 2;
 var DRAW_TYPE_SHADOW = 3;
 
-
 /** object: an abstraction for a object. Objects contain a material, geometry,
  *  and transform object to define it. Objects can also be deactivated, causing
  *  their motion to still be upated, but they won't be drawn to the screen.
@@ -15,6 +14,9 @@ class object {
      *  @param { transform } transform: the orientation and position of the object.
      *  @param { material } material: the material that defines an object.
      *  @param { geometry } geometry: the object's geometry to define it.
+     *  @param { texture } texture: the object's texture if present.
+     *  @param { collider } collider: the object's collider.
+     *  @param { rigidBody } rigidBody: the object's rigidbody. 
      */
     constructor (_transform, _material, _geometry, _texture, _collider, _rigidBody) {
         this.transform = _transform || new transform ();
@@ -62,7 +64,9 @@ class object {
 
     }
 
-    setup (_player) {
+    /** setup: sets up all the webgl attributes and uniforms for the object. 
+     */
+    setup () {
         if (this.material) {
             this.material.setup ();
         } 
@@ -82,8 +86,6 @@ class object {
             gl.uniformMatrix4fv (modelMatrixLoc, false, this.collider.matrix);
             gl.uniformMatrix4fv (cameraMatrixLoc, false, currentScene.playerController.player.camera.view);
             gl.uniformMatrix4fv (projectionMatrixLoc, false, currentScene.playerController.player.camera.perspectiveProjectionMatrix); 
-            //gl.uniformMatrix4fv (cameraMatrixLoc, false, currentScene.lightsManager.lightSources[0].view);
-            //gl.uniformMatrix4fv (projectionMatrixLoc, false, currentScene.lightsManager.lightSources[0].projectionMatrix); 
 
             var CTMN = mat3.create ();
             mat3.normalFromMat4 (CTMN, this.collider.matrix);
@@ -91,6 +93,8 @@ class object {
         }
     }
 
+    /** draw: draws the object to the screen if geometry is present
+     */
     draw () {
         if (this.geometry) {
             if (this.material.ambient[3] != 1.0) {
@@ -108,6 +112,11 @@ class object {
         }
     }
 
+    /** loadFromObj: loads the object from an .obj, .mat, and texture image.
+     *  @param: { HTML ID } ObjID: the html ID for the .obj file.
+     *  @param: { HTML ID } MatID: the html ID for the .mat file.
+     *  @param: { HTML ID } TexID: the html ID for the texture image.
+     */
     loadFromObj (ObjID, MatID, TexID) {
         var ObjEle = document.getElementById(ObjID).contentWindow.document.body.textContent;
         if (!ObjEle) { 

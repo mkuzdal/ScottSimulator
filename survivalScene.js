@@ -146,6 +146,7 @@ function buildSurvivalScene (SGraph) {
             currentScene.playerController.health--;
             if (currentScene.playerController.health <= 0) {
                 console.log ("YOU LOSE");
+                StateManager.apply("deathEvent");
             }
             console.log (currentScene.playerController.health);
 
@@ -163,5 +164,4 @@ function buildSurvivalScene (SGraph) {
     enemySpawner.addAnimation (new animationEnemySpawner (enemySpawner, enemy));
 
     SGraph.push (enemySpawner);
-
 }

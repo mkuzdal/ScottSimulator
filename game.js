@@ -130,7 +130,7 @@ function buildMenuSceneGraph(SGraph) {
     var rotation = quat.create();
     quat.rotateZ(rotation, rotation, glMatrix.toRadian(-90));
     quat.rotateX(rotation, rotation, glMatrix.toRadian(-90));
-    startButtonMount.transform = new transform (vec3.fromValues (0.0, 3.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.clone (rotation));
+    startButtonMount.transform = new transform (vec3.fromValues (0.0, 3.0, 0.0), vec3.fromValues (4.0, 4.0, 4.0), quat.clone (rotation));
     startButtonMount.children.push (startButton);
 
     startButtonMount.children[0].addOnMouseClickTrigger(function(object) {
@@ -297,6 +297,10 @@ function buildSceneGraph (SGraph) {
                                         null, null, null,
                                         new boxCollider (),
                                         new rigidBody (1000.0, "static")));
+    broomCloset.collider.collisionFunction = function (object1, object2) {
+        StateManager.apply('broomcloset');
+        object1.collider.collisionFunction = null;
+    }
 
     var rotation = quat.create ();
     quat.setAxisAngle (rotation, [0, 1, 0], glMatrix.toRadian (-30));
@@ -408,6 +412,7 @@ function buildSceneGraph (SGraph) {
     hallwayCapLeft.collider.physics = "static";
     hallwayCapLeft.collider.collisionFunction = function (object1, object2) {
         StateManager.apply('hallwayleft');
+        object1.collider.collisionFunction = null;
     }
 
     var hallwayCapRight = hallwayCapLeft.clone ();
@@ -417,6 +422,7 @@ function buildSceneGraph (SGraph) {
     hallwayCapRight.collider.physics = "static";
     hallwayCapRight.collider.collisionFunction = function (object1, object2) {
         StateManager.apply('hallwayright');
+        object1.collider.collisionFunction = null;
     }
 
     var hallwayCapEnd = hallwayCapLeft.clone ();
@@ -426,6 +432,7 @@ function buildSceneGraph (SGraph) {
     hallwayCapEnd.collider.physics = "static";
     hallwayCapEnd.collider.collisionFunction = function (object1, object2) {
         StateManager.apply('hallwayend');
+        object1.collider.collisionFunction = null;
     }
 
 
@@ -788,13 +795,20 @@ function buildSceneGraph (SGraph) {
     buttonMount.transform = new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ());
     buttonMount.children.push (button);
     
+    rightButtonPicture = new object ();
+    rightButtonPicture.tag = "rightButtonPicture";
+    rightButtonPicture.loadFromObj ("pictureOBJ", "pictureMAT", "pictureTEX");
+    rightButtonPicture.transform = new transform (vec3.fromValues (0.0,0.75,-17.0), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.7071, 0.0, 0.0, 0.7071));
+    rightButtonPicture.active = false;
+    room.children.push (rightButtonPicture);
+
     rightButtonMount = buttonMount.clone(); rightButtonMount.transform.position = vec3.fromValues (-5,0,3); rightButtonMount.active = true; room.children.push (rightButtonMount);
     leftButtonMount = buttonMount.clone(); leftButtonMount.transform.position = vec3.fromValues (5,0,3); leftButtonMount.active = true; room.children.push (leftButtonMount);
     
     changeGravityCautionBox = new object(new transform (vec3.fromValues (0.0, 0.0, 0.0), vec3.fromValues (3.0, 1.0, 3.0), quat.create ()),
                                 new material (vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), vec4.fromValues (0.6, 0.6, 0.6, 1.0), 40.0),
                                 new geometry (pointsArray, normalsArray, textureArray),
-                                new texture (document.getElementById ("TEXfrance"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
+                                new texture (document.getElementById ("whiteTEX"), [ [gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.REPEAT], [gl.TEXTURE_WRAP_T, gl.REPEAT]]), 
                                 new boxCollider (vec3.fromValues (-0.5, -0.5, -0.5), vec3.fromValues (0.5, 0.5, 0.5)),
                                 new rigidBody (50.0, "static")); changeGravityCautionBox.active = false;
     room.children.push(changeGravityCautionBox);
@@ -805,7 +819,9 @@ function buildSceneGraph (SGraph) {
     exitFoundBugButton = buttonMount.clone(); exitFoundBugButton.transform.position = vec3.fromValues(15,0,10); exitFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); exitFoundBugButton.active = false; room.children.push (exitFoundBugButton);
     stayFoundBugButton = buttonMount.clone(); stayFoundBugButton.transform.position = vec3.fromValues(15,0,16); stayFoundBugButton.transform.rotation = vec4.fromValues(0.0, 0.0, 0.7071, 0.7071); stayFoundBugButton.active = false; room.children.push (stayFoundBugButton);
 
-
+    rightButtonPicture.addOnMouseClickTrigger(function(object) {
+        StateManager.apply("clickedRight");
+    });
     rightButtonMount.children[0].addOnMouseClickTrigger(function(object) {
         object.animations[0].pressed = true;
         StateManager.apply("clickedRight");
@@ -820,12 +836,17 @@ function buildSceneGraph (SGraph) {
     });
     
     changeGravityButton.children[0].addOnMouseClickTrigger(function(object) {
+        object.animations[0].pressed = true;    
         StateManager.apply("changeGravity");
     }); 
+
     clickMeButton.children[0].addOnMouseClickTrigger(function(object) {
+        object.animations[0].pressed = true;
         StateManager.apply("clickMe");
     }); 
+
     dontClickMeButton.children[0].addOnMouseClickTrigger(function(object) {
+        object.animations[0].pressed = true;        
         StateManager.apply("dontClickMe");
     }); 
 
@@ -935,7 +956,7 @@ function buildSceneGraph (SGraph) {
 var room;
 var leavetrigger1, leavetrigger2, leavetrigger3;
 var returntrigger;
-var rightButtonMount, leftButtonMount;
+var rightButtonMount, leftButtonMount, rightButtonPicture;
 var changeGravityCautionBox, changeGravityButton, clickMeButton, dontClickMeButton, numIncorrectClicks = 0;
 
 var foundbugtrigger, exitedFindingBug = false;
@@ -960,8 +981,7 @@ function buildStateMachine () {
     StateManager.addState("clickedRight2");
     StateManager.addState("clickedRight3");
     StateManager.addState("clickedLeft");
-    StateManager.addState("changeGravity");
-    StateManager.addState("saved");
+    StateManager.addState("playingGame");
 
 
     var clickedStart = new Event("clickStart", new Activity('A_intro1', function() { mainScene.resetScene (); currentScene = mainScene; }, null));
@@ -969,6 +989,8 @@ function buildStateMachine () {
     var introWait2 = new Event("introWait2", new Activity('A_intro3', null, null));
     var introWait3 = new Event("introWait3", new Activity('A_intro4', null, function() {alert('YOU\'RE MUTED. TURN UP YOUR VOLUME!')}));
     var introWait4 = new Event("introWait4", new Activity('A_intro5', null, null));
+    var broomclosetEvent = new Event("broomcloset", new Activity('A_broomcloset', null, null));
+
     var leaving1 = new Event("leavetrigger1", new Activity('A_leaving1', 
         function() {
             if (previousState) console.log('Something is wrong. We should never enter a different state while previous state is still set.');
@@ -1015,7 +1037,8 @@ function buildStateMachine () {
         function() {
             //currentScene.playerController.player.transform.position = vec3.fromValues(0.0, 10, -15.8);
             //currentScene.playerController.player.transform.rotation = vec3.fromValues(-0.07094697654247284, -0.9180688858032227, -0.19179458916187286, 0.3396040201187134);
-            rightButtonMount.transform.position = vec3.fromValues(3.0,0.75,-17.5); 
+            rightButtonMount.active = false;
+            rightButtonPicture.active = true;
             leftButtonMount.transform.scale = vec3.fromValues(5.0, 5.0, 5.0);
         }, 
         function() {
@@ -1033,9 +1056,12 @@ function buildStateMachine () {
     var clickedRight4 = new Event("clickedRight", new Activity('A_rightbutton4', 
         function() {
             rightButtonMount.active = false;
-            currentScene = startMenuScene;
         }, 
-        function() {console.log('Seriously? Again???')}
+        function() {
+            currentScene = startMenuScene;
+            StateManager.setState(StateManager.getState('root'));
+            console.log('Seriously? Again???')
+        }
     ));
     var clickedLeft = new Event("clickedLeft", new Activity('A_leftbutton', 
         function() {
@@ -1069,9 +1095,11 @@ function buildStateMachine () {
             stool.addRigidBody (new rigidBody (10.0, "dynamic"));
             stool.collider.physics = "dynamic";
             currentScene.push (stool);
+            clickMeButton.active = false;
         }, 
         function() {
             console.log('Clicked me!');
+            clickMeButton.active = true;
         }
     ));
     var dontClickMe = new Event("dontClickMe", new Activity(null, 
@@ -1094,14 +1122,17 @@ function buildStateMachine () {
         }, 
         function() {
             console.log('Physics demo.');
+            currentScene = survivalScene; // move player into survival scene
         }
     ));
     var hallwayrightEvent = new Event("hallwayright", new Activity('A_project1Intro', 
         function() {
             currentScene = project1Scene;
         }, 
-        function() {
+        function() {    
             console.log('Assignment 1');
+            currentScene = mainScene;
+            currentScene.playerController.player.transform.position = vec3.fromValues (130.0, 10.0, 170.0);
         }
     ));
     var hallwayendEvent = new Event("hallwayend", new Activity('A_eggertIntro', 
@@ -1115,6 +1146,8 @@ function buildStateMachine () {
             currentScene.playerController.player.transform.position = vec3.fromValues (0.0, 10.0, 300.0);
         }
     ));
+
+    var deathEvent = new Event("deathEvent", new Activity('A_death', function(){}, function() {currentScene = startMenuScene;}));
 
 
     var savedWorld = new Event("savedWorld", new Activity(null, function(){}, function(){console.log('Saved world!')}));
@@ -1140,7 +1173,6 @@ function buildStateMachine () {
     StateManager.getState("clickedLeft").addChild(changeGravity, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedLeft").addChild(clickMe, StateManager.getState("clickedLeft"));
     StateManager.getState("clickedLeft").addChild(dontClickMe, StateManager.getState("clickedLeft"));
-    StateManager.getState("changeGravity").addChild(savedWorld, StateManager.getState("saved"));
     
     // add all the leaving triggers
     StateManager.getState("intro1").addChild(leaving1, StateManager.getState("leaving1"));
@@ -1153,20 +1185,31 @@ function buildStateMachine () {
     StateManager.getState("clickedRight2").addChild(leaving1, StateManager.getState("leaving1"));
     StateManager.getState("clickedRight3").addChild(leaving1, StateManager.getState("leaving1"));
     StateManager.getState("clickedLeft").addChild(leaving1, StateManager.getState("leaving1"));
-    StateManager.getState("changeGravity").addChild(leaving1, StateManager.getState("leaving1"));
-    StateManager.getState("saved").addChild(leaving1, StateManager.getState("leaving1"));
     StateManager.getState("leaving1").addChild(leaving2, StateManager.getState("leaving2"));
     StateManager.getState("leaving2").addChild(leaving3, StateManager.getState("leaving3"));
     StateManager.getState("leaving3").addChild(leaving4, StateManager.getState("leaving4"));
     StateManager.getState("leaving4").addChild(leaving5, StateManager.getState("leaving5"));
-    StateManager.getState("leaving5").addChild(hallwayleftEvent, StateManager.getState("leaving5"));
+    StateManager.getState("leaving5").addChild(hallwayleftEvent, StateManager.getState("playingGame"));
     StateManager.getState("leaving5").addChild(hallwayrightEvent, StateManager.getState("leaving5"));
     StateManager.getState("leaving5").addChild(hallwayendEvent, StateManager.getState("leaving5"));
+    StateManager.getState("playingGame").addChild(deathEvent, StateManager.getState("root"));
     StateManager.getState("leaving1").addChild(returning, StateManager.getState("root"));
     StateManager.getState("leaving2").addChild(returning, StateManager.getState("root"));
     StateManager.getState("leaving3").addChild(returning, StateManager.getState("root"));
     StateManager.getState("leaving4").addChild(returning, StateManager.getState("root"));
     StateManager.getState("leaving5").addChild(returning, StateManager.getState("root"));
+
+    // add all the broom closet triggers
+    StateManager.getState("intro1").addChild(broomclosetEvent, StateManager.getState("intro1"));
+    StateManager.getState("intro2").addChild(broomclosetEvent, StateManager.getState("intro2"));
+    StateManager.getState("intro3").addChild(broomclosetEvent, StateManager.getState("intro3"));
+    StateManager.getState("intro4").addChild(broomclosetEvent, StateManager.getState("intro4"));
+    StateManager.getState("intro5").addChild(broomclosetEvent, StateManager.getState("intro5"));
+    StateManager.getState("twobuttons").addChild(broomclosetEvent, StateManager.getState("twobuttons"));
+    StateManager.getState("clickedRight1").addChild(broomclosetEvent, StateManager.getState("clickedRight1"));
+    StateManager.getState("clickedRight2").addChild(broomclosetEvent, StateManager.getState("clickedRight2"));
+    StateManager.getState("clickedRight3").addChild(broomclosetEvent, StateManager.getState("clickedRight3"));
+    StateManager.getState("clickedLeft").addChild(broomclosetEvent, StateManager.getState("clickedLeft"));
 }
 
 
