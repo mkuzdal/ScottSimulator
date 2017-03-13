@@ -714,6 +714,10 @@ class animationButton {
         vec3.lerp (this.currentPosition, this.currentPosition, destinationPos, 4.0 * dTime);
 
         this.object.transform.position = vec3.clone (this.currentPosition); 
+        
+        if (Math.abs(this.currentPosition[1] - this.pressedPosition[1]) < 0.1) {
+            this.pressed = false;
+        }
     }
 
     clone () {
