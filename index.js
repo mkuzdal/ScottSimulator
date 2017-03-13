@@ -80,9 +80,13 @@ var planeVertices = [
 	vec4.fromValues (10.0, 0.0, 10.0, 1.0)
 ];
 
+window.onload = function loading () {
+    setTimeout(init, 5000);
+}
+
 /** init: intialization function.
  */
-window.onload = function init () {
+function init () {
 
 	// Get the canvas variable and set it up
 	canvas = document.getElementById ("gl-canvas");
