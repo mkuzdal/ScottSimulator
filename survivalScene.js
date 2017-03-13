@@ -145,17 +145,20 @@ function buildSurvivalScene (SGraph) {
         if (object2.tag == "player") {
             currentScene.playerController.health--;
             if (currentScene.playerController.health <= 0) {
-                console.log ("YOU LOSE");
+                document.getElementById('loser').textContent = "YOU DIED";
                 StateManager.apply("deathEvent");
             }
-            console.log (currentScene.playerController.health);
+
+            
+            if(currentScene.playerController.health > -200) document.getElementById('health').textContent = 'Health: ' + currentScene.playerController.health;
+            else document.getElementById('health').textContent = 'Health: '  + currentScene.playerController.health + '. Seriously? The programmers didn\'t even consider putting a cap at zero? You can go into negatives. Horrible design. Just horrible.';
 
         } else if (object2.tag == "sphere") {
             currentScene.remove (object1);
             currentScene.remove (object2);
 
             currentScene.playerController.score += 10;
-            console.log (currentScene.playerController.score);
+            document.getElementById('score').textContent = 'Score: ' + currentScene.playerController.score + '        ';
         }
     }
 
