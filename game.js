@@ -146,6 +146,10 @@ function buildSceneGraph (SGraph) {
     generateCubeNormals (cubeVertices);
     generateCubeVertices (cubeVertices);
     generateCubeTexCoords (texCoords);
+    // This function and all the similar scene graph generating function follow the general struction of:
+    // add lights
+    // add visible objects
+    // add invisible objects (to be used as triggers for events)
 
     // Add a bunch of lights and a camera to the scene
     SGraph.lightsManager.addSource (new light (new transform (vec3.fromValues (0.0, 40.0, -45.0), vec3.fromValues (1.0, 1.0, 1.0), quat.create ()),
