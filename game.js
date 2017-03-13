@@ -170,7 +170,7 @@ function buildSceneGraph (SGraph) {
     SGraph.lightsManager.lightSources[1].shadows = false;
 
     var cam = new camera ([0,0,0], glMatrix.toRadian(180), glMatrix.toRadian(5));
-    var player = new object (new transform (vec3.fromValues (0.0, 5.0, -12), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.0, 0.3827, 0.0, 0.9239)),
+    var player = new object (new transform (vec3.fromValues (0.0, 5.0, -15), vec3.fromValues (1.0, 1.0, 1.0), vec4.fromValues (0.0, 0.3827, 0.0, 0.9239)),
                          null, 
                          null, 
                          null,
@@ -305,8 +305,10 @@ function buildSceneGraph (SGraph) {
     vec3.scale(broomCloset.collider.max, broomCloset.collider.max, 0.75);
     broomCloset.collider = new boxCollider(broomCloset.collider.min, broomCloset.collider.max);
     broomCloset.collider.collisionFunction = function (object1, object2) {
-        StateManager.apply('broomcloset');
-        object1.collider.collisionFunction = null;
+        if(object2.tag == "player") {
+            StateManager.apply('broomcloset');
+            object1.collider.collisionFunction = null;
+        }
     }
 
     var rotation = quat.create ();
@@ -418,8 +420,10 @@ function buildSceneGraph (SGraph) {
     hallway.children.push (hallwayCapLeft);
     hallwayCapLeft.collider.physics = "static";
     hallwayCapLeft.collider.collisionFunction = function (object1, object2) {
-        StateManager.apply('hallwayleft');
-        object1.collider.collisionFunction = null;
+        if(object2.tag == "player") {
+            StateManager.apply('hallwayleft');
+            object1.collider.collisionFunction = null;
+        }
     }
 
     var hallwayCapRight = hallwayCapLeft.clone ();
@@ -428,8 +432,10 @@ function buildSceneGraph (SGraph) {
     hallway.children.push (hallwayCapRight);
     hallwayCapRight.collider.physics = "static";
     hallwayCapRight.collider.collisionFunction = function (object1, object2) {
-        StateManager.apply('hallwayright');
-        object1.collider.collisionFunction = null;
+        if(object2.tag == "player") {
+            StateManager.apply('hallwayright');
+            object1.collider.collisionFunction = null;
+        }
     }
 
     var hallwayCapEnd = hallwayCapLeft.clone ();
@@ -438,8 +444,10 @@ function buildSceneGraph (SGraph) {
     hallway.children.push (hallwayCapEnd);
     hallwayCapEnd.collider.physics = "static";
     hallwayCapEnd.collider.collisionFunction = function (object1, object2) {
-        StateManager.apply('hallwayend');
-        object1.collider.collisionFunction = null;
+        if(object2.tag == "player") {
+            StateManager.apply('hallwayend');
+            object1.collider.collisionFunction = null;
+        }
     }
 
 
